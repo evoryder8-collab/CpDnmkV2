@@ -710,10 +710,10 @@ main {
   z-index: 2;
   background: linear-gradient(
     180deg,
-    transparent 52%,
-    rgba(7, 7, 6, 0.12) 66%,
-    rgba(7, 7, 6, 0.68) 86%,
-    #070706 100%
+    transparent 58%,
+    rgba(7, 7, 6, 0.06) 72%,
+    rgba(7, 7, 6, 0.34) 90%,
+    rgba(7, 7, 6, 0.82) 100%
   );
   content: "";
   pointer-events: none;
@@ -759,9 +759,9 @@ main {
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(7, 7, 6, 0.18) 16%,
-    rgba(7, 7, 6, 0.78) 44%,
-    #070706 68%
+    rgba(7, 7, 6, 0.08) 20%,
+    rgba(7, 7, 6, 0.62) 50%,
+    #070706 72%
   );
   text-align: center;
 }
