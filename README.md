@@ -17,13 +17,13 @@ CpDnmkV2/
 │   └── app.js
 └── img/
     ├── README.md
-    ├── gof.jpg
-    ├── zoltan-kodor.jpg
-    ├── hubert-mak.jpg
-    └── antonio-costea.jpg
+    ├── Gof.webp
+    ├── Zoltan.webp
+    ├── Hubert.webp
+    └── Antonio Costea.webp
 ```
 
-The four JPG files are expected names. Until those images are added, the cards show an initials placeholder.
+The four WebP files are the current booked-client portraits. If an image is missing, its card shows an initials placeholder.
 
 ## Add a booked client
 
@@ -39,7 +39,7 @@ Open `js/data.js` and add one object to `clients` for each scheduled appearance:
   round: "12:35",
   room: "d223",
   category: "Sports massage",
-  portrait: "display-name.jpg"
+  portrait: "display-name.webp"
 }
 ```
 
