@@ -108,7 +108,7 @@ window.BOARD_DATA = {
       "round": "10:00",
       "room": "gryden",
       "category": "Chair massage",
-      "portrait": "gof.jpg"
+      "portrait": "Gof.webp"
     },
     {
       "id": "gof-sun-chair",
@@ -119,7 +119,7 @@ window.BOARD_DATA = {
       "round": "13:30",
       "room": "b086",
       "category": "Chair massage",
-      "portrait": "gof.jpg"
+      "portrait": "Gof.webp"
     },
     {
       "id": "zoltan-sat-sports",
@@ -130,7 +130,7 @@ window.BOARD_DATA = {
       "round": "12:35",
       "room": "d223",
       "category": "Sports massage",
-      "portrait": "zoltan-kodor.jpg"
+      "portrait": "Zoltan.webp"
     },
     {
       "id": "zoltan-sun-western",
@@ -141,7 +141,7 @@ window.BOARD_DATA = {
       "round": "12:10",
       "room": "d245",
       "category": "Freestyle massage - Western inspired",
-      "portrait": "zoltan-kodor.jpg"
+      "portrait": "Zoltan.webp"
     },
     {
       "id": "hubert-sat-sports",
@@ -152,7 +152,7 @@ window.BOARD_DATA = {
       "round": "12:35",
       "room": "d223",
       "category": "Sports massage",
-      "portrait": "hubert-mak.jpg"
+      "portrait": "Hubert.webp"
     },
     {
       "id": "hubert-sun-western",
@@ -163,7 +163,7 @@ window.BOARD_DATA = {
       "round": "13:30",
       "room": "d245",
       "category": "Freestyle massage - Western inspired",
-      "portrait": "hubert-mak.jpg"
+      "portrait": "Hubert.webp"
     },
     {
       "id": "antonio-sat-western",
@@ -174,7 +174,7 @@ window.BOARD_DATA = {
       "round": "11:15",
       "room": "d245",
       "category": "Freestyle massage - Western inspired",
-      "portrait": "antonio-costea.jpg"
+      "portrait": "Antonio Costea.webp"
     },
     {
       "id": "antonio-sun-eastern",
@@ -185,7 +185,7 @@ window.BOARD_DATA = {
       "round": "09:30",
       "room": "b086",
       "category": "Freestyle massage - Eastern inspired",
-      "portrait": "antonio-costea.jpg"
+      "portrait": "Antonio Costea.webp"
     }
   ],
   "schedule": [
