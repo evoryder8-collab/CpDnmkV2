@@ -714,6 +714,7 @@ main {
 .portrait-frame img {
   position: relative;
   z-index: 1;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -724,6 +725,7 @@ main {
 .portrait-fallback {
   position: absolute;
   inset: 0;
+  z-index: 0;
   display: grid;
   place-items: center;
   color: color-mix(in srgb, var(--tier-light), transparent 40%);
@@ -731,6 +733,10 @@ main {
   font-weight: 900;
   letter-spacing: -0.08em;
   text-shadow: 0 0 28px color-mix(in srgb, var(--tier-mid), transparent 55%);
+}
+
+.portrait-loaded .portrait-fallback {
+  display: none;
 }
 
 .portrait-missing .portrait-frame img {
