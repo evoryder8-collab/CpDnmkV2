@@ -134,6 +134,10 @@
     image.src = `img/${client.portrait}`;
     image.alt = `${client.name} portrait`;
     image.loading = "eager";
+    image.addEventListener("load", () => {
+      card.classList.add("portrait-loaded");
+      card.classList.remove("portrait-missing");
+    });
     image.addEventListener("error", () => card.classList.add("portrait-missing"));
 
     const copy = document.createElement("div");
