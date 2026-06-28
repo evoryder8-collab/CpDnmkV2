@@ -2,14 +2,20 @@
   "use strict";
 
   const data = window.BOARD_DATA;
+  const config = window.BOARD_CONFIG;
 
   if (!data) {
     throw new Error("BOARD_DATA is missing. Check js/data.js.");
   }
 
+  if (!config) {
+    throw new Error("BOARD_CONFIG is missing. Check js/data.js.");
+  }
+
   const elements = {
     dayTabs: document.querySelector("#day-tabs"),
     roundTabs: document.querySelector("#round-tabs"),
+    dayHeatStrip: document.querySelector("#day-heat-strip"),
     fieldToggle: document.querySelector("#field-toggle"),
     activeRound: document.querySelector("#active-round"),
     secondFloor: document.querySelector("#second-floor"),
@@ -41,6 +47,188 @@
 
   function normalize(value) {
     return value.trim().toLocaleLowerCase("en");
+  }
+
+  function getVenueRoom(roomId) {
+    const venueRoom = config.VENUE[roomId];
+    const room = getRoom(roomId);
+
+    if (!venueRoom || !room) {
+      throw new Error(`Unknown venue room: ${roomId}`);
+    }
+
+    return { ...venueRoom, room };
+  }
+
+  function travelCost(roomAId, roomBId) {
+    if (roomAId === roomBId) return 0;
+
+    const roomA = getVenueRoom(roomAId);
+    const roomB = getVenueRoom(roomBId);
+
+    if (roomA.floor === roomB.floor) {
+      return Math.abs(roomA.distToStairs - roomB.distToStairs);
+    }
+
+    return roomA.distToStairs + config.STAIR_COST + roomB.distToStairs;
+  }
+
+  function computeRoundDifficulty(dayId, roundTime) {
+    const clients = data.clients.filter(
+      (client) => client.day === dayId && client.round === roundTime,
+    );
+    const judges = clients.filter((client) => client.role === "Official event judge");
+    const coverageClients = clients.filter((client) => client.role !== "Official event judge");
+    let photoCount = 0;
+    let videoCount = 0;
+    let coverageDemand = 0;
+    let tierBump = 0;
+
+    coverageClients.forEach((client) => {
+      const photoOnly = client.package === "Essential";
+      const weight = photoOnly ? config.PHOTO_WEIGHT : config.VIDEO_WEIGHT;
+      coverageDemand += weight;
+      tierBump += config.TIER_BUMP[client.package] || 0;
+      if (photoOnly) photoCount += 1;
+      else videoCount += 1;
+    });
+
+    const demand = coverageDemand + tierBump + judges.length * config.JUDGE_WEIGHT;
+    const occupiedRoomIds = [...new Set(coverageClients.map((client) => client.room))];
+    const occupiedFloors = new Set(
+      occupiedRoomIds.map((roomId) => getVenueRoom(roomId).floor),
+    );
+    const bridge = { cost: 0, roomA: null, roomB: null };
+
+    for (let index = 0; index < occupiedRoomIds.length; index += 1) {
+      for (let compare = index + 1; compare < occupiedRoomIds.length; compare += 1) {
+        const roomA = occupiedRoomIds[index];
+        const roomB = occupiedRoomIds[compare];
+        const cost = travelCost(roomA, roomB);
+        if (cost > bridge.cost) {
+          const venueA = getVenueRoom(roomA);
+          const venueB = getVenueRoom(roomB);
+          const swapForReading =
+            (venueA.floor === venueB.floor && venueA.distToStairs > venueB.distToStairs) ||
+            (venueA.floor === "ground" && venueB.floor === "second");
+          bridge.cost = cost;
+          bridge.roomA = swapForReading ? roomB : roomA;
+          bridge.roomB = swapForReading ? roomA : roomB;
+        }
+      }
+    }
+
+    // Tier nudges and opportunistic judge grabs shape the level without
+    // manufacturing an extra dedicated camera.
+    const camerasNeeded = Math.max(occupiedRoomIds.length, Math.ceil(coverageDemand));
+    const travelPressure = Math.max(1, camerasNeeded / config.CAMERA_COUNT);
+    const travelLoad =
+      (bridge.cost / config.METRES_PER_UNIT) * config.BRIDGE_WEIGHT * travelPressure;
+    const load = demand + travelLoad;
+    const ratio = load / config.CAMERA_COUNT;
+    const bridgeRooms = bridge.roomA && bridge.roomB
+      ? [getVenueRoom(bridge.roomA), getVenueRoom(bridge.roomB)]
+      : [];
+    const crossesFloors =
+      bridgeRooms.length === 2 && bridgeRooms[0].floor !== bridgeRooms[1].floor;
+    const reachesFarAuditorium =
+      bridgeRooms.length === 2 &&
+      [bridge.roomA, bridge.roomB].includes("b086") &&
+      bridge.cost >= config.FAR_GAP_METRES;
+    const overCapacity =
+      camerasNeeded > config.CAMERA_COUNT || crossesFloors || reachesFarAuditorium;
+    const level =
+      config.LEVELS.find((item) => ratio <= item.maxRatio) ||
+      config.LEVELS[config.LEVELS.length - 1];
+
+    return {
+      clients,
+      judges,
+      coverageClients,
+      photoCount,
+      videoCount,
+      demand,
+      occupiedRoomIds,
+      floorCount: occupiedFloors.size,
+      bridge,
+      crossesFloors,
+      camerasNeeded,
+      load,
+      ratio,
+      overCapacity,
+      level,
+    };
+  }
+
+  window.computeRoundDifficulty = computeRoundDifficulty;
+
+  function setDifficultyStyle(element, difficulty) {
+    element.dataset.level = difficulty.level.key;
+    element.style.setProperty("--difficulty-color", difficulty.level.color);
+  }
+
+  function bookedCountLabel(count) {
+    return `${count} booked`;
+  }
+
+  function roomDisplayName(roomId) {
+    const room = getRoom(roomId);
+    return `${room.name} ${room.code}`;
+  }
+
+  function coveragePhrase(difficulty) {
+    const parts = [];
+    if (difficulty.videoCount) {
+      parts.push(`${difficulty.videoCount} video client${difficulty.videoCount === 1 ? "" : "s"}`);
+    }
+    if (difficulty.photoCount) {
+      parts.push(`${difficulty.photoCount} photo client${difficulty.photoCount === 1 ? "" : "s"}`);
+    }
+
+    let phrase = parts.join(" and ");
+    if (difficulty.judges.length) {
+      const judgePhrase = `${difficulty.judges.length} judge grab${difficulty.judges.length === 1 ? "" : "s"}`;
+      phrase = phrase ? `${phrase} plus ${judgePhrase}` : judgePhrase;
+    }
+    return phrase;
+  }
+
+  function difficultySummary(difficulty) {
+    if (!difficulty.clients.length) {
+      return `${difficulty.level.label}: no booked clients this round, so all ${config.CAMERA_COUNT} cameras are free.`;
+    }
+
+    if (!difficulty.coverageClients.length) {
+      return `${difficulty.level.label}: ${coveragePhrase(difficulty)} with no dedicated camera needed.`;
+    }
+
+    const coverage = coveragePhrase(difficulty);
+    const rooms = difficulty.occupiedRoomIds;
+    let spread;
+
+    if (rooms.length === 1) {
+      spread = `in ${roomDisplayName(rooms[0])}`;
+    } else if (difficulty.floorCount > 1) {
+      spread = `across ${difficulty.floorCount} floors`;
+    } else {
+      const floor = getVenueRoom(rooms[0]).floor === "second" ? "second-floor" : "ground-floor";
+      spread = `across ${rooms.length} ${floor} rooms`;
+    }
+
+    if (!difficulty.bridge.roomA) {
+      return `${difficulty.level.label}: ${coverage} ${spread}, with no room change.`;
+    }
+
+    const route = difficulty.crossesFloors ? "via the stairs" : "along the hallway";
+    return `${difficulty.level.label}: ${coverage} ${spread}, longest hop ${roomDisplayName(difficulty.bridge.roomA)} to ${roomDisplayName(difficulty.bridge.roomB)} (~${Math.round(difficulty.bridge.cost)} m ${route}).`;
+  }
+
+  function splitNeededMessage(difficulty) {
+    if (!difficulty.overCapacity) return "";
+    if (difficulty.bridge.roomA) {
+      return `Split needed: hold ${roomDisplayName(difficulty.bridge.roomA)} and ${roomDisplayName(difficulty.bridge.roomB)} with separate operators.`;
+    }
+    return `Split needed: assign ${difficulty.camerasNeeded} camera positions for this round.`;
   }
 
   function updateUrl() {
@@ -75,15 +263,52 @@
     });
 
     elements.roundTabs.replaceChildren();
+    elements.dayHeatStrip.replaceChildren();
     getDay(state.day).rounds.forEach((round) => {
-      const label = `<span>${round.label}</span>${round.time}`;
-      elements.roundTabs.append(
-        makeButton("round-button", label, round.time === state.round, () => {
-          if (state.round === round.time) return;
-          state.round = round.time;
-          render();
-        }),
+      const difficulty = computeRoundDifficulty(state.day, round.time);
+      const label = `
+        <span class="round-button-label">${round.label}</span>
+        <strong class="round-button-time">${round.time}</strong>
+        <span class="round-difficulty-meta">
+          <i class="difficulty-shape" aria-hidden="true"></i>
+          <span>${difficulty.level.shortLabel || difficulty.level.label}</span>
+          <b>${bookedCountLabel(difficulty.clients.length)}</b>
+        </span>
+      `;
+      const roundButton = makeButton("round-button", label, round.time === state.round, () => {
+        if (state.round === round.time) return;
+        state.round = round.time;
+        render();
+      });
+      setDifficultyStyle(roundButton, difficulty);
+      roundButton.setAttribute(
+        "aria-label",
+        `${round.label}, ${round.time}, ${difficulty.level.label}, ${bookedCountLabel(difficulty.clients.length)}`,
       );
+      elements.roundTabs.append(roundButton);
+
+      const heatCell = document.createElement("button");
+      const heatPercent = Math.min(100, (difficulty.ratio / config.METER_MAX_RATIO) * 100);
+      heatCell.type = "button";
+      heatCell.className = "heat-cell";
+      heatCell.setAttribute("aria-pressed", String(round.time === state.round));
+      heatCell.setAttribute(
+        "aria-label",
+        `${round.time}, ${difficulty.level.label}, ${bookedCountLabel(difficulty.clients.length)}`,
+      );
+      heatCell.style.setProperty("--difficulty-heat", `${Math.max(difficulty.clients.length ? 18 : 8, heatPercent)}%`);
+      setDifficultyStyle(heatCell, difficulty);
+      heatCell.innerHTML = `
+        <span class="heat-cell-time">${round.time}</span>
+        <span class="heat-bar" aria-hidden="true"><i></i></span>
+        <span class="heat-cell-level"><i class="difficulty-shape" aria-hidden="true"></i>${difficulty.level.shortLabel || difficulty.level.label}</span>
+      `;
+      heatCell.addEventListener("click", () => {
+        if (state.round === round.time) return;
+        state.round = round.time;
+        render();
+      });
+      elements.dayHeatStrip.append(heatCell);
     });
   }
 
@@ -146,6 +371,7 @@
       ? `Official schedule · Table ${officialEntry.table}`
       : client.role || "Confirmed coverage client";
     copy.innerHTML = `
+      ${tier === "signature" ? '<span class="signature-mark" aria-hidden="true">◆</span>' : ""}
       <h5>${client.name}</h5>
       <span class="card-package">${client.package}</span>
       <div class="card-details">
@@ -233,7 +459,29 @@
   function renderVenue() {
     const day = getDay(state.day);
     const round = day.rounds.find((item) => item.time === state.round);
-    elements.activeRound.innerHTML = `<span>${day.shortLabel} · ${round.label}</span><strong>${round.time}</strong>`;
+    const difficulty = computeRoundDifficulty(state.day, state.round);
+    const filledSegments = difficulty.ratio > 0
+      ? Math.max(1, Math.ceil((difficulty.ratio / config.METER_MAX_RATIO) * config.METER_SEGMENTS))
+      : 0;
+    const meterSegments = Array.from({ length: config.METER_SEGMENTS }, (_, index) =>
+      `<i class="${index < Math.min(config.METER_SEGMENTS, filledSegments) ? "is-filled" : ""}"></i>`,
+    ).join("");
+    const splitMessage = splitNeededMessage(difficulty);
+
+    setDifficultyStyle(elements.activeRound, difficulty);
+    elements.activeRound.style.setProperty("--meter-segments", config.METER_SEGMENTS);
+    elements.activeRound.innerHTML = `
+      <div class="active-round-top">
+        <div class="active-round-time">
+          <span>${day.shortLabel} · ${round.label}</span>
+          <strong>${round.time}</strong>
+        </div>
+        <span class="difficulty-badge"><i class="difficulty-shape" aria-hidden="true"></i>${difficulty.level.label}</span>
+      </div>
+      <div class="difficulty-meter" aria-label="Difficulty meter: ${difficulty.level.label}">${meterSegments}</div>
+      <p class="difficulty-summary">${difficultySummary(difficulty)}</p>
+      ${splitMessage ? `<p class="split-needed"><i aria-hidden="true"></i>${splitMessage}</p>` : ""}
+    `;
 
     elements.secondFloor.replaceChildren();
     elements.groundFloor.replaceChildren();
