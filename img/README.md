@@ -8,5 +8,10 @@ Expected starter files:
 - `Zoltan.webp`
 - `Hubert.webp`
 - `Antonio Costea.webp`
+- `Gogutsa.webp`
+- `Gerarda.webp`
+- `Antoine.webp`
+- `Pitiprapada.webp`
+- `Chia Henry.webp`
 
 Portraits work best in a vertical 4:5 crop with the face in the upper centre.
