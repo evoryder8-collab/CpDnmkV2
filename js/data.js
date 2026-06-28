@@ -1,6 +1,48 @@
 // EDITING GUIDE
 // Add one object to `clients` for each booked appearance.
+// Required difficulty fields are package, day, round, and room.
+// Packages map automatically: Essential is photo only. Authority, Showcase,
+// and Signature are photo plus video. Use role: "Official event judge" for a
+// stationary judge grab that needs no dedicated camera.
+// Put the portrait in img/ and make its filename match client.portrait exactly,
+// for example img/Name.webp with portrait: "Name.webp".
+// Difficulty settings, venue distances, thresholds, and colors live below.
+// Edit a value here and every round indicator will recompute on reload.
 // The full official field follows in `schedule`.
+window.BOARD_CONFIG = {
+  CAMERA_COUNT: 3,
+  PHOTO_WEIGHT: 0.4,
+  VIDEO_WEIGHT: 1,
+  JUDGE_WEIGHT: 0.15,
+  TIER_BUMP: {
+    Essential: 0,
+    Authority: 0,
+    Showcase: 0.1,
+    Signature: 0.15,
+  },
+  BRIDGE_WEIGHT: 0.25,
+  STAIR_COST: 40,
+  METRES_PER_UNIT: 20,
+  FAR_GAP_METRES: 90,
+  METER_SEGMENTS: 10,
+  METER_MAX_RATIO: 2.2,
+  LEVELS: [
+    { key: "calm", label: "Calm", shortLabel: "Calm", maxRatio: 0.7, color: "#45c6b8" },
+    { key: "steady", label: "Steady", shortLabel: "Steady", maxRatio: 1, color: "#d5b65d" },
+    { key: "busy", label: "Busy", shortLabel: "Busy", maxRatio: 1.4, color: "#d99a3e" },
+    { key: "heavy", label: "Heavy", shortLabel: "Heavy", maxRatio: 1.9, color: "#e56f2f" },
+    { key: "mission-impossible", label: "Mission Impossible", shortLabel: "Mission", maxRatio: Infinity, color: "#a73535" },
+  ],
+  VENUE: {
+    c233: { floor: "second", distToStairs: 10 },
+    c275: { floor: "second", distToStairs: 30 },
+    d223: { floor: "second", distToStairs: 50 },
+    d245: { floor: "second", distToStairs: 70 },
+    gryden: { floor: "ground", distToStairs: 60 },
+    b086: { floor: "ground", distToStairs: 150 },
+  },
+};
+
 window.BOARD_DATA = {
   "days": [
     {
