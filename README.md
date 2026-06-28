@@ -20,10 +20,15 @@ CpDnmkV2/
     ├── Gof.webp
     ├── Zoltan.webp
     ├── Hubert.webp
-    └── Antonio Costea.webp
+    ├── Antonio Costea.webp
+    ├── Gogutsa.webp
+    ├── Gerarda.webp
+    ├── Antoine.webp
+    ├── Pitiprapada.webp
+    └── Chia Henry.webp
 ```
 
-The four WebP files are the current booked-client portraits. If an image is missing, its card shows an initials placeholder.
+The WebP files are the current booked-client portraits. If an image is missing, its card shows an initials placeholder.
 
 ## Add a booked client
 
@@ -43,7 +48,7 @@ Open `js/data.js` and add one object to `clients` for each scheduled appearance:
 }
 ```
 
-Valid room IDs are `c233`, `c275`, `d223`, `d245`, `gryden` and `b086`. Package names currently styled are `Signature` and `Showcase`.
+Valid room IDs are `c233`, `c275`, `d223`, `d245`, `gryden` and `b086`. Package names currently styled are `Signature`, `Showcase` and `Authority`.
 
 ## GitHub Pages
 
