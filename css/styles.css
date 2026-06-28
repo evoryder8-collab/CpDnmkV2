@@ -646,6 +646,12 @@ main {
   --tier-deep: #2f164f;
 }
 
+.client-card[data-tier="authority"] {
+  --tier-light: #ffc0ae;
+  --tier-mid: #d24a39;
+  --tier-deep: #430b0a;
+}
+
 .client-card-inner {
   position: relative;
   min-height: 316px;
