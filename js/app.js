@@ -120,7 +120,7 @@
 
     const ribbon = document.createElement("span");
     ribbon.className = "booked-ribbon";
-    ribbon.textContent = "BOOKED";
+    ribbon.textContent = client.role === "Official event judge" ? "JUDGE" : "BOOKED";
 
     const portraitFrame = document.createElement("div");
     portraitFrame.className = "portrait-frame";
@@ -142,7 +142,9 @@
 
     const copy = document.createElement("div");
     copy.className = "card-copy";
-    const tableText = officialEntry?.table ? `Official schedule · Table ${officialEntry.table}` : "Confirmed coverage client";
+    const tableText = officialEntry?.table
+      ? `Official schedule · Table ${officialEntry.table}`
+      : client.role || "Confirmed coverage client";
     copy.innerHTML = `
       <h5>${client.name}</h5>
       <span class="card-package">${client.package}</span>
