@@ -9,6 +9,123 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=20260630-1">
+  </head>
+  <body>
+    <div class="blueprint-grid" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <a class="wordmark" href="./" aria-label="iConstantine coverage board home">
+        <span class="wordmark-i">i</span>Constantine
+      </a>
+      <div class="event-lockup">
+        <p class="eyebrow">Live coverage control</p>
+        <h1>World Championship in Massage</h1>
+        <p>Copenhagen <span aria-hidden="true">·</span> 4-5 July 2026 <span aria-hidden="true">·</span> CEST</p>
+      </div>
+      <div class="live-status"><span></span>Schedule locked</div>
+    </header>
+
+    <main>
+      <section class="control-deck" aria-label="Schedule controls">
+        <div class="control-group">
+          <p class="control-label">Choose day</p>
+          <div class="day-tabs" id="day-tabs" role="tablist" aria-label="Event day"></div>
+        </div>
+
+        <div class="control-divider" aria-hidden="true"></div>
+
+        <div class="control-group rounds-group">
+          <p class="control-label">Choose round</p>
+          <div class="round-tabs" id="round-tabs" role="tablist" aria-label="Round time"></div>
+          <div class="day-heat-strip" id="day-heat-strip" aria-label="Day difficulty overview"></div>
+        </div>
+
+        <div class="control-actions">
+          <label class="field-toggle">
+            <input id="field-toggle" type="checkbox" checked>
+            <span class="toggle-track" aria-hidden="true"><span></span></span>
+            <span>
+              <strong>Full field</strong>
+              <small>Show every competitor</small>
+            </span>
+          </label>
+          <button class="all-clients-button" id="all-clients-button" type="button">All clients</button>
+        </div>
+      </section>
+
+      <section class="venue-shell viewfinder" aria-labelledby="venue-heading">
+        <span class="corner corner-tl" aria-hidden="true"></span>
+        <span class="corner corner-tr" aria-hidden="true"></span>
+        <span class="corner corner-bl" aria-hidden="true"></span>
+        <span class="corner corner-br" aria-hidden="true"></span>
+
+        <header class="venue-heading">
+          <div>
+            <p class="eyebrow">Venue map</p>
+            <h2 id="venue-heading">Coverage positions</h2>
+          </div>
+          <div class="active-round" id="active-round" aria-live="polite"></div>
+        </header>
+
+        <section class="floor-section" aria-labelledby="second-floor-heading">
+          <div class="floor-label">
+            <span>02</span>
+            <div>
+              <p>Second floor</p>
+              <small>Four competition rooms</small>
+            </div>
+          </div>
+          <h3 class="visually-hidden" id="second-floor-heading">Second floor rooms</h3>
+          <div class="room-grid second-floor" id="second-floor"></div>
+        </section>
+
+        <div class="stair-bridge" aria-label="Stairs between the second and ground floors">
+          <span class="bridge-line" aria-hidden="true"></span>
+          <div class="stair-icon" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <div>
+            <strong>Stairs</strong>
+            <small>Ground floor below</small>
+          </div>
+          <span class="bridge-line" aria-hidden="true"></span>
+        </div>
+
+        <section class="floor-section" aria-labelledby="ground-floor-heading">
+          <div class="floor-label">
+            <span>00</span>
+            <div>
+              <p>Ground floor</p>
+              <small>Floor Hall and Auditorium</small>
+            </div>
+          </div>
+          <h3 class="visually-hidden" id="ground-floor-heading">Ground floor rooms</h3>
+          <div class="room-grid ground-floor" id="ground-floor"></div>
+        </section>
+      </section>
+    </main>
+
+    <footer>
+      <p>Official schedule mapped from the 2026 event programme.</p>
+      <p>Built for <strong>iConstantine</strong></p>
+    </footer>
+
+    <script src="js/data.js?v=20260630-1"></script>
+    <script src="js/app.js?v=20260630-1"></script>
+  </body>
+</html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#070706">
+    <meta name="description" content="iConstantine event coverage board for the 2026 World Championship in Massage in Copenhagen.">
+    <title>iConstantine | Coverage Board</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css?v=20260628-2">
   </head>
   <body>
