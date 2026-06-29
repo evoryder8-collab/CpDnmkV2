@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=20260630-3">
+    <link rel="stylesheet" href="css/styles.css?v=20260630-4">
   </head>
   <body>
     <div class="blueprint-grid" aria-hidden="true"></div>
@@ -69,12 +69,18 @@
         </header>
 
         <section class="floor-section" aria-labelledby="second-floor-heading">
-          <div class="floor-label">
-            <span>02</span>
-            <div>
-              <p>Second floor</p>
-              <small>Four competition rooms</small>
+          <div class="floor-toolbar">
+            <div class="floor-label">
+              <span>02</span>
+              <div>
+                <p>Second floor</p>
+                <small>Four competition rooms</small>
+              </div>
             </div>
+            <button class="video-filter-button" id="video-filter-button" type="button" aria-pressed="false" aria-label="Show video-included clients only">
+              <span aria-hidden="true"></span>
+              Video-Included
+            </button>
           </div>
           <h3 class="visually-hidden" id="second-floor-heading">Second floor rooms</h3>
           <div class="room-grid second-floor" id="second-floor"></div>
@@ -111,7 +117,7 @@
       <p>Built for <strong>iConstantine</strong></p>
     </footer>
 
-    <script src="js/data.js?v=20260630-3"></script>
-    <script src="js/app.js?v=20260630-3"></script>
+    <script src="js/data.js?v=20260630-4"></script>
+    <script src="js/app.js?v=20260630-4"></script>
   </body>
 </html>
