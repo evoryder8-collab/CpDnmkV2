@@ -408,6 +408,13 @@ main {
   outline-offset: 3px;
 }
 
+.control-actions {
+  display: grid;
+  align-self: stretch;
+  align-content: end;
+  gap: 10px;
+}
+
 .field-toggle {
   display: flex;
   align-items: center;
@@ -474,6 +481,32 @@ main {
   font-size: 0.62rem;
 }
 
+.all-clients-button {
+  min-height: 34px;
+  padding: 8px 14px;
+  border: 1px solid rgba(218, 184, 94, 0.32);
+  border-radius: 2px;
+  background:
+    linear-gradient(145deg, rgba(126, 88, 19, 0.18), rgba(15, 14, 10, 0.78)),
+    rgba(255, 255, 255, 0.02);
+  color: var(--gold-pale);
+  cursor: pointer;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.all-clients-button:hover {
+  border-color: var(--gold-bright);
+  background: rgba(121, 84, 18, 0.2);
+}
+
+.all-clients-button:focus-visible {
+  outline: 2px solid var(--gold-pale);
+  outline-offset: 3px;
+}
+
 .viewfinder {
   position: relative;
 }
@@ -537,26 +570,23 @@ main {
 }
 
 .venue-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 30px;
-  padding-bottom: 22px;
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
   border-bottom: 1px solid var(--line-soft);
 }
 
 .venue-heading h2 {
   margin: 0;
-  font-size: clamp(1.45rem, 2.5vw, 2.25rem);
+  font-size: clamp(1.3rem, 2vw, 1.8rem);
   letter-spacing: -0.035em;
 }
 
 .active-round {
   display: grid;
-  flex: 0 1 760px;
-  gap: 9px;
-  min-height: 120px;
+  gap: 6px;
+  min-height: 0;
   color: var(--text);
   text-align: left;
 }
@@ -564,17 +594,21 @@ main {
 .active-round-top {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 14px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 10px 14px;
 }
 
 .active-round-time {
-  text-align: right;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  text-align: left;
 }
 
 .active-round-time span {
   display: block;
-  margin-bottom: 3px;
+  margin: 0;
   color: #74736c;
   font-size: 0.66rem;
   font-weight: 800;
@@ -609,8 +643,8 @@ main {
   display: grid;
   grid-template-columns: repeat(var(--meter-segments, 10), minmax(9px, 1fr));
   gap: 4px;
-  width: min(100%, 480px);
-  margin-left: auto;
+  width: min(100%, 560px);
+  margin: 0;
 }
 
 .difficulty-meter i {
@@ -627,12 +661,12 @@ main {
 
 .difficulty-summary,
 .split-needed {
-  width: min(100%, 680px);
-  margin: 0 0 0 auto;
+  width: 100%;
+  margin: 0;
   font-size: 0.62rem;
   font-weight: 600;
-  line-height: 1.55;
-  text-align: right;
+  line-height: 1.4;
+  text-align: left;
 }
 
 .difficulty-summary {
@@ -642,7 +676,7 @@ main {
 .split-needed {
   display: flex;
   align-items: flex-start;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 8px;
   color: #d6d2c6;
   font-weight: 700;
@@ -794,16 +828,17 @@ main {
 .room-body {
   position: relative;
   z-index: 1;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
   min-height: 170px;
   padding: 16px;
 }
 
 .room-empty {
   display: flex;
+  grid-column: 1 / -1;
   align-items: center;
   gap: 12px;
   margin: auto;
@@ -825,6 +860,7 @@ main {
 
 .field-note {
   display: block;
+  grid-column: 1 / -1;
   width: 100%;
   margin-bottom: -3px;
   color: #696760;
@@ -836,11 +872,11 @@ main {
 
 .participant-marker {
   display: grid;
-  flex: 1 0 132px;
   grid-template-columns: auto minmax(0, 1fr);
   gap: 0 8px;
-  min-width: 132px;
-  max-width: 190px;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
   min-height: 48px;
   padding: 8px 10px;
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -879,24 +915,35 @@ main {
   --tier-light: #f8e4a0;
   --tier-mid: #b07b20;
   --tier-deep: #4d2f08;
+  --card-unit: calc(100cqw / 184);
   position: relative;
-  flex: none;
-  width: 188px;
-  min-height: 320px;
-  padding: 2px;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 188 / 320;
+  padding: 1.064%;
   overflow: hidden;
+  container-type: inline-size;
   clip-path: polygon(8% 0, 92% 0, 100% 6%, 100% 94%, 92% 100%, 8% 100%, 0 94%, 0 6%);
   background: linear-gradient(135deg, var(--tier-deep), var(--tier-light) 17%, var(--tier-mid) 38%, var(--tier-light) 54%, var(--tier-deep) 79%, var(--tier-mid));
+  cursor: pointer;
   filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.45)) drop-shadow(0 0 9px color-mix(in srgb, var(--tier-mid), transparent 66%));
+}
+
+.client-card:focus-visible {
+  outline: 2px solid var(--tier-light);
+  outline-offset: 3px;
 }
 
 .client-card[data-tier="signature"] {
   --tier-light: var(--gold-pale);
   --tier-mid: var(--gold);
   --tier-deep: var(--gold-deep);
+  --card-unit: calc(100cqw / 180);
   z-index: 2;
-  padding: 4px;
-  transform: translateY(-2px) scale(1.012);
+  aspect-ratio: 188 / 324;
+  padding: 2.128%;
+  transform: translateY(-0.625%) scale(1.012);
   background:
     linear-gradient(
       132deg,
@@ -926,7 +973,7 @@ main {
 
 .client-card-inner {
   position: relative;
-  min-height: 316px;
+  min-height: calc(var(--card-unit) * 316);
   overflow: hidden;
   clip-path: polygon(8% 0, 92% 0, 100% 6%, 100% 94%, 92% 100%, 8% 100%, 0 94%, 0 6%);
   background:
@@ -943,39 +990,39 @@ main {
 }
 
 .client-card-inner::before {
-  inset: 8px;
-  border: 1px solid color-mix(in srgb, var(--tier-light), transparent 65%);
+  inset: calc(var(--card-unit) * 8);
+  border: calc(var(--card-unit) * 1) solid color-mix(in srgb, var(--tier-light), transparent 65%);
   clip-path: polygon(8% 0, 92% 0, 100% 7%, 100% 93%, 92% 100%, 8% 100%, 0 93%, 0 7%);
 }
 
 .client-card[data-tier="signature"] .client-card-inner::before {
-  inset: 7px;
+  inset: calc(var(--card-unit) * 7);
   border-color: color-mix(in srgb, var(--gold-pale), transparent 38%);
   box-shadow:
-    inset 0 0 0 2px rgba(78, 49, 8, 0.72),
-    inset 0 0 0 3px rgba(232, 200, 102, 0.2);
+    inset 0 0 0 calc(var(--card-unit) * 2) rgba(78, 49, 8, 0.72),
+    inset 0 0 0 calc(var(--card-unit) * 3) rgba(232, 200, 102, 0.2);
 }
 
 .client-card-inner::after {
-  top: -40px;
-  left: -80px;
-  width: 260px;
-  height: 70px;
+  top: calc(var(--card-unit) * -40);
+  left: calc(var(--card-unit) * -80);
+  width: calc(var(--card-unit) * 260);
+  height: calc(var(--card-unit) * 70);
   transform: rotate(-35deg);
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--tier-light), transparent 80%), transparent);
 }
 
 .booked-ribbon {
   position: absolute;
-  top: 13px;
-  right: -30px;
+  top: calc(var(--card-unit) * 13);
+  right: calc(var(--card-unit) * -30);
   z-index: 4;
-  width: 116px;
-  padding: 5px 0;
+  width: calc(var(--card-unit) * 116);
+  padding: calc(var(--card-unit) * 5) 0;
   transform: rotate(39deg);
   background: linear-gradient(90deg, var(--tier-deep), var(--tier-light), var(--tier-mid));
   color: #0a0906;
-  font-size: 0.48rem;
+  font-size: calc(var(--card-unit) * 7.2);
   font-weight: 900;
   letter-spacing: 0.16em;
   text-align: center;
@@ -983,7 +1030,7 @@ main {
 
 .portrait-frame {
   position: relative;
-  height: 200px;
+  height: calc(var(--card-unit) * 200);
   overflow: hidden;
   background:
     radial-gradient(circle at 50% 28%, color-mix(in srgb, var(--tier-mid), transparent 56%), transparent 40%),
@@ -1023,10 +1070,10 @@ main {
   display: grid;
   place-items: center;
   color: color-mix(in srgb, var(--tier-light), transparent 40%);
-  font-size: 2.7rem;
+  font-size: calc(var(--card-unit) * 40.5);
   font-weight: 900;
   letter-spacing: -0.08em;
-  text-shadow: 0 0 28px color-mix(in srgb, var(--tier-mid), transparent 55%);
+  text-shadow: 0 0 calc(var(--card-unit) * 28) color-mix(in srgb, var(--tier-mid), transparent 55%);
 }
 
 .portrait-loaded .portrait-fallback {
@@ -1040,8 +1087,11 @@ main {
 .card-copy {
   position: relative;
   z-index: 3;
-  margin-top: -64px;
-  padding: 72px 14px 16px;
+  margin-top: calc(var(--card-unit) * -64);
+  padding:
+    calc(var(--card-unit) * 72)
+    calc(var(--card-unit) * 14)
+    calc(var(--card-unit) * 16);
   background: linear-gradient(
     180deg,
     transparent 0%,
@@ -1053,9 +1103,9 @@ main {
 }
 
 .card-copy h5 {
-  margin: 0 0 5px;
+  margin: 0 0 calc(var(--card-unit) * 5);
   color: #fffdf5;
-  font-size: 0.86rem;
+  font-size: calc(var(--card-unit) * 12.9);
   font-weight: 900;
   letter-spacing: -0.025em;
   line-height: 1.12;
@@ -1064,18 +1114,21 @@ main {
 
 .card-package {
   display: inline-block;
-  margin-bottom: 10px;
+  margin-bottom: calc(var(--card-unit) * 10);
   color: var(--tier-light);
-  font-size: 0.52rem;
+  font-size: calc(var(--card-unit) * 7.8);
   font-weight: 900;
   letter-spacing: 0.17em;
   text-transform: uppercase;
 }
 
 .client-card[data-tier="signature"] .card-package {
-  min-width: 116px;
-  margin-top: 2px;
-  padding: 5px 16px 4px;
+  min-width: calc(var(--card-unit) * 116);
+  margin-top: calc(var(--card-unit) * 2);
+  padding:
+    calc(var(--card-unit) * 5)
+    calc(var(--card-unit) * 16)
+    calc(var(--card-unit) * 4);
   clip-path: polygon(7% 0, 93% 0, 100% 50%, 93% 100%, 7% 100%, 0 50%);
   background:
     linear-gradient(180deg, rgba(255, 244, 193, 0.94), rgba(184, 138, 43, 0.94) 48%, rgba(95, 61, 11, 0.98));
@@ -1087,24 +1140,24 @@ main {
 .signature-mark {
   display: block;
   width: max-content;
-  margin: 0 auto 5px;
+  margin: 0 auto calc(var(--card-unit) * 5);
   color: var(--gold-bright);
-  font-size: 0.48rem;
+  font-size: calc(var(--card-unit) * 7.2);
   line-height: 1;
 }
 
 .card-details {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 7px 9px;
-  padding-top: 9px;
-  border-top: 1px solid color-mix(in srgb, var(--tier-light), transparent 77%);
+  gap: calc(var(--card-unit) * 7) calc(var(--card-unit) * 9);
+  padding-top: calc(var(--card-unit) * 9);
+  border-top: calc(var(--card-unit) * 1) solid color-mix(in srgb, var(--tier-light), transparent 77%);
   text-align: left;
 }
 
 .card-details span {
   color: #aaa89f;
-  font-size: 0.52rem;
+  font-size: calc(var(--card-unit) * 7.8);
   font-weight: 600;
   line-height: 1.25;
 }
@@ -1115,7 +1168,7 @@ main {
 
 .card-details strong {
   color: var(--tier-light);
-  font-size: 0.6rem;
+  font-size: calc(var(--card-unit) * 9);
   font-weight: 900;
   letter-spacing: 0.03em;
   white-space: nowrap;
@@ -1124,9 +1177,195 @@ main {
 .card-table {
   grid-column: 1 / -1;
   color: #66645e !important;
-  font-size: 0.48rem !important;
+  font-size: calc(var(--card-unit) * 7.2) !important;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.modal-open {
+  overflow: hidden;
+}
+
+.card-overlay,
+.roster-overlay {
+  position: fixed;
+  inset: 0;
+  opacity: 0;
+  background: rgba(2, 2, 2, 0.82);
+  backdrop-filter: blur(7px);
+  transition: opacity 140ms ease;
+}
+
+.card-overlay[hidden],
+.roster-overlay[hidden] {
+  display: none;
+}
+
+.card-overlay {
+  z-index: 120;
+  display: grid;
+  padding: 22px;
+  place-items: center;
+  cursor: pointer;
+}
+
+.card-overlay.is-open,
+.roster-overlay.is-open {
+  opacity: 1;
+}
+
+.card-zoom-stage {
+  width: min(230px, calc(100vw - 44px));
+  transform: scale(0.96);
+  transition: transform 140ms ease;
+}
+
+.card-overlay.is-open .card-zoom-stage {
+  transform: scale(1);
+}
+
+.card-zoom-card {
+  width: 100%;
+}
+
+.card-zoom-card.roster-card {
+  aspect-ratio: 188 / 332;
+}
+
+.card-zoom-card.roster-card[data-tier="signature"] {
+  aspect-ratio: 188 / 336;
+}
+
+.roster-overlay {
+  z-index: 110;
+  display: grid;
+  padding: 12px;
+  place-items: center;
+}
+
+.roster-panel {
+  width: min(1180px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  overflow: hidden;
+  transform: scale(0.985);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(145deg, rgba(20, 20, 17, 0.99), rgba(7, 7, 6, 0.99)),
+    var(--ink);
+  box-shadow: var(--shadow);
+  transition: transform 140ms ease;
+}
+
+.roster-overlay.is-open .roster-panel {
+  transform: scale(1);
+}
+
+.roster-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 20px 15px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.roster-header h2 {
+  margin: 0;
+  font-size: clamp(1.25rem, 2vw, 1.8rem);
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.roster-close {
+  min-height: 34px;
+  padding: 7px 12px;
+  border: 1px solid rgba(218, 184, 94, 0.28);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--gold-pale);
+  cursor: pointer;
+  font-size: 0.55rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.roster-close:focus-visible {
+  outline: 2px solid var(--gold-pale);
+  outline-offset: 3px;
+}
+
+.roster-content {
+  max-height: calc(100vh - 104px);
+  overflow-y: auto;
+  padding: 18px 20px 24px;
+  scrollbar-color: var(--gold-deep) transparent;
+}
+
+.roster-section {
+  --section-color: var(--muted);
+}
+
+.roster-section + .roster-section {
+  margin-top: 24px;
+}
+
+.roster-section[data-tier="signature"] {
+  --section-color: var(--gold-bright);
+}
+
+.roster-section[data-tier="showcase"] {
+  --section-color: var(--violet);
+}
+
+.roster-section[data-tier="authority"] {
+  --section-color: #d24a39;
+}
+
+.roster-section-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--section-color), transparent 76%);
+}
+
+.roster-section-heading h3,
+.roster-section-heading span {
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.roster-section-heading h3 {
+  color: var(--section-color);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+}
+
+.roster-section-heading span {
+  color: #65635d;
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: start;
+  gap: clamp(4px, 0.8vw, 10px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-overlay,
+  .roster-overlay,
+  .card-zoom-stage,
+  .roster-panel {
+    transition-duration: 0ms;
+  }
 }
 
 .stair-bridge {
@@ -1251,6 +1490,10 @@ footer strong {
     justify-self: start;
   }
 
+  .control-actions {
+    justify-self: start;
+  }
+
   .venue-shell {
     padding: 26px 20px;
   }
@@ -1306,6 +1549,12 @@ footer strong {
     padding: 18px;
   }
 
+  .control-actions {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    width: 100%;
+  }
+
   .day-tabs,
   .round-tabs {
     display: grid;
@@ -1319,13 +1568,12 @@ footer strong {
   }
 
   .venue-heading {
-    align-items: start;
-    flex-direction: column;
+    align-items: stretch;
   }
 
   .active-round {
     width: 100%;
-    min-height: 142px;
+    min-height: 0;
   }
 
   .active-round-top {
@@ -1362,7 +1610,7 @@ footer strong {
   }
 
   .client-card {
-    width: 176px;
+    width: 100%;
   }
 
   footer {
@@ -1380,11 +1628,11 @@ footer strong {
   }
 
   .venue-heading {
-    display: block;
+    display: grid;
   }
 
   .active-round {
-    margin-top: 14px;
+    margin-top: 0;
     text-align: left;
   }
 
@@ -1398,8 +1646,27 @@ footer strong {
   }
 
   .room-body {
-    justify-content: center;
+    gap: 5px;
     padding-inline: 11px;
+  }
+
+  .participant-marker {
+    gap: 0 4px;
+    min-height: 42px;
+    padding: 6px;
+  }
+
+  .roster-header {
+    padding: 14px 12px 12px;
+  }
+
+  .roster-content {
+    max-height: calc(100vh - 88px);
+    padding: 14px 10px 18px;
+  }
+
+  .roster-section + .roster-section {
+    margin-top: 18px;
   }
 
   .participant-marker,
