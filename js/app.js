@@ -17,6 +17,7 @@
     roundTabs: document.querySelector("#round-tabs"),
     dayHeatStrip: document.querySelector("#day-heat-strip"),
     fieldToggle: document.querySelector("#field-toggle"),
+    allClientsButton: document.querySelector("#all-clients-button"),
     activeRound: document.querySelector("#active-round"),
     secondFloor: document.querySelector("#second-floor"),
     groundFloor: document.querySelector("#ground-floor"),
@@ -36,6 +37,38 @@
     round: initialRound,
     showField: true,
   };
+
+  const cardOverlay = document.createElement("div");
+  cardOverlay.className = "card-overlay";
+  cardOverlay.hidden = true;
+  cardOverlay.tabIndex = -1;
+  cardOverlay.setAttribute("role", "dialog");
+  cardOverlay.setAttribute("aria-modal", "true");
+
+  const rosterOverlay = document.createElement("div");
+  rosterOverlay.className = "roster-overlay";
+  rosterOverlay.hidden = true;
+  rosterOverlay.innerHTML = `
+    <section class="roster-panel" role="dialog" aria-modal="true" aria-labelledby="roster-heading">
+      <header class="roster-header">
+        <div>
+          <p class="eyebrow">Booked coverage</p>
+          <h2 id="roster-heading">All clients</h2>
+        </div>
+        <button class="roster-close" type="button" aria-label="Close all clients">Close</button>
+      </header>
+      <div class="roster-content" id="roster-content"></div>
+    </section>
+  `;
+
+  document.body.append(cardOverlay, rosterOverlay);
+
+  const rosterContent = rosterOverlay.querySelector("#roster-content");
+  const rosterClose = rosterOverlay.querySelector(".roster-close");
+  let cardOverlayTimer;
+  let rosterOverlayTimer;
+  let cardReturnFocus;
+  let rosterReturnFocus;
 
   function getDay(dayId) {
     return data.days.find((day) => day.id === dayId);
@@ -332,13 +365,51 @@
     );
   }
 
-  function makeClientCard(client) {
+  function formatRosterAppearances(appearances) {
+    const groups = new Map();
+
+    appearances.forEach((appearance) => {
+      const key = `${appearance.day}|${appearance.room}`;
+      if (!groups.has(key)) {
+        groups.set(key, {
+          day: appearance.day.toUpperCase(),
+          room: getRoom(appearance.room).code,
+          times: [],
+        });
+      }
+      groups.get(key).times.push(appearance.round);
+    });
+
+    return [...groups.values()]
+      .map((group) => `${group.day} ${group.times.join("/")} · ${group.room}`)
+      .join("<br>");
+  }
+
+  function makeClientCard(client, options = {}) {
+    const appearances = options.appearances || null;
     const officialEntry = findOfficialEntry(client);
     const card = document.createElement("article");
     const tier = client.package.toLowerCase();
     card.className = "client-card";
     card.dataset.tier = tier;
-    card.setAttribute("aria-label", `${client.name}, ${client.package}, ${client.category}, ${client.round}`);
+    if (appearances) card.classList.add("roster-card");
+
+    const appearanceLabel = appearances
+      ? `${appearances.length} booked appearance${appearances.length === 1 ? "" : "s"}`
+      : `${client.category}, ${client.round}`;
+    card.setAttribute("aria-label", `${client.name}, ${client.package}, ${appearanceLabel}`);
+
+    if (options.interactive !== false) {
+      card.tabIndex = 0;
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-haspopup", "dialog");
+      card.addEventListener("click", () => openCardOverlay(client, appearances));
+      card.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        openCardOverlay(client, appearances);
+      });
+    }
 
     const inner = document.createElement("div");
     inner.className = "client-card-inner";
@@ -367,16 +438,27 @@
 
     const copy = document.createElement("div");
     copy.className = "card-copy";
-    const tableText = officialEntry?.table
-      ? `Official schedule · Table ${officialEntry.table}`
-      : client.role || "Confirmed coverage client";
+    const categories = appearances
+      ? [...new Set(appearances.map((appearance) => appearance.category))]
+      : [client.category];
+    const categoryText = categories.length > 1
+      ? `${categories.length} categories`
+      : categories[0];
+    const roundText = appearances
+      ? `${appearances.length} slot${appearances.length === 1 ? "" : "s"}`
+      : client.round;
+    const tableText = appearances
+      ? formatRosterAppearances(appearances)
+      : officialEntry?.table
+        ? `Official schedule · Table ${officialEntry.table}`
+        : client.role || "Confirmed coverage client";
     copy.innerHTML = `
       ${tier === "signature" ? '<span class="signature-mark" aria-hidden="true">◆</span>' : ""}
       <h5>${client.name}</h5>
       <span class="card-package">${client.package}</span>
       <div class="card-details">
-        <span>${client.category}</span>
-        <strong>${client.round}</strong>
+        <span>${categoryText}</span>
+        <strong>${roundText}</strong>
         <span class="card-table">${tableText}</span>
       </div>
     `;
@@ -385,6 +467,114 @@
     inner.append(ribbon, portraitFrame, copy);
     card.append(inner);
     return card;
+  }
+
+  function syncBodyLock() {
+    document.body.classList.toggle(
+      "modal-open",
+      !cardOverlay.hidden || !rosterOverlay.hidden,
+    );
+  }
+
+  function openCardOverlay(client, appearances = null) {
+    window.clearTimeout(cardOverlayTimer);
+    cardReturnFocus = document.activeElement;
+    const enlargedCard = makeClientCard(client, {
+      appearances,
+      interactive: false,
+    });
+    enlargedCard.classList.add("card-zoom-card");
+    const zoomStage = document.createElement("div");
+    zoomStage.className = "card-zoom-stage";
+    zoomStage.append(enlargedCard);
+    cardOverlay.replaceChildren(zoomStage);
+    cardOverlay.setAttribute(
+      "aria-label",
+      `${client.name} enlarged card. Tap anywhere or press Escape to close.`,
+    );
+    cardOverlay.hidden = false;
+    syncBodyLock();
+    window.requestAnimationFrame(() => cardOverlay.classList.add("is-open"));
+    cardOverlay.focus();
+  }
+
+  function closeCardOverlay() {
+    if (cardOverlay.hidden) return;
+    cardOverlay.classList.remove("is-open");
+    cardOverlayTimer = window.setTimeout(() => {
+      cardOverlay.hidden = true;
+      cardOverlay.replaceChildren();
+      syncBodyLock();
+      if (cardReturnFocus?.isConnected) cardReturnFocus.focus();
+    }, 140);
+  }
+
+  function getRosterGroups() {
+    const people = new Map();
+
+    data.clients.forEach((client) => {
+      const key = normalize(client.officialName);
+      if (!people.has(key)) {
+        people.set(key, { client, appearances: [] });
+      }
+      people.get(key).appearances.push(client);
+    });
+
+    const packageOrder = ["Signature", "Showcase", "Authority", "Essential"];
+    return packageOrder
+      .map((packageName) => ({
+        packageName,
+        people: [...people.values()]
+          .filter((person) => person.client.package === packageName)
+          .sort((personA, personB) => personA.client.name.localeCompare(personB.client.name)),
+      }))
+      .filter((group) => group.people.length);
+  }
+
+  function renderRoster() {
+    rosterContent.replaceChildren();
+
+    getRosterGroups().forEach((group) => {
+      const section = document.createElement("section");
+      section.className = "roster-section";
+      section.dataset.tier = group.packageName.toLowerCase();
+
+      const heading = document.createElement("header");
+      heading.className = "roster-section-heading";
+      heading.innerHTML = `
+        <h3>${group.packageName}</h3>
+        <span>${group.people.length} client${group.people.length === 1 ? "" : "s"}</span>
+      `;
+
+      const grid = document.createElement("div");
+      grid.className = "roster-grid";
+      group.people.forEach((person) => {
+        grid.append(makeClientCard(person.client, { appearances: person.appearances }));
+      });
+
+      section.append(heading, grid);
+      rosterContent.append(section);
+    });
+  }
+
+  function openRoster() {
+    window.clearTimeout(rosterOverlayTimer);
+    rosterReturnFocus = document.activeElement;
+    renderRoster();
+    rosterOverlay.hidden = false;
+    syncBodyLock();
+    window.requestAnimationFrame(() => rosterOverlay.classList.add("is-open"));
+    rosterClose.focus();
+  }
+
+  function closeRoster() {
+    if (rosterOverlay.hidden) return;
+    rosterOverlay.classList.remove("is-open");
+    rosterOverlayTimer = window.setTimeout(() => {
+      rosterOverlay.hidden = true;
+      syncBodyLock();
+      if (rosterReturnFocus?.isConnected) rosterReturnFocus.focus();
+    }, 140);
   }
 
   function makeParticipantMarker(entry) {
@@ -501,6 +691,21 @@
   elements.fieldToggle.addEventListener("change", () => {
     state.showField = elements.fieldToggle.checked;
     renderVenue();
+  });
+
+  elements.allClientsButton.addEventListener("click", openRoster);
+  cardOverlay.addEventListener("click", closeCardOverlay);
+  rosterClose.addEventListener("click", closeRoster);
+  rosterOverlay.addEventListener("click", (event) => {
+    if (event.target === rosterOverlay) closeRoster();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    if (!cardOverlay.hidden) {
+      closeCardOverlay();
+    } else if (!rosterOverlay.hidden) {
+      closeRoster();
+    }
   });
 
   render();
