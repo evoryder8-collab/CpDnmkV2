@@ -695,6 +695,14 @@ main {
   padding-left: 74px;
 }
 
+.floor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 34px;
+  margin-bottom: 10px;
+}
+
 .floor-label {
   position: absolute;
   top: 0;
@@ -731,6 +739,55 @@ main {
   color: #56554f;
   font-size: 0.54rem;
   letter-spacing: 0.1em;
+}
+
+.video-filter-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 8px 12px;
+  border: 1px solid rgba(183, 201, 166, 0.34);
+  border-radius: 2px;
+  background: linear-gradient(145deg, rgba(31, 44, 31, 0.74), rgba(12, 16, 12, 0.88));
+  color: #9eae92;
+  cursor: pointer;
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+}
+
+.video-filter-button > span {
+  width: 7px;
+  height: 7px;
+  border: 1px solid #78906c;
+  transform: rotate(45deg);
+  background: transparent;
+}
+
+.video-filter-button:hover {
+  border-color: rgba(183, 201, 166, 0.58);
+  color: #c2d0b5;
+}
+
+.video-filter-button[aria-pressed="true"] {
+  border-color: #829b73;
+  background: linear-gradient(145deg, rgba(74, 101, 64, 0.72), rgba(27, 42, 28, 0.94));
+  color: #d4dec9;
+  box-shadow: inset 0 0 0 1px rgba(183, 201, 166, 0.1);
+}
+
+.video-filter-button[aria-pressed="true"] > span {
+  background: #9eb28e;
+  box-shadow: 0 0 0 2px rgba(110, 138, 95, 0.2);
+}
+
+.video-filter-button:focus-visible {
+  outline: 2px solid #9eb28e;
+  outline-offset: 3px;
 }
 
 .room-grid {
@@ -969,6 +1026,12 @@ main {
   --tier-light: #ffc0ae;
   --tier-mid: #d24a39;
   --tier-deep: #430b0a;
+}
+
+.client-card[data-tier="essential"] {
+  --tier-light: #b7c9a6;
+  --tier-mid: #6e8a5f;
+  --tier-deep: #26392a;
 }
 
 .client-card-inner {
@@ -1323,6 +1386,10 @@ main {
   --section-color: #d24a39;
 }
 
+.roster-section[data-tier="essential"] {
+  --section-color: #7f9b70;
+}
+
 .roster-section-heading {
   display: flex;
   align-items: baseline;
@@ -1507,6 +1574,13 @@ footer strong {
     flex-direction: row;
     align-items: center;
     width: auto;
+    margin-bottom: 0;
+  }
+
+  .floor-toolbar {
+    justify-content: space-between;
+    gap: 14px;
+    min-height: 0;
     margin-bottom: 13px;
   }
 
