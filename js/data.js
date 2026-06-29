@@ -412,6 +412,72 @@ window.BOARD_DATA = {
       "room": "d223",
       "category": "Sports massage",
       "portrait": "Chia Henry.webp"
+    },
+    {
+      "id": "victor-sat-wellness",
+      "name": "Victor Fabian Martin",
+      "officialName": "Victor F. Martin",
+      "package": "Signature",
+      "day": "sat",
+      "round": "12:35",
+      "room": "c275",
+      "category": "Wellness massage",
+      "portrait": "Victor.webp"
+    },
+    {
+      "id": "victor-sun-eastern",
+      "name": "Victor Fabian Martin",
+      "officialName": "Victor F. Martin",
+      "package": "Signature",
+      "day": "sun",
+      "round": "12:10",
+      "room": "b086",
+      "category": "Freestyle massage - Eastern inspired",
+      "portrait": "Victor.webp"
+    },
+    {
+      "id": "harpa-sat-sports",
+      "name": "Harpa",
+      "officialName": "Harpa Finnsdóttir",
+      "package": "Essential",
+      "day": "sat",
+      "round": "12:35",
+      "room": "d223",
+      "category": "Sports massage",
+      "portrait": "Harpa.webp"
+    },
+    {
+      "id": "harpa-sun-sports",
+      "name": "Harpa",
+      "officialName": "Harpa Finnsdóttir",
+      "package": "Essential",
+      "day": "sun",
+      "round": "13:30",
+      "room": "d223",
+      "category": "Sports massage",
+      "portrait": "Harpa.webp"
+    },
+    {
+      "id": "hege-sat-swedish",
+      "name": "Hege Rokseth",
+      "officialName": "Hege Rokseth",
+      "package": "Authority",
+      "day": "sat",
+      "round": "11:15",
+      "room": "c233",
+      "category": "Swedish massage",
+      "portrait": "Hege.webp"
+    },
+    {
+      "id": "hege-sun-sports",
+      "name": "Hege Rokseth",
+      "officialName": "Hege Rokseth",
+      "package": "Authority",
+      "day": "sun",
+      "round": "13:30",
+      "room": "d223",
+      "category": "Sports massage",
+      "portrait": "Hege.webp"
     }
   ],
   "schedule": [
