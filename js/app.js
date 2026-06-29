@@ -18,6 +18,7 @@
     dayHeatStrip: document.querySelector("#day-heat-strip"),
     fieldToggle: document.querySelector("#field-toggle"),
     allClientsButton: document.querySelector("#all-clients-button"),
+    videoFilterButton: document.querySelector("#video-filter-button"),
     activeRound: document.querySelector("#active-round"),
     secondFloor: document.querySelector("#second-floor"),
     groundFloor: document.querySelector("#ground-floor"),
@@ -36,6 +37,7 @@
     day: initialDay,
     round: initialRound,
     showField: true,
+    videoIncludedOnly: false,
   };
 
   const cardOverlay = document.createElement("div");
@@ -512,13 +514,15 @@
   function getRosterGroups() {
     const people = new Map();
 
-    data.clients.forEach((client) => {
-      const key = normalize(client.officialName);
-      if (!people.has(key)) {
-        people.set(key, { client, appearances: [] });
-      }
-      people.get(key).appearances.push(client);
-    });
+    data.clients
+      .filter((client) => !state.videoIncludedOnly || client.package !== "Essential")
+      .forEach((client) => {
+        const key = normalize(client.officialName);
+        if (!people.has(key)) {
+          people.set(key, { client, appearances: [] });
+        }
+        people.get(key).appearances.push(client);
+      });
 
     const packageOrder = ["Signature", "Showcase", "Authority", "Essential"];
     return packageOrder
@@ -594,13 +598,18 @@
   }
 
   function makeRoom(room) {
-    const clients = data.clients.filter(
+    const bookedClients = data.clients.filter(
       (client) => client.day === state.day && client.round === state.round && client.room === room.id,
     );
+    const clients = state.videoIncludedOnly
+      ? bookedClients.filter((client) => client.package !== "Essential")
+      : bookedClients;
     const officialEntries = data.schedule.filter(
       (entry) => entry.day === state.day && entry.round === state.round && entry.room === room.id,
     );
-    const neutralEntries = officialEntries.filter((entry) => !isPromotedParticipant(entry, clients));
+    const neutralEntries = officialEntries.filter(
+      (entry) => !isPromotedParticipant(entry, bookedClients),
+    );
     const visibleCount = clients.length + (state.showField ? neutralEntries.length : 0);
 
     const article = document.createElement("article");
@@ -638,7 +647,13 @@
     if (!visibleCount) {
       const empty = document.createElement("p");
       empty.className = "room-empty";
-      empty.textContent = officialEntries.length && !state.showField ? "No booked clients this round" : "No competitors scheduled";
+      if (state.videoIncludedOnly && bookedClients.length && !clients.length) {
+        empty.textContent = "No video-included clients this round";
+      } else {
+        empty.textContent = officialEntries.length && !state.showField
+          ? "No booked clients this round"
+          : "No competitors scheduled";
+      }
       body.append(empty);
     }
 
@@ -657,6 +672,17 @@
       `<i class="${index < Math.min(config.METER_SEGMENTS, filledSegments) ? "is-filled" : ""}"></i>`,
     ).join("");
     const splitMessage = splitNeededMessage(difficulty);
+
+    elements.videoFilterButton.setAttribute(
+      "aria-pressed",
+      String(state.videoIncludedOnly),
+    );
+    elements.videoFilterButton.setAttribute(
+      "aria-label",
+      state.videoIncludedOnly
+        ? "Showing video-included clients only. Show all booked clients"
+        : "Show video-included clients only",
+    );
 
     setDifficultyStyle(elements.activeRound, difficulty);
     elements.activeRound.style.setProperty("--meter-segments", config.METER_SEGMENTS);
@@ -694,6 +720,10 @@
   });
 
   elements.allClientsButton.addEventListener("click", openRoster);
+  elements.videoFilterButton.addEventListener("click", () => {
+    state.videoIncludedOnly = !state.videoIncludedOnly;
+    renderVenue();
+  });
   cardOverlay.addEventListener("click", closeCardOverlay);
   rosterClose.addEventListener("click", closeRoster);
   rosterOverlay.addEventListener("click", (event) => {
