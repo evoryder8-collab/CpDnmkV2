@@ -20,6 +20,7 @@
     allClientsButton: document.querySelector("#all-clients-button"),
     videoFilterButton: document.querySelector("#video-filter-button"),
     activeRound: document.querySelector("#active-round"),
+    roundBriefing: document.querySelector("#round-briefing"),
     secondFloor: document.querySelector("#second-floor"),
     groundFloor: document.querySelector("#ground-floor"),
   };
@@ -78,6 +79,12 @@
 
   function getRoom(roomId) {
     return data.rooms.find((room) => room.id === roomId);
+  }
+
+  function getRoundPlan(dayId, roundTime) {
+    return data.roundPlans.find(
+      (plan) => plan.day === dayId && plan.round === roundTime,
+    );
   }
 
   function normalize(value) {
@@ -504,14 +511,17 @@
     return `${difficulty.level.label}: ${coverage} in ${spread}. ${passPhrase}.`;
   }
 
-  function splitNeededMessage(difficulty) {
+  function splitNeededMessage(difficulty, roundPlan) {
+    if (roundPlan?.neckCam) {
+      return "Neck cam planned: Iulian owns the split floor while Constantin protects the anchor.";
+    }
     if (difficulty.helperRequired) {
-      return "Second video recommended: give the volume photographer the stabilised camera for this round.";
+      return "Second video recommended: give Iulian the stabilised neck camera for this round.";
     }
     if (difficulty.helperStandby) {
-      return "Video assist on standby: keep the stabilised camera on the volume photographer.";
+      return "Video assist on standby: keep the stabilised camera ready for Iulian.";
     }
-    return "Crew plan: one assistant targets booked photos while the other keeps full-field photo volume.";
+    return "Crew plan: June hunts booked stills while Iulian keeps full-field photo volume.";
   }
 
   function routeSummary(difficulty) {
@@ -559,7 +569,9 @@
     elements.roundTabs.replaceChildren();
     elements.dayHeatStrip.replaceChildren();
     getDayPressureProfile(state.day).forEach(({ round, difficulty }) => {
+      const roundPlan = getRoundPlan(state.day, round.time);
       const label = `
+        ${roundPlan?.neckCam ? '<span class="round-neck-cam" title="Neck cam planned">NC</span>' : ""}
         <span class="round-button-label">${round.label}</span>
         <strong class="round-button-time">${round.time}</strong>
         <span class="round-difficulty-meta">
@@ -575,9 +587,10 @@
         render();
       });
       setDifficultyStyle(roundButton, difficulty);
+      if (roundPlan?.neckCam) roundButton.dataset.neckCam = "true";
       roundButton.setAttribute(
         "aria-label",
-        `${round.label}, ${round.time}, ${difficulty.level.label}, ${bookedCountLabel(difficulty.clients.length)}, difficulty rank ${difficulty.rank} of ${difficulty.roundCount}`,
+        `${round.label}, ${round.time}, ${difficulty.level.label}, ${bookedCountLabel(difficulty.clients.length)}, difficulty rank ${difficulty.rank} of ${difficulty.roundCount}${roundPlan?.neckCam ? ", neck cam planned" : ""}`,
       );
       elements.roundTabs.append(roundButton);
 
@@ -587,11 +600,12 @@
       heatCell.setAttribute("aria-pressed", String(round.time === state.round));
       heatCell.setAttribute(
         "aria-label",
-        `${round.time}, ${difficulty.level.label}, ${bookedCountLabel(difficulty.clients.length)}, difficulty rank ${difficulty.rank} of ${difficulty.roundCount}`,
+        `${round.time}, ${difficulty.level.label}, ${bookedCountLabel(difficulty.clients.length)}, difficulty rank ${difficulty.rank} of ${difficulty.roundCount}${roundPlan?.neckCam ? ", neck cam planned" : ""}`,
       );
       setDifficultyStyle(heatCell, difficulty);
+      if (roundPlan?.neckCam) heatCell.dataset.neckCam = "true";
       heatCell.innerHTML = `
-        <span class="heat-cell-time">${round.time}<b>#${difficulty.rank}</b></span>
+        <span class="heat-cell-time">${round.time}<span>${roundPlan?.neckCam ? '<em class="neck-cam-mini">NC</em>' : ""}<b>#${difficulty.rank}</b></span></span>
         <span class="heat-bar" aria-hidden="true"><i></i></span>
         <span class="heat-cell-level"><i class="difficulty-shape" aria-hidden="true"></i>${difficulty.level.shortLabel || difficulty.level.label}</span>
         <span class="heat-cell-count">${difficulty.clients.length} booked · ${difficulty.videoCount} video</span>
@@ -919,6 +933,60 @@
     return article;
   }
 
+  function renderRoundBriefing(roundPlan) {
+    const doctrine = data.doctrine
+      .map((rule, index) => `<span><b>0${index + 1}</b>${rule}</span>`)
+      .join("");
+    const cameraPlan = data.crew
+      .map((member) => {
+        const neckCamOperator = member.id === "iulian" && roundPlan.neckCam;
+        return `
+          <article class="camera-assignment" data-camera="${member.id}" data-neck-cam="${neckCamOperator}">
+            <header>
+              <span>${member.camera}</span>
+              <div>
+                <h4>${member.name}</h4>
+                <small>${neckCamOperator ? "Stabilised neck-cam video" : member.role}</small>
+              </div>
+            </header>
+            <p>${roundPlan.assignments[member.id]}</p>
+          </article>
+        `;
+      })
+      .join("");
+    const tips = roundPlan.tips
+      .map((tip) => `<li><i aria-hidden="true"></i>${tip}</li>`)
+      .join("");
+
+    elements.roundBriefing.dataset.neckCam = String(roundPlan.neckCam);
+    elements.roundBriefing.setAttribute("aria-labelledby", "round-briefing-heading");
+    elements.roundBriefing.innerHTML = `
+      <header class="briefing-header">
+        <div>
+          <p class="eyebrow">Round playbook · ${roundPlan.callout}</p>
+          <h3 id="round-briefing-heading">${roundPlan.title}</h3>
+        </div>
+        <span class="neck-cam-status" data-active="${roundPlan.neckCam}">
+          <i aria-hidden="true"></i>${roundPlan.neckCam ? "Neck cam on" : "Neck cam off"}
+        </span>
+      </header>
+      <div class="doctrine-strip" aria-label="Standing filming rules">${doctrine}</div>
+      <div class="briefing-command">
+        <section class="briefing-anchor">
+          <span>Anchor</span>
+          <strong>${roundPlan.anchor}</strong>
+          <p>${roundPlan.objective}</p>
+        </section>
+        <section class="briefing-loop">
+          <span>Loop order</span>
+          <strong>${roundPlan.loop}</strong>
+        </section>
+      </div>
+      <div class="camera-plan" aria-label="Camera assignments">${cameraPlan}</div>
+      <ul class="briefing-tips">${tips}</ul>
+    `;
+  }
+
   function renderVenue() {
     const day = getDay(state.day);
     const pressureEntry = getDayPressureProfile(state.day).find(
@@ -926,18 +994,23 @@
     );
     const round = pressureEntry.round;
     const difficulty = pressureEntry.difficulty;
+    const roundPlan = getRoundPlan(state.day, state.round);
     const filledSegments = difficulty.visualPercent > 0
       ? Math.max(1, Math.ceil((difficulty.visualPercent / 100) * config.METER_SEGMENTS))
       : 0;
     const meterSegments = Array.from({ length: config.METER_SEGMENTS }, (_, index) =>
       `<i class="${index < Math.min(config.METER_SEGMENTS, filledSegments) ? "is-filled" : ""}"></i>`,
     ).join("");
-    const splitMessage = splitNeededMessage(difficulty);
-    const assistantTwoLabel = difficulty.helperRequired
-      ? "Second video"
-      : difficulty.helperStandby
-        ? "Video standby"
-        : "Volume photos";
+    const splitMessage = splitNeededMessage(difficulty, roundPlan);
+    const plannedSecondVideo = roundPlan.neckCam;
+    const helperDisplayKey = plannedSecondVideo ? "required" : difficulty.helperMode.key;
+    const iulianLabel = plannedSecondVideo
+      ? "Neck-cam video"
+      : difficulty.helperRequired
+        ? "Second video"
+        : difficulty.helperStandby
+          ? "Video standby"
+          : "Volume photos";
 
     elements.videoFilterButton.setAttribute(
       "aria-pressed",
@@ -965,14 +1038,16 @@
       <div class="pressure-meter-heading"><span>Coverage pressure</span><strong>#${difficulty.rank} today</strong></div>
       <div class="difficulty-meter" aria-label="Coverage pressure: ${difficulty.level.label}, rank ${difficulty.rank} of ${difficulty.roundCount}">${meterSegments}</div>
       <p class="difficulty-summary">${difficultySummary(difficulty)}</p>
-      <div class="crew-strip" data-helper="${difficulty.helperMode.key}" aria-label="Crew allocation">
-        <span><b>You</b>Primary video</span>
-        <span><b>A1</b>Client photos</span>
-        <span><b>A2</b>${assistantTwoLabel}</span>
+      <div class="crew-strip" data-helper="${helperDisplayKey}" aria-label="Crew allocation">
+        <span><b>C1</b>${config.TEAM.PRIMARY_VIDEO_NAME} · Cinema</span>
+        <span><b>C2</b>${config.TEAM.VOLUME_PHOTO_NAME} · ${iulianLabel}</span>
+        <span><b>C3</b>${config.TEAM.CLIENT_PHOTO_NAME} · Client stills</span>
       </div>
       <p class="route-note">${routeSummary(difficulty)}</p>
-      <p class="split-needed" data-helper="${difficulty.helperMode.key}"><i aria-hidden="true"></i>${splitMessage}</p>
+      <p class="split-needed" data-helper="${helperDisplayKey}"><i aria-hidden="true"></i>${splitMessage}</p>
     `;
+
+    renderRoundBriefing(roundPlan);
 
     elements.secondFloor.replaceChildren();
     elements.groundFloor.replaceChildren();
