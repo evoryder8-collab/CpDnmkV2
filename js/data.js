@@ -186,6 +186,28 @@ window.BOARD_I18N = {
       hideFullPlan: "Hide full team plan",
       threeActionsOnly: "Three actions. Then start moving.",
       secondaryCameraNote: "Secondary camera means periodic short handheld clips, not continuous recording.",
+      database: "Database",
+      databaseEyebrow: "Sales check",
+      databaseTitle: "Competition database",
+      databaseSearchLabel: "Search participant",
+      databasePlaceholder: "Type a name",
+      databaseHint: "Tap a predicted name to check whether that person lands in calm or difficult rounds.",
+      databasePrompt: "Search a participant name to see categories, rounds, tables, and add-on difficulty.",
+      databaseNoMatches: "No matching participant",
+      closeDatabase: "Close database",
+      alreadyBooked: "Already booked",
+      appearances: "appearances",
+      photoOnlyFit: "Photo-only fit",
+      photoVideoFit: "Photo + Video fit",
+      easyAdd: "Easy add",
+      manageableAdd: "Manageable",
+      tightAdd: "Tight",
+      hardAdd: "Hard add",
+      affectsRounds: "Affects {count} round(s)",
+      worstLanding: "Worst landing",
+      noNewImpact: "Already in the booked roster. No extra load added.",
+      afterAdding: "after adding",
+      current: "current",
     },
     levels: {
       calm: "Calm",
@@ -316,6 +338,28 @@ window.BOARD_I18N = {
       hideFullPlan: "Ascunde planul complet",
       threeActionsOnly: "Trei acțiuni. Apoi pornește.",
       secondaryCameraNote: "A doua cameră înseamnă clipuri scurte filmate din mână, nu filmare continuă.",
+      database: "Database",
+      databaseEyebrow: "Verificare vânzare",
+      databaseTitle: "Baza de date concurs",
+      databaseSearchLabel: "Caută participant",
+      databasePlaceholder: "Scrie un nume",
+      databaseHint: "Apasă pe numele prezis ca să vezi dacă pică în runde calme sau grele.",
+      databasePrompt: "Caută un participant ca să vezi categoriile, rundele, mesele și dificultatea dacă îl adăugăm.",
+      databaseNoMatches: "Nu există potrivire",
+      closeDatabase: "Închide database",
+      alreadyBooked: "Deja rezervat",
+      appearances: "apariții",
+      photoOnlyFit: "Potrivire doar foto",
+      photoVideoFit: "Potrivire foto + video",
+      easyAdd: "Ușor de adăugat",
+      manageableAdd: "Se poate",
+      tightAdd: "La limită",
+      hardAdd: "Greu de adăugat",
+      affectsRounds: "Afectează {count} runde",
+      worstLanding: "Cea mai grea rundă",
+      noNewImpact: "Este deja în lista de clienți. Nu adaugă presiune nouă.",
+      afterAdding: "după adăugare",
+      current: "acum",
     },
     levels: {
       calm: "Calm",
@@ -409,6 +453,7 @@ window.BOARD_I18N = {
       "Filmează alt moment la fiecare revenire",
       "Gogutsa în D245 este o oprire rapidă din mers",
       "Clienții Essential sunt prioritatea camerei foto",
+      "Constantin face personal cel puțin un tur video pe fiecare etaj cu clienți video",
     ],
     plans: {
       "sat-10:00": {
@@ -450,11 +495,11 @@ window.BOARD_I18N = {
         title: "Clienții premium sus, echipa împărțită jos",
         anchor: "Antoine + Victor · etajul 2",
         loop: "D245 Antoine → D223 Zoltán și Hubert → C275 Victor → repetă",
-        objective: "Constantin și June țin traseul premium de sus. Iulian rămâne jos ca Pitiprapada să primească vizite regulate.",
+        objective: "Constantin și June țin traseul premium de sus. Iulian rămâne jos ca Pitiprapada să fie acoperită între vizitele personale ale lui Constantin.",
         assignments: {
           constantin: "Fă turul Antoine plus juratul, perechea Showcase din D223, apoi Victor. Coboară o dată la mijlocul rundei pentru câteva minute cu Pitiprapada.",
           iulian: "A DOUA CAMERĂ PREGĂTITĂ. Rămâi cu Pitiprapada în Gryden. Fă periodic clipuri scurte din mână și fotografii, nu filmare continuă.",
-          june: "Harpa prima, fiindcă produsul ei este doar foto. Apoi Antoine, Victor, Zoltán și Hubert.",
+          june: "Harpa (Essential) prima, fiindcă produsul ei este doar foto. Apoi Antoine, Victor, Zoltán și Hubert.",
         },
         tips: [
           "Două Signature sunt la capetele traseului de sus",
@@ -534,17 +579,17 @@ window.BOARD_I18N = {
         callout: "Finala",
         title: "Podium jos, echipa împărțită sus",
         anchor: "Gof + Gerarda · Auditoriu B086",
-        loop: "Ține B086 → tur video scurt în D245 și D223 → înapoi pentru finală",
+        loop: "B086 principal → un tur personal în D245 și D223 → înapoi pentru finală",
         objective: "Finala și podiumul lui Gof sunt cadrele principale ale weekendului. În aceeași sală primești și Gerarda fără deplasare.",
         assignments: {
-          constantin: "Ține Auditoriul pentru Gof și Gerarda. Fă doar tururi scurte sus, apoi revino pentru final și podium.",
-          iulian: "A DOUA CAMERĂ PREGĂTITĂ. Fă periodic clipuri scurte cu Hubert în D245 și Hege în D223 și fotografiile lui Harpa.",
+          constantin: "Ține Auditoriul pentru Gof și Gerarda. Fă un tur personal sus pentru Hubert și Hege, apoi revino pentru final și podium.",
+          iulian: "A DOUA CAMERĂ PREGĂTITĂ. Fă periodic clipuri scurte cu Hubert în D245 și Hege în D223 și fotografiile lui Harpa (Essential).",
           june: "Rămâi jos cu Gof și Gerarda. Protejează cadrul de podium înainte de orice altceva.",
         },
         tips: [
           "Podiumul lui Gof este cadrul principal al weekendului",
           "Doi clienți sunt în aceeași sală jos",
-          "Iulian ține singur toată partea de sus",
+          "Iulian ține partea de sus între vizitele lui Constantin",
         ],
       },
       "sun-13:55": {
@@ -675,6 +720,28 @@ window.BOARD_I18N = {
       hideFullPlan: "ซ่อนแผนทีมทั้งหมด",
       threeActionsOnly: "จำแค่ 3 อย่าง แล้วเริ่มทำงาน",
       secondaryCameraNote: "กล้องตัวที่สองใช้ถ่ายคลิปสั้นเป็นช่วงๆ ไม่ได้เปิดถ่ายต่อเนื่อง",
+      database: "Database",
+      databaseEyebrow: "เช็กการขาย",
+      databaseTitle: "ฐานข้อมูลการแข่งขัน",
+      databaseSearchLabel: "ค้นหาผู้แข่งขัน",
+      databasePlaceholder: "พิมพ์ชื่อ",
+      databaseHint: "แตะชื่อที่ขึ้นมา เพื่อดูว่าถ้าเพิ่มแล้วอยู่รอบง่ายหรือรอบหนัก",
+      databasePrompt: "ค้นหาชื่อเพื่อดูประเภท รอบ โต๊ะ และความยากถ้ารับเพิ่ม",
+      databaseNoMatches: "ไม่พบชื่อที่ตรง",
+      closeDatabase: "ปิด database",
+      alreadyBooked: "จองแล้ว",
+      appearances: "รอบที่ลง",
+      photoOnlyFit: "ความเหมาะแบบภาพนิ่ง",
+      photoVideoFit: "ความเหมาะแบบภาพ + วิดีโอ",
+      easyAdd: "รับง่าย",
+      manageableAdd: "รับได้",
+      tightAdd: "ค่อนข้างแน่น",
+      hardAdd: "รับยาก",
+      affectsRounds: "กระทบ {count} รอบ",
+      worstLanding: "รอบที่หนักสุด",
+      noNewImpact: "อยู่ในรายชื่อลูกค้าแล้ว ไม่เพิ่มภาระใหม่",
+      afterAdding: "หลังเพิ่ม",
+      current: "ตอนนี้",
     },
     levels: {
       calm: "สบาย",
@@ -768,6 +835,7 @@ window.BOARD_I18N = {
       "กลับไปแต่ละครั้งให้ถ่ายคนละช่วง",
       "ถ้าผ่าน D245 ให้เก็บภาพ Gogutsa ได้เลย",
       "ลูกค้า Essential เป็นงานหลักของกล้องภาพนิ่ง",
+      "Constantin ต้องวนไปถ่ายวิดีโอเองอย่างน้อยหนึ่งครั้งในทุกชั้นที่มีลูกค้าวิดีโอ",
     ],
     plans: {
       "sat-10:00": {
@@ -809,11 +877,11 @@ window.BOARD_I18N = {
         title: "ลูกค้าหลักอยู่ชั้น 2 แยก Iulian ไปชั้นล่าง",
         anchor: "Antoine + Victor · ชั้น 2",
         loop: "D245 Antoine → D223 Zoltán และ Hubert → C275 Victor → ทำซ้ำ",
-        objective: "Constantin และ June ดูเส้นทางลูกค้าหลักชั้น 2 Iulian อยู่ชั้นล่างเพื่อให้ Pitiprapada มีคนถ่ายตลอด",
+        objective: "Constantin และ June ดูเส้นทางลูกค้าหลักชั้น 2 Iulian อยู่ชั้นล่างเพื่อดู Pitiprapada ระหว่างที่ Constantin ขึ้นชั้น 2",
         assignments: {
           constantin: "วน Antoine กับกรรมการ ต่อด้วย Zoltán และ Hubert ที่ D223 แล้ว Victor ลงไปหา Pitiprapada หนึ่งครั้งช่วงกลางรอบ",
           iulian: "เตรียมกล้องตัวที่สอง อยู่กับ Pitiprapada ที่ Gryden ถ่ายคลิปสั้นเป็นช่วงๆ และภาพนิ่ง ห้ามถ่ายต่อเนื่อง",
-          june: "เริ่ม Harpa ก่อน เพราะแพ็กเกจของเธอมีแค่ภาพนิ่ง จากนั้น Antoine, Victor, Zoltán และ Hubert",
+          june: "เริ่ม Harpa (Essential) ก่อน เพราะแพ็กเกจของเธอมีแค่ภาพนิ่ง จากนั้น Antoine, Victor, Zoltán และ Hubert",
         },
         tips: [
           "Signature สองคนอยู่คนละด้านของทางเดินชั้น 2",
@@ -896,14 +964,14 @@ window.BOARD_I18N = {
         loop: "อยู่ B086 → ขึ้นไป D245 และ D223 เป็นบางช่วง → กลับมาก่อนจบ",
         objective: "รอบสุดท้ายและโพเดียมของ Gof คือช็อตสำคัญที่สุดของสุดสัปดาห์ Gerarda อยู่ห้องเดียวกันจึงถ่ายได้โดยไม่ต้องเดินเพิ่ม",
         assignments: {
-          constantin: "อยู่หอประชุมกับ Gof และ Gerarda ขึ้นชั้น 2 เฉพาะช่วงสำคัญ แล้วกลับมาก่อนจบและโพเดียม",
-          iulian: "เตรียมกล้องตัวที่สอง ถ่ายคลิปสั้น Hubert ที่ D245 และ Hege ที่ D223 เป็นช่วงๆ พร้อมถ่ายภาพนิ่ง Harpa",
+          constantin: "อยู่หอประชุมกับ Gof และ Gerarda แล้วขึ้นไปแตะ Hubert และ Hege เองหนึ่งครั้ง จากนั้นกลับมาก่อนจบและโพเดียม",
+          iulian: "เตรียมกล้องตัวที่สอง ถ่ายคลิปสั้น Hubert ที่ D245 และ Hege ที่ D223 เป็นช่วงๆ พร้อมถ่ายภาพนิ่ง Harpa (Essential)",
           june: "อยู่ชั้นล่างกับ Gof และ Gerarda ภาพโพเดียมสำคัญกว่างานอื่น",
         },
         tips: [
           "โพเดียมของ Gof คือช็อตหลักของสุดสัปดาห์",
           "ลูกค้าสองคนอยู่ห้องเดียวกันชั้นล่าง",
-          "Iulian ดูชั้น 2 ทั้งหมด",
+          "Iulian ดูชั้น 2 ระหว่างที่ Constantin ลงไปจุดหลัก",
         ],
       },
       "sun-13:55": {
@@ -940,9 +1008,9 @@ window.BOARD_QUICK = {
       june: { where: "D245 ↔ C233", action: "Alternate Antonio and Hege stills.", watch: "Start each new loop with Antonio." },
     },
     "sat-12:35": {
-      constantin: { where: "D245 → D223 → C275", action: "Film Antoine, Zoltán and Hubert, then Victor.", watch: "Make one short descent to Pitiprapada near mid-round." },
+      constantin: { where: "D245 → D223 → C275 → Gryden → upstairs", action: "Film Antoine, Zoltán and Hubert, then Victor, then personally touch Pitiprapada.", watch: "Iulian protects Pitiprapada between Constantin's visits." },
       iulian: { where: "Stay downstairs in Gryden", action: "Give Pitiprapada periodic short video clips plus stills.", watch: "Use the secondary camera in short bursts. Do not record continuously." },
-      june: { where: "D223 → D245 → C275", action: "Photograph Harpa first, then the two Signatures and Showcases.", watch: "Stay upstairs." },
+      june: { where: "D223 → D245 → C275", action: "Photograph Harpa (Essential) first, then the two Signatures and Showcases.", watch: "Stay upstairs." },
     },
     "sat-13:55": {
       constantin: { where: "D223 ↔ D245", action: "Give Gerarda feature coverage and catch Gogutsa while passing.", watch: "Use spare time for strong event B-roll." },
@@ -965,8 +1033,8 @@ window.BOARD_QUICK = {
       june: { where: "Auditorium B086", action: "Stay on Victor's Signature stills.", watch: "Remain downstairs." },
     },
     "sun-13:30": {
-      constantin: { where: "Hold Auditorium B086", action: "Film Gof and Gerarda. Make only one selective upstairs visit.", watch: "The finish and Gof's podium come first." },
-      iulian: { where: "Stay upstairs: D245 ↔ D223", action: "Take periodic short clips of Hubert and Hege. Photograph Harpa too.", watch: "Do not record continuously. Do not leave upstairs." },
+      constantin: { where: "B086 anchor → D245 and D223 → B086", action: "Film Gof and Gerarda, then personally touch Hubert and Hege upstairs once.", watch: "Return before the finish. Gof's podium comes first." },
+      iulian: { where: "Stay upstairs: D245 ↔ D223", action: "Take periodic short clips of Hubert and Hege. Photograph Harpa (Essential) too.", watch: "Do not record continuously. Do not leave upstairs." },
       june: { where: "Auditorium B086", action: "Photograph Gof and Gerarda.", watch: "Gof's podium is the shot of the weekend." },
     },
     "sun-13:55": {
@@ -987,9 +1055,9 @@ window.BOARD_QUICK = {
       june: { where: "D245 ↔ C233", action: "Alternează fotografiile lui Antonio și Hege.", watch: "Începe fiecare tur cu Antonio." },
     },
     "sat-12:35": {
-      constantin: { where: "D245 → D223 → C275", action: "Filmează Antoine, Zoltán și Hubert, apoi Victor.", watch: "Coboară o singură dată la Pitiprapada la mijlocul rundei." },
+      constantin: { where: "D245 → D223 → C275 → Gryden → sus", action: "Filmează Antoine, Zoltán și Hubert, apoi Victor, apoi atinge personal Pitiprapada.", watch: "Iulian protejează Pitiprapada între vizitele lui Constantin." },
       iulian: { where: "Rămâi jos în Gryden", action: "Fă periodic clipuri video scurte cu Pitiprapada și fotografiile ei.", watch: "Folosește a doua cameră în reprize scurte. Nu filma continuu." },
-      june: { where: "D223 → D245 → C275", action: "Fotografiază Harpa prima, apoi clienții Signature și Showcase.", watch: "Rămâi sus." },
+      june: { where: "D223 → D245 → C275", action: "Fotografiază Harpa (Essential) prima, apoi clienții Signature și Showcase.", watch: "Rămâi sus." },
     },
     "sat-13:55": {
       constantin: { where: "D223 ↔ D245", action: "Filmează mult Gerarda și ia Gogutsa din mers.", watch: "Folosește timpul liber pentru cadre bune de eveniment." },
@@ -1012,8 +1080,8 @@ window.BOARD_QUICK = {
       june: { where: "Auditoriu B086", action: "Rămâi pe fotografiile Signature ale lui Victor.", watch: "Rămâi jos." },
     },
     "sun-13:30": {
-      constantin: { where: "Ține Auditoriul B086", action: "Filmează Gof și Gerarda. Fă o singură vizită scurtă sus.", watch: "Finalul și podiumul lui Gof sunt primele." },
-      iulian: { where: "Rămâi sus: D245 ↔ D223", action: "Fă periodic clipuri scurte cu Hubert și Hege. Fotografiază și Harpa.", watch: "Nu filma continuu. Nu pleca de la etaj." },
+      constantin: { where: "B086 principal → D245 și D223 → B086", action: "Filmează Gof și Gerarda, apoi atinge personal Hubert și Hege sus o dată.", watch: "Revino înainte de final. Podiumul lui Gof este primul." },
+      iulian: { where: "Rămâi sus: D245 ↔ D223", action: "Fă periodic clipuri scurte cu Hubert și Hege. Fotografiază și Harpa (Essential).", watch: "Nu filma continuu. Nu pleca de la etaj." },
       june: { where: "Auditoriu B086", action: "Fotografiază Gof și Gerarda.", watch: "Podiumul lui Gof este cadrul weekendului." },
     },
     "sun-13:55": {
@@ -1034,9 +1102,9 @@ window.BOARD_QUICK = {
       june: { where: "D245 ↔ C233", action: "สลับถ่ายภาพ Antonio กับ Hege", watch: "เริ่มแต่ละรอบที่ Antonio" },
     },
     "sat-12:35": {
-      constantin: { where: "D245 → D223 → C275", action: "ถ่าย Antoine, Zoltán และ Hubert แล้วถ่าย Victor", watch: "ลงไปหา Pitiprapada หนึ่งครั้งช่วงกลางรอบ" },
+      constantin: { where: "D245 → D223 → C275 → Gryden → กลับขึ้น", action: "ถ่าย Antoine, Zoltán และ Hubert แล้วถ่าย Victor จากนั้นลงไปแตะ Pitiprapada เอง", watch: "Iulian ดู Pitiprapada ระหว่างที่ Constantin อยู่ชั้น 2" },
       iulian: { where: "อยู่ชั้นล่างที่ Gryden", action: "ถ่ายคลิปสั้นของ Pitiprapada เป็นช่วงๆ และถ่ายภาพนิ่งด้วย", watch: "ใช้กล้องตัวที่สองเป็นช่วงสั้นๆ ห้ามเปิดถ่ายต่อเนื่อง" },
-      june: { where: "D223 → D245 → C275", action: "ถ่ายภาพ Harpa ก่อน แล้วถ่ายลูกค้า Signature และ Showcase", watch: "อยู่ชั้น 2" },
+      june: { where: "D223 → D245 → C275", action: "ถ่ายภาพ Harpa (Essential) ก่อน แล้วถ่ายลูกค้า Signature และ Showcase", watch: "อยู่ชั้น 2" },
     },
     "sat-13:55": {
       constantin: { where: "D223 ↔ D245", action: "ถ่าย Gerarda ให้มาก และเก็บ Gogutsa ตอนเดินผ่าน", watch: "ใช้เวลาที่เหลือถ่ายภาพบรรยากาศดีๆ" },
@@ -1059,8 +1127,8 @@ window.BOARD_QUICK = {
       june: { where: "หอประชุม B086", action: "อยู่ถ่ายภาพ Signature ของ Victor", watch: "อยู่ชั้นล่าง" },
     },
     "sun-13:30": {
-      constantin: { where: "อยู่หอประชุม B086", action: "ถ่าย Gof กับ Gerarda ขึ้นชั้น 2 แค่หนึ่งครั้งสั้นๆ", watch: "ตอนจบและโพเดียมของ Gof สำคัญที่สุด" },
-      iulian: { where: "อยู่ชั้น 2: D245 ↔ D223", action: "ถ่ายคลิปสั้น Hubert กับ Hege เป็นช่วงๆ และถ่ายภาพ Harpa", watch: "ห้ามถ่ายต่อเนื่อง และห้ามลงจากชั้น 2" },
+      constantin: { where: "ยึด B086 → D245 และ D223 → กลับ B086", action: "ถ่าย Gof กับ Gerarda แล้วขึ้นไปแตะ Hubert กับ Hege ด้วยตัวเองหนึ่งครั้ง", watch: "กลับมาก่อนจบ โพเดียมของ Gof สำคัญที่สุด" },
+      iulian: { where: "อยู่ชั้น 2: D245 ↔ D223", action: "ถ่ายคลิปสั้น Hubert กับ Hege เป็นช่วงๆ และถ่ายภาพ Harpa (Essential)", watch: "ห้ามถ่ายต่อเนื่อง และห้ามลงจากชั้น 2" },
       june: { where: "หอประชุม B086", action: "ถ่ายภาพ Gof กับ Gerarda", watch: "โพเดียมของ Gof คือช็อตสำคัญที่สุด" },
     },
     "sun-13:55": {
@@ -1195,7 +1263,8 @@ window.BOARD_DATA = {
     "Highest tier first on every loop",
     "Change the moment on every return",
     "Gogutsa in D245 is a free passing grab",
-    "Essential clients belong to targeted photo"
+    "Essential clients belong to targeted photo",
+    "Constantin personally makes at least one video loop to every floor with video clients"
   ],
   "roundPlans": [
     {
@@ -1246,15 +1315,15 @@ window.BOARD_DATA = {
       "neckCam": true,
       "anchor": "Antoine + Victor · second floor",
       "loop": "D245 Antoine → D223 Zoltán and Hubert → C275 Victor → repeat",
-      "objective": "Constantin and June own the premium upstairs line. Iulian stays downstairs so Pitiprapada receives regular coverage.",
+      "objective": "Constantin and June own the premium upstairs line. Iulian stays downstairs so Pitiprapada is covered between Constantin's personal visits.",
       "assignments": {
         "constantin": "Loop Antoine plus the judge, the D223 Showcase pair, then Victor. Make one quick cinema descent to Pitiprapada near mid-round.",
         "iulian": "SECONDARY CAMERA READY. Stay with Pitiprapada in Gryden. Capture periodic short handheld clips plus stills, not continuous video.",
-        "june": "Harpa stills first because photo is her full product, then Antoine, Victor, Zoltán, and Hubert."
+        "june": "Harpa (Essential) stills first because photo is her full product, then Antoine, Victor, Zoltán, and Hubert."
       },
       "tips": [
         "Two Signatures bookend the upstairs route",
-        "Iulian solos the ground floor",
+        "Iulian protects the ground floor between Constantin's visits",
         "Aim for 2 or 3 distinct loops upstairs"
       ]
     },
@@ -1325,7 +1394,7 @@ window.BOARD_DATA = {
       "title": "Signature downstairs, second camera upstairs",
       "neckCam": true,
       "anchor": "Victor · Auditorium B086",
-      "loop": "Constantin holds Victor → one D245 and D223 cinema loop → return",
+      "loop": "Constantin anchors Victor → one personal D245 and D223 cinema loop → return",
       "objective": "The isolated Signature wins the anchor. Iulian gives Zoltán and Henry regular short video visits upstairs.",
       "assignments": {
         "constantin": "Build a strong Victor block, then loop up for Zoltán plus the judge and Henry before returning to Victor.",
@@ -1345,17 +1414,17 @@ window.BOARD_DATA = {
       "title": "Podium anchor downstairs, split upstairs",
       "neckCam": true,
       "anchor": "Gof + Gerarda · Auditorium B086",
-      "loop": "Hold B086 → occasional D245 and D223 cinema loop → return for the finale",
+      "loop": "Anchor B086 → one personal D245 and D223 cinema loop → return for the finale",
       "objective": "Gof's finale and podium are the shots of the weekend. The shared Auditorium gives a free Authority while the Signature remains central.",
       "assignments": {
-        "constantin": "Hold the Auditorium for Gof and Gerarda. Make only selective upstairs loops, then return for the finish and podium.",
-        "iulian": "SECONDARY CAMERA READY. Take periodic short handheld clips of Hubert in D245 and Hege in D223, and collect Harpa's photo-only stills.",
+        "constantin": "Anchor the Auditorium for Gof and Gerarda. Make one personal upstairs touch for Hubert and Hege, then return for the finish and podium.",
+        "iulian": "SECONDARY CAMERA READY. Take periodic short handheld clips of Hubert in D245 and Hege in D223, and collect Harpa (Essential) stills.",
         "june": "Anchor downstairs on Gof and Gerarda. Protect the podium shot above everything."
       },
       "tips": [
         "Gof's podium is the weekend hero shot",
         "Two booked clients share one downstairs frame",
-        "Iulian owns the full upstairs split"
+        "Iulian protects upstairs between Constantin's personal loops"
       ]
     },
     {
