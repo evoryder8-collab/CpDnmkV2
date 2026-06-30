@@ -60,6 +60,7 @@
     groundFloor: document.querySelector("#ground-floor"),
     footerSchedule: document.querySelector("#footer-schedule"),
     footerBuiltFor: document.querySelector("#footer-built-for"),
+    databaseButton: document.querySelector("#database-button"),
   };
 
   const urlState = new URLSearchParams(window.location.search);
@@ -127,14 +128,45 @@
     </section>
   `;
 
-  document.body.append(cardOverlay, rosterOverlay);
+  const databaseOverlay = document.createElement("div");
+  databaseOverlay.className = "database-overlay";
+  databaseOverlay.hidden = true;
+  databaseOverlay.innerHTML = `
+    <section class="database-panel" role="dialog" aria-modal="true" aria-labelledby="database-heading">
+      <header class="database-header">
+        <div>
+          <p class="eyebrow" id="database-eyebrow">Sales check</p>
+          <h2 id="database-heading">Competition database</h2>
+        </div>
+        <button class="database-close" type="button" aria-label="Close database">Close</button>
+      </header>
+      <div class="database-content">
+        <label class="database-search-label" for="database-search">
+          <span id="database-search-label">Search participant</span>
+          <input id="database-search" type="search" autocomplete="off" placeholder="Type a name">
+        </label>
+        <p class="database-hint" id="database-hint">Tap a predicted name to check whether that person lands in calm or difficult rounds.</p>
+        <div class="database-suggestions" id="database-suggestions"></div>
+        <div class="database-result" id="database-result"></div>
+      </div>
+    </section>
+  `;
+
+  document.body.append(cardOverlay, rosterOverlay, databaseOverlay);
 
   const rosterContent = rosterOverlay.querySelector("#roster-content");
   const rosterClose = rosterOverlay.querySelector(".roster-close");
+  const databaseClose = databaseOverlay.querySelector(".database-close");
+  const databaseSearch = databaseOverlay.querySelector("#database-search");
+  const databaseSuggestions = databaseOverlay.querySelector("#database-suggestions");
+  const databaseResult = databaseOverlay.querySelector("#database-result");
   let cardOverlayTimer;
   let rosterOverlayTimer;
+  let databaseOverlayTimer;
   let cardReturnFocus;
   let rosterReturnFocus;
+  let databaseReturnFocus;
+  let selectedDatabasePerson = null;
 
   function languagePack() {
     return i18n[state.language] || i18n.en;
@@ -267,10 +299,18 @@
     setText(elements.groundFloorHeading, t("groundFloorRooms"));
     setText(elements.footerSchedule, t("footerSchedule"));
     setText(elements.footerBuiltFor, t("builtFor"));
+    setText(elements.databaseButton, t("database"));
     setText(rosterOverlay.querySelector(".roster-header .eyebrow"), t("bookedCoverage"));
     setText(rosterOverlay.querySelector("#roster-heading"), t("allClients"));
     setText(rosterClose, t("close"));
     rosterClose.setAttribute("aria-label", t("closeAllClients"));
+    setText(databaseOverlay.querySelector("#database-eyebrow"), t("databaseEyebrow"));
+    setText(databaseOverlay.querySelector("#database-heading"), t("databaseTitle"));
+    setText(databaseOverlay.querySelector("#database-search-label"), t("databaseSearchLabel"));
+    setText(databaseOverlay.querySelector("#database-hint"), t("databaseHint"));
+    databaseSearch.placeholder = t("databasePlaceholder");
+    setText(databaseClose, t("close"));
+    databaseClose.setAttribute("aria-label", t("closeDatabase"));
   }
 
   function getDay(dayId) {
@@ -466,9 +506,9 @@
     };
   }
 
-  function computeRoundDifficulty(dayId, roundTime) {
+  function computeRoundDifficulty(dayId, roundTime, extraClients = []) {
     const model = config.COVERAGE_MODEL;
-    const clients = data.clients.filter(
+    const clients = data.clients.concat(extraClients).filter(
       (client) => client.day === dayId && client.round === roundTime,
     );
     const judges = clients.filter((client) => client.role === "Official event judge");
@@ -1093,7 +1133,7 @@
   function syncBodyLock() {
     document.body.classList.toggle(
       "modal-open",
-      !cardOverlay.hidden || !rosterOverlay.hidden,
+      !cardOverlay.hidden || !rosterOverlay.hidden || !databaseOverlay.hidden,
     );
   }
 
@@ -1197,6 +1237,318 @@
       rosterOverlay.hidden = true;
       syncBodyLock();
       if (rosterReturnFocus?.isConnected) rosterReturnFocus.focus();
+    }, 140);
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#039;",
+    }[character]));
+  }
+
+  function bookedAppearanceKey(item) {
+    return [
+      normalize(item.officialName || item.name),
+      item.day,
+      item.round,
+      item.room,
+    ].join("|");
+  }
+
+  function scheduleOrder(entry) {
+    const dayIndex = data.days.findIndex((day) => day.id === entry.day);
+    const roundIndex = getDay(entry.day).rounds.findIndex((round) => round.time === entry.round);
+    const roomIndex = data.rooms.findIndex((room) => room.id === entry.room);
+    return dayIndex * 1000 + roundIndex * 100 + roomIndex * 10 + Number(entry.table || 0);
+  }
+
+  function getDatabasePeople() {
+    const people = new Map();
+
+    data.schedule.forEach((entry) => {
+      const key = normalize(entry.name);
+      if (!people.has(key)) {
+        people.set(key, {
+          key,
+          name: entry.name,
+          countries: new Set(),
+          categories: new Set(),
+          entries: [],
+        });
+      }
+
+      const person = people.get(key);
+      person.countries.add(entry.country);
+      person.categories.add(entry.category);
+      person.entries.push(entry);
+    });
+
+    const bookedNames = new Set(data.clients.map((client) => normalize(client.officialName)));
+
+    return [...people.values()]
+      .map((person) => ({
+        ...person,
+        countries: [...person.countries],
+        categories: [...person.categories],
+        entries: person.entries.sort((entryA, entryB) => scheduleOrder(entryA) - scheduleOrder(entryB)),
+        alreadyBooked: bookedNames.has(person.key),
+      }))
+      .sort((personA, personB) => personA.name.localeCompare(personB.name));
+  }
+
+  function getDatabasePerson(key) {
+    return getDatabasePeople().find((person) => person.key === key) || null;
+  }
+
+  function unbookedEntriesForPerson(person) {
+    const bookedKeys = new Set(data.clients.map(bookedAppearanceKey));
+    return person.entries.filter((entry) => !bookedKeys.has(bookedAppearanceKey(entry)));
+  }
+
+  function candidateClientsForPerson(person, packageName) {
+    return unbookedEntriesForPerson(person).map((entry, index) => ({
+      id: `candidate-${packageName.toLowerCase()}-${person.key}-${index}`,
+      name: entry.name,
+      officialName: entry.name,
+      package: packageName,
+      day: entry.day,
+      round: entry.round,
+      room: entry.room,
+      category: entry.category,
+      portrait: "",
+    }));
+  }
+
+  function clamp(value, minimum, maximum) {
+    return Math.max(minimum, Math.min(maximum, value));
+  }
+
+  function fitLabel(score) {
+    if (score >= 80) return t("easyAdd");
+    if (score >= 64) return t("manageableAdd");
+    if (score >= 44) return t("tightAdd");
+    return t("hardAdd");
+  }
+
+  function computeDatabaseImpact(person, packageName) {
+    const additions = candidateClientsForPerson(person, packageName);
+
+    if (!additions.length) {
+      return {
+        packageName,
+        score: 100,
+        label: t("alreadyBooked"),
+        noNewImpact: true,
+        details: [],
+        worst: null,
+      };
+    }
+
+    const roundKeys = [...new Set(additions.map((client) => `${client.day}|${client.round}`))];
+    const details = roundKeys.map((key) => {
+      const [dayId, roundTime] = key.split("|");
+      const roundAdditions = additions.filter(
+        (client) => client.day === dayId && client.round === roundTime,
+      );
+      const profileEntry = getDayPressureProfile(dayId).find(
+        (entry) => entry.round.time === roundTime,
+      );
+      const before = computeRoundDifficulty(dayId, roundTime);
+      const after = computeRoundDifficulty(dayId, roundTime, roundAdditions);
+
+      return {
+        dayId,
+        roundTime,
+        before,
+        after,
+        rank: profileEntry?.difficulty.rank || 1,
+        delta: Math.max(0, after.ratio - before.ratio),
+        additions: roundAdditions,
+      };
+    });
+
+    const worst = [...details].sort(
+      (detailA, detailB) =>
+        detailB.after.ratio - detailA.after.ratio ||
+        detailB.delta - detailA.delta ||
+        detailA.rank - detailB.rank,
+    )[0];
+    const totalDelta = details.reduce((total, detail) => total + detail.delta, 0);
+    const isPhotoOnly = packageName === "Essential";
+    const basePenalty = (worst.after.ratio / config.METER_MAX_RATIO) * (isPhotoOnly ? 48 : 66);
+    const deltaPenalty = totalDelta * (isPhotoOnly ? 70 : 118);
+    const rankPenalty = worst.rank === 1
+      ? (isPhotoOnly ? 6 : 13)
+      : worst.rank === 2
+        ? (isPhotoOnly ? 3 : 8)
+        : 0;
+    const helperPenalty = worst.after.helperRequired ? (isPhotoOnly ? 4 : 12) : 0;
+    const floorPenalty = worst.after.videoFloorCount > 1 ? (isPhotoOnly ? 0 : 8) : 0;
+    const leniency = isPhotoOnly ? 14 : 0;
+    const score = clamp(
+      Math.round(100 - basePenalty - deltaPenalty - rankPenalty - helperPenalty - floorPenalty + leniency),
+      3,
+      99,
+    );
+
+    return {
+      packageName,
+      score,
+      label: fitLabel(score),
+      noNewImpact: false,
+      details,
+      worst,
+    };
+  }
+
+  function databaseRoundLabel(detail) {
+    const day = getDay(detail.dayId);
+    const round = day.rounds.find((candidate) => candidate.time === detail.roundTime);
+    return `${localizedDay(day).mini} ${detail.roundTime} · ${localizedRoundLabel(day, round)}`;
+  }
+
+  function renderDatabaseImpactCard(impact, title) {
+    if (impact.noNewImpact) {
+      return `
+        <article class="database-impact-card" style="--fit-percent: 100%; --difficulty-color: #45c6b8;">
+          <header><span>${escapeHtml(title)}</span><strong>100%</strong></header>
+          <div class="database-fit-meter" aria-hidden="true"><i></i></div>
+          <b>${escapeHtml(impact.label)}</b>
+          <p>${escapeHtml(t("noNewImpact"))}</p>
+        </article>
+      `;
+    }
+
+    const worst = impact.worst;
+    const worstRoom = worst.additions[0] ? roomDisplayName(worst.additions[0].room) : "";
+    const currentLevel = levelLabel(worst.before.level.key, true);
+    const afterLevel = levelLabel(worst.after.level.key, true);
+
+    return `
+      <article class="database-impact-card" style="--fit-percent: ${impact.score}%; --difficulty-color: ${worst.after.level.color};">
+        <header><span>${escapeHtml(title)}</span><strong>${impact.score}%</strong></header>
+        <div class="database-fit-meter" aria-label="${escapeHtml(title)} ${impact.score}%"><i></i></div>
+        <b>${escapeHtml(impact.label)}</b>
+        <p>${escapeHtml(t("worstLanding"))}: ${escapeHtml(databaseRoundLabel(worst))} · ${escapeHtml(worstRoom)}</p>
+        <p>${escapeHtml(t("current"))}: ${escapeHtml(currentLevel)} · ${escapeHtml(t("afterAdding"))}: ${escapeHtml(afterLevel)}</p>
+        <small>${escapeHtml(t("affectsRounds", { count: impact.details.length }))}</small>
+      </article>
+    `;
+  }
+
+  function renderDatabaseResult(person) {
+    selectedDatabasePerson = person;
+    const photoImpact = computeDatabaseImpact(person, "Essential");
+    const videoImpact = computeDatabaseImpact(person, "Showcase");
+    const countries = person.countries.map(localizedCountry).join(" · ");
+    const categories = person.categories.map(localizedCategory).join(" · ");
+    const appearances = person.entries
+      .map((entry) => {
+        const day = getDay(entry.day);
+        return `
+          <li>
+            <b>${escapeHtml(localizedDay(day).mini)} ${escapeHtml(entry.round)}</b>
+            <span>${escapeHtml(roomDisplayName(entry.room))} · ${escapeHtml(t("table"))} ${escapeHtml(entry.table)}</span>
+            <small>${escapeHtml(localizedCategory(entry.category))}</small>
+          </li>
+        `;
+      })
+      .join("");
+
+    databaseResult.innerHTML = `
+      <section class="database-person">
+        <header>
+          <div>
+            <p class="eyebrow">${escapeHtml(t("databaseEyebrow"))}</p>
+            <h3>${escapeHtml(person.name)}</h3>
+            <span>${escapeHtml(countries)}</span>
+          </div>
+          ${person.alreadyBooked ? `<em>${escapeHtml(t("alreadyBooked"))}</em>` : ""}
+        </header>
+        <p>${escapeHtml(categories)}</p>
+        <ul class="database-appearance-list">${appearances}</ul>
+      </section>
+      <section class="database-impact-grid">
+        ${renderDatabaseImpactCard(photoImpact, t("photoOnlyFit"))}
+        ${renderDatabaseImpactCard(videoImpact, t("photoVideoFit"))}
+      </section>
+    `;
+  }
+
+  function renderDatabasePrompt() {
+    databaseResult.innerHTML = `<p class="database-empty">${escapeHtml(t("databasePrompt"))}</p>`;
+  }
+
+  function renderDatabaseSuggestions() {
+    const query = normalize(databaseSearch.value);
+    databaseSuggestions.replaceChildren();
+
+    if (!query) {
+      renderDatabasePrompt();
+      return;
+    }
+
+    const terms = query.split(/\s+/).filter(Boolean);
+    const matches = getDatabasePeople()
+      .filter((person) => {
+        const haystack = normalize([
+          person.name,
+          ...person.countries,
+          ...person.categories,
+        ].join(" "));
+        return terms.every((term) => haystack.includes(term));
+      })
+      .slice(0, 8);
+
+    if (!matches.length) {
+      databaseResult.innerHTML = `<p class="database-empty">${escapeHtml(t("databaseNoMatches"))}</p>`;
+      return;
+    }
+
+    matches.forEach((person) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "database-suggestion";
+      button.dataset.personKey = person.key;
+      button.innerHTML = `
+        <strong>${escapeHtml(person.name)}</strong>
+        <span>${escapeHtml(person.countries.map(localizedCountry).join(" · "))}</span>
+        <small>${person.entries.length} ${escapeHtml(t("appearances"))}${person.alreadyBooked ? ` · ${escapeHtml(t("alreadyBooked"))}` : ""}</small>
+      `;
+      button.addEventListener("click", () => {
+        const currentPerson = getDatabasePerson(button.dataset.personKey);
+        if (currentPerson) renderDatabaseResult(currentPerson);
+      });
+      databaseSuggestions.append(button);
+    });
+
+    renderDatabaseResult(matches[0]);
+  }
+
+  function openDatabase() {
+    window.clearTimeout(databaseOverlayTimer);
+    databaseReturnFocus = document.activeElement;
+    selectedDatabasePerson = null;
+    databaseSearch.value = "";
+    databaseSuggestions.replaceChildren();
+    renderDatabasePrompt();
+    databaseOverlay.hidden = false;
+    syncBodyLock();
+    window.requestAnimationFrame(() => databaseOverlay.classList.add("is-open"));
+    databaseSearch.focus();
+  }
+
+  function closeDatabase() {
+    if (databaseOverlay.hidden) return;
+    databaseOverlay.classList.remove("is-open");
+    databaseOverlayTimer = window.setTimeout(() => {
+      databaseOverlay.hidden = true;
+      syncBodyLock();
+      if (databaseReturnFocus?.isConnected) databaseReturnFocus.focus();
     }, 140);
   }
 
@@ -1503,6 +1855,13 @@
     }
     render();
     if (!rosterOverlay.hidden) renderRoster();
+    if (!databaseOverlay.hidden) {
+      renderDatabaseSuggestions();
+      if (selectedDatabasePerson) {
+        const currentPerson = getDatabasePerson(selectedDatabasePerson.key);
+        if (currentPerson) renderDatabaseResult(currentPerson);
+      }
+    }
   });
 
   elements.fieldToggle.addEventListener("change", () => {
@@ -1511,14 +1870,27 @@
   });
 
   elements.allClientsButton.addEventListener("click", openRoster);
+  elements.databaseButton.addEventListener("click", openDatabase);
   elements.videoFilterButton.addEventListener("click", () => {
     state.videoIncludedOnly = !state.videoIncludedOnly;
     renderVenue();
   });
   cardOverlay.addEventListener("click", closeCardOverlay);
   rosterClose.addEventListener("click", closeRoster);
+  databaseClose.addEventListener("click", closeDatabase);
   rosterOverlay.addEventListener("click", (event) => {
     if (event.target === rosterOverlay) closeRoster();
+  });
+  databaseOverlay.addEventListener("click", (event) => {
+    if (event.target === databaseOverlay) closeDatabase();
+  });
+  databaseSearch.addEventListener("input", renderDatabaseSuggestions);
+  databaseSearch.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    const suggestion = databaseSuggestions.querySelector(".database-suggestion");
+    if (!suggestion) return;
+    event.preventDefault();
+    suggestion.click();
   });
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
@@ -1526,6 +1898,8 @@
       closeCardOverlay();
     } else if (!rosterOverlay.hidden) {
       closeRoster();
+    } else if (!databaseOverlay.hidden) {
+      closeDatabase();
     }
   });
 
