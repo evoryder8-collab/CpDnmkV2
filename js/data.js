@@ -15,6 +15,9 @@
 window.BOARD_CONFIG = {
   CAMERA_COUNT: 3,
   TEAM: {
+    PRIMARY_VIDEO_NAME: "Constantin",
+    CLIENT_PHOTO_NAME: "June",
+    VOLUME_PHOTO_NAME: "Iulian",
     PRIMARY_VIDEO_OPERATORS: 1,
     CLIENT_PHOTO_OPERATORS: 1,
     VOLUME_PHOTO_OPERATORS: 1,
@@ -168,6 +171,217 @@ window.BOARD_DATA = {
       "code": "B086",
       "floor": "ground",
       "floorLabel": "Ground floor"
+    }
+  ],
+  "crew": [
+    {
+      "id": "constantin",
+      "camera": "CAM 1",
+      "name": "Constantin",
+      "role": "Cinema video",
+      "defaultJob": "Roving video, highest tier first"
+    },
+    {
+      "id": "iulian",
+      "camera": "CAM 2",
+      "name": "Iulian",
+      "role": "Volume photo",
+      "defaultJob": "Full-field sales photos, neck cam during split rounds"
+    },
+    {
+      "id": "june",
+      "camera": "CAM 3",
+      "name": "June",
+      "role": "Targeted photo",
+      "defaultJob": "Hunt booked clients, highest tier first"
+    }
+  ],
+  "doctrine": [
+    "Highest tier first on every loop",
+    "Change the moment on every return",
+    "Gogutsa in D245 is a free passing grab",
+    "Essential clients belong to targeted photo"
+  ],
+  "roundPlans": [
+    {
+      "day": "sat",
+      "round": "10:00",
+      "callout": "Light",
+      "title": "Signature-first two-floor cycle",
+      "neckCam": false,
+      "anchor": "Gof · Gryden",
+      "loop": "Gof in Gryden → Gogutsa in D245 → Henry in C233 → return",
+      "objective": "Run 2 or 3 rich loops. Gof gets the first and longest touch, around 6 to 8 minutes before the first climb.",
+      "assignments": {
+        "constantin": "Start on Gof, climb for the judge and Henry, then return downstairs. Change the moment on every visit.",
+        "iulian": "Shoot full-field sales volume, leaning toward Gryden and Gof's room.",
+        "june": "Hold Gof's stills first, then make one targeted upstairs trip for Henry."
+      },
+      "tips": [
+        "Do not split the team",
+        "Gof receives the deepest coverage",
+        "Grab the judge only while passing D245"
+      ]
+    },
+    {
+      "day": "sat",
+      "round": "11:15",
+      "callout": "Calm",
+      "title": "One-floor hallway loops",
+      "neckCam": false,
+      "anchor": "Antonio · Western D245",
+      "loop": "Antonio plus Gogutsa in D245 → Hege in C233 → repeat",
+      "objective": "No stairs. Use the full hallway for 3 or 4 loops, returning to Antonio first each time.",
+      "assignments": {
+        "constantin": "Open on Antonio and collect the judge in the same room, then work back to Hege and repeat.",
+        "iulian": "Stay on volume photo across all upstairs rooms.",
+        "june": "Alternate Antonio and Hege stills, with Antonio first on each fresh cycle."
+      },
+      "tips": [
+        "Signature-style patience is possible",
+        "No stair time to protect",
+        "Use each return for a new angle"
+      ]
+    },
+    {
+      "day": "sat",
+      "round": "12:35",
+      "callout": "Mission Impossible",
+      "title": "Premium upstairs anchor, split downstairs",
+      "neckCam": true,
+      "anchor": "Antoine + Victor · second floor",
+      "loop": "D245 Antoine → D223 Zoltán and Hubert → C275 Victor → repeat",
+      "objective": "Constantin and June own the premium upstairs line. Iulian isolates downstairs so Pitiprapada is never starved.",
+      "assignments": {
+        "constantin": "Loop Antoine plus the judge, the D223 Showcase pair, then Victor. Make one quick cinema descent to Pitiprapada near mid-round.",
+        "iulian": "NECK CAM ON. Own Pitiprapada in Gryden for video and stills for the whole round.",
+        "june": "Harpa stills first because photo is her full product, then Antoine, Victor, Zoltán, and Hubert."
+      },
+      "tips": [
+        "Two Signatures bookend the upstairs route",
+        "Iulian solos the ground floor",
+        "Aim for 2 or 3 distinct loops upstairs"
+      ]
+    },
+    {
+      "day": "sat",
+      "round": "13:55",
+      "callout": "Calm",
+      "title": "Authority feature plus sales harvest",
+      "neckCam": false,
+      "anchor": "Gerarda · Sports D223",
+      "loop": "Gerarda in D223 ↔ Gogutsa in D245 · roam for B-roll",
+      "objective": "Give Gerarda near-Signature volume, then use the spare time for flashy field coverage and upsell material.",
+      "assignments": {
+        "constantin": "Park on Gerarda, change angles generously, and grab the judge between setups.",
+        "iulian": "Harvest full-field upsell photos. This calm round is a sales opportunity.",
+        "june": "Finish Gerarda's stills early, then roam for premium non-client moments."
+      },
+      "tips": [
+        "Gerarda receives feature-level depth",
+        "Collect flashy non-buyer techniques",
+        "Build the after-event sales library"
+      ]
+    },
+    {
+      "day": "sun",
+      "round": "09:30",
+      "callout": "Calm",
+      "title": "Auditorium priority block",
+      "neckCam": false,
+      "anchor": "Antonio · Auditorium B086",
+      "loop": "Hold Antonio in B086 → optional Gogutsa pass upstairs → return",
+      "objective": "Antonio is the only active client and sits at the far point. Give him rich, varied cinema coverage before any optional judge trip.",
+      "assignments": {
+        "constantin": "Sprint to the Auditorium and build Antonio's coverage first. Only climb for the judge after a complete block.",
+        "iulian": "Shoot sales volume with a downstairs bias.",
+        "june": "Stay on Antonio's stills until the essential set is complete."
+      },
+      "tips": [
+        "Antonio outranks the optional judge trip",
+        "Vary wide, technique, detail, face, and finish",
+        "Keep the morning start controlled"
+      ]
+    },
+    {
+      "day": "sun",
+      "round": "10:50",
+      "callout": "Steady",
+      "title": "Signature-led upstairs circuit",
+      "neckCam": false,
+      "anchor": "Antoine · Sports D223",
+      "loop": "Antoine in D223 → Gogutsa in D245 → Pitiprapada in C275 → repeat",
+      "objective": "Run 3 or 4 upstairs loops. Antoine starts every loop and receives the longest visit.",
+      "assignments": {
+        "constantin": "Open on Antoine, pass the judge just beyond him, then work back toward Pitiprapada.",
+        "iulian": "Stay on full-field sales photos upstairs.",
+        "june": "Alternate booked stills with Antoine first on each new cycle."
+      },
+      "tips": [
+        "No stairs this round",
+        "Signature first and longest",
+        "Change the story beat every loop"
+      ]
+    },
+    {
+      "day": "sun",
+      "round": "12:10",
+      "callout": "Split",
+      "title": "Signature downstairs, neck cam upstairs",
+      "neckCam": true,
+      "anchor": "Victor · Auditorium B086",
+      "loop": "Constantin holds Victor → one D245 and D223 cinema loop → return",
+      "objective": "The isolated Signature wins the anchor. Iulian keeps Zoltán and Henry continuously covered upstairs.",
+      "assignments": {
+        "constantin": "Build a strong Victor block, then loop up for Zoltán plus the judge and Henry before returning to Victor.",
+        "iulian": "NECK CAM ON. Own upstairs video between D245 and D223, and collect their stills while June is downstairs.",
+        "june": "Anchor downstairs on Victor's Signature stills."
+      },
+      "tips": [
+        "Worst far-to-far geometry on Sunday",
+        "Victor must still receive the most",
+        "Iulian prevents upstairs coverage gaps"
+      ]
+    },
+    {
+      "day": "sun",
+      "round": "13:30",
+      "callout": "The Finale",
+      "title": "Podium anchor downstairs, split upstairs",
+      "neckCam": true,
+      "anchor": "Gof + Gerarda · Auditorium B086",
+      "loop": "Hold B086 → occasional D245 and D223 cinema loop → return for the finale",
+      "objective": "Gof's finale and podium are the shots of the weekend. The shared Auditorium gives a free Authority while the Signature remains central.",
+      "assignments": {
+        "constantin": "Hold the Auditorium for Gof and Gerarda. Make only selective upstairs loops, then return for the finish and podium.",
+        "iulian": "NECK CAM ON. Own Hubert in D245 and Hege in D223, and collect Harpa's photo-only stills.",
+        "june": "Anchor downstairs on Gof and Gerarda. Protect the podium shot above everything."
+      },
+      "tips": [
+        "Gof's podium is the weekend hero shot",
+        "Two booked clients share one downstairs frame",
+        "Iulian owns the full upstairs split"
+      ]
+    },
+    {
+      "day": "sun",
+      "round": "13:55",
+      "callout": "Buffer",
+      "title": "Pickups, podiums, and recovery",
+      "neckCam": false,
+      "anchor": "Awards and missed story beats",
+      "loop": "No fixed route · follow podiums, reactions, and missing coverage",
+      "objective": "Use the buffer for award pickups, podium B-roll, flashy non-buyer variety, and a controlled reset.",
+      "assignments": {
+        "constantin": "Collect missing cinema moments, award reactions, and podium texture.",
+        "iulian": "Return to high-volume sales photos and catch winners with their teams.",
+        "june": "Audit booked stills and fill any client gaps before the event closes."
+      },
+      "tips": [
+        "Check missing client moments first",
+        "Build podium and reaction variety",
+        "Breathe before final wrap"
+      ]
     }
   ],
   "clients": [
