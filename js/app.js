@@ -3,6 +3,7 @@
 
   const data = window.BOARD_DATA;
   const config = window.BOARD_CONFIG;
+  const i18n = window.BOARD_I18N;
 
   if (!data) {
     throw new Error("BOARD_DATA is missing. Check js/data.js.");
@@ -12,17 +13,47 @@
     throw new Error("BOARD_CONFIG is missing. Check js/data.js.");
   }
 
+  if (!i18n) {
+    throw new Error("BOARD_I18N is missing. Check js/data.js.");
+  }
+
   const elements = {
+    brandHome: document.querySelector("#brand-home"),
+    eventEyebrow: document.querySelector("#event-eyebrow"),
+    eventTitle: document.querySelector("#event-title"),
+    eventMeta: document.querySelector("#event-meta"),
+    scheduleStatus: document.querySelector("#schedule-status"),
+    languageLabel: document.querySelector("#language-label"),
+    languageSelect: document.querySelector("#language-select"),
+    controlDeck: document.querySelector("#control-deck"),
+    chooseDayLabel: document.querySelector("#choose-day-label"),
+    chooseRoundLabel: document.querySelector("#choose-round-label"),
     dayTabs: document.querySelector("#day-tabs"),
     roundTabs: document.querySelector("#round-tabs"),
     dayHeatStrip: document.querySelector("#day-heat-strip"),
     fieldToggle: document.querySelector("#field-toggle"),
+    fieldToggleTitle: document.querySelector("#field-toggle-title"),
+    fieldToggleSubtitle: document.querySelector("#field-toggle-subtitle"),
     allClientsButton: document.querySelector("#all-clients-button"),
+    venueEyebrow: document.querySelector("#venue-eyebrow"),
+    venueHeading: document.querySelector("#venue-heading"),
     videoFilterButton: document.querySelector("#video-filter-button"),
+    videoFilterLabel: document.querySelector("#video-filter-label"),
     activeRound: document.querySelector("#active-round"),
     roundBriefing: document.querySelector("#round-briefing"),
+    secondFloorLabel: document.querySelector("#second-floor-label"),
+    secondFloorSubtitle: document.querySelector("#second-floor-subtitle"),
+    secondFloorHeading: document.querySelector("#second-floor-heading"),
     secondFloor: document.querySelector("#second-floor"),
+    stairsBridge: document.querySelector(".stair-bridge"),
+    stairsLabel: document.querySelector("#stairs-label"),
+    stairsSubtitle: document.querySelector("#stairs-subtitle"),
+    groundFloorLabel: document.querySelector("#ground-floor-label"),
+    groundFloorSubtitle: document.querySelector("#ground-floor-subtitle"),
+    groundFloorHeading: document.querySelector("#ground-floor-heading"),
     groundFloor: document.querySelector("#ground-floor"),
+    footerSchedule: document.querySelector("#footer-schedule"),
+    footerBuiltFor: document.querySelector("#footer-built-for"),
   };
 
   const urlState = new URLSearchParams(window.location.search);
@@ -33,12 +64,21 @@
   const initialRound = getDay(initialDay).rounds.some((round) => round.time === requestedRound)
     ? requestedRound
     : getDay(initialDay).rounds[0].time;
+  const savedLanguage = (() => {
+    try {
+      return window.localStorage.getItem("coverage-board-language");
+    } catch {
+      return null;
+    }
+  })();
+  const initialLanguage = Object.hasOwn(i18n, savedLanguage) ? savedLanguage : "en";
 
   const state = {
     day: initialDay,
     round: initialRound,
     showField: true,
     videoIncludedOnly: false,
+    language: initialLanguage,
   };
 
   const cardOverlay = document.createElement("div");
@@ -72,6 +112,136 @@
   let rosterOverlayTimer;
   let cardReturnFocus;
   let rosterReturnFocus;
+
+  function languagePack() {
+    return i18n[state.language] || i18n.en;
+  }
+
+  function t(key, values = {}) {
+    const template = languagePack().ui[key] ?? i18n.en.ui[key] ?? key;
+    return Object.entries(values).reduce(
+      (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+      template,
+    );
+  }
+
+  function levelLabel(levelKey, short = false) {
+    const group = short ? "levelShort" : "levels";
+    return languagePack()[group]?.[levelKey] ?? i18n.en[group][levelKey] ?? levelKey;
+  }
+
+  function qualityLabel(qualityKey) {
+    const keyByQuality = {
+      "photo-only": "photoOperationOnly",
+      diverse: "diverseLikely",
+      disciplined: "twoPassNeeded",
+      thin: "singlePassRisk",
+    };
+    return t(keyByQuality[qualityKey] || "primaryVideoRoute");
+  }
+
+  function localizedRoomName(room) {
+    return languagePack().rooms?.[room.id] || room.name;
+  }
+
+  function localizedFloorLabel(floor) {
+    return floor === "second" ? t("secondFloor") : t("groundFloor");
+  }
+
+  function localizedCategory(category) {
+    return languagePack().categories?.[category] || category;
+  }
+
+  function localizedCountry(country) {
+    return languagePack().countries?.[country] || country;
+  }
+
+  function localizedDay(day) {
+    if (day.id === "sat") {
+      return { label: t("satLabel"), shortLabel: t("satShort"), mini: t("satMini") };
+    }
+    return { label: t("sunLabel"), shortLabel: t("sunShort"), mini: t("sunMini") };
+  }
+
+  function localizedRoundLabel(day, round) {
+    if (round.label === "Wellness final") return t("wellnessFinal");
+    const roundIndex = day.rounds.findIndex((candidate) => candidate.time === round.time);
+    return `${t("round")} ${roundIndex + 1}`;
+  }
+
+  function localizedRoundPlan(dayId, roundTime) {
+    const plan = getRoundPlan(dayId, roundTime);
+    const translated = languagePack().plans?.[`${dayId}-${roundTime}`];
+
+    if (!translated) return plan;
+
+    return {
+      ...plan,
+      ...translated,
+      assignments: {
+        ...plan.assignments,
+        ...translated.assignments,
+      },
+      tips: translated.tips || plan.tips,
+    };
+  }
+
+  function localizedDoctrine() {
+    return languagePack().doctrine || data.doctrine;
+  }
+
+  function localizedCrewRole(member, neckCamOperator) {
+    if (neckCamOperator) return t("stabilisedNeckCamVideo");
+    if (member.id === "constantin") return t("cinemaVideo");
+    if (member.id === "iulian") return t("volumePhoto");
+    return t("targetedPhoto");
+  }
+
+  function setText(element, value) {
+    if (element) element.textContent = value;
+  }
+
+  function applyStaticTranslations() {
+    const pack = languagePack();
+    document.documentElement.lang = pack.lang;
+    document.title = t("pageTitle");
+    document.querySelector('meta[name="description"]')?.setAttribute("content", t("metaDescription"));
+    elements.brandHome.setAttribute("aria-label", t("brandHome"));
+    setText(elements.eventEyebrow, t("liveCoverageControl"));
+    setText(elements.eventTitle, t("eventTitle"));
+    setText(elements.eventMeta, t("eventMeta"));
+    setText(elements.scheduleStatus, t("scheduleLocked"));
+    setText(elements.languageLabel, t("language"));
+    elements.languageSelect.value = state.language;
+    elements.controlDeck.setAttribute("aria-label", t("scheduleControls"));
+    setText(elements.chooseDayLabel, t("chooseDay"));
+    setText(elements.chooseRoundLabel, t("chooseRound"));
+    elements.dayTabs.setAttribute("aria-label", t("eventDay"));
+    elements.roundTabs.setAttribute("aria-label", t("roundTime"));
+    elements.dayHeatStrip.setAttribute("aria-label", t("dayDifficulty"));
+    setText(elements.fieldToggleTitle, t("fullField"));
+    setText(elements.fieldToggleSubtitle, t("showEveryCompetitor"));
+    setText(elements.allClientsButton, t("allClients"));
+    setText(elements.venueEyebrow, t("venueMap"));
+    setText(elements.venueHeading, t("coveragePositions"));
+    elements.roundBriefing.setAttribute("aria-label", t("roundPlaybook"));
+    setText(elements.secondFloorLabel, t("secondFloor"));
+    setText(elements.secondFloorSubtitle, t("fourRooms"));
+    setText(elements.secondFloorHeading, t("secondFloorRooms"));
+    setText(elements.videoFilterLabel, t("videoIncluded"));
+    setText(elements.stairsLabel, t("stairs"));
+    setText(elements.stairsSubtitle, t("groundFloorBelow"));
+    elements.stairsBridge.setAttribute("aria-label", t("stairsBetween"));
+    setText(elements.groundFloorLabel, t("groundFloor"));
+    setText(elements.groundFloorSubtitle, t("groundRoomsSubtitle"));
+    setText(elements.groundFloorHeading, t("groundFloorRooms"));
+    setText(elements.footerSchedule, t("footerSchedule"));
+    setText(elements.footerBuiltFor, t("builtFor"));
+    setText(rosterOverlay.querySelector(".roster-header .eyebrow"), t("bookedCoverage"));
+    setText(rosterOverlay.querySelector("#roster-heading"), t("allClients"));
+    setText(rosterClose, t("close"));
+    rosterClose.setAttribute("aria-label", t("closeAllClients"));
+  }
 
   function getDay(dayId) {
     return data.days.find((day) => day.id === dayId);
@@ -455,16 +625,50 @@
   }
 
   function bookedCountLabel(count) {
-    return `${count} booked`;
+    if (state.language === "ro") {
+      return `${count} ${count === 1 ? "rezervat" : "rezervați"}`;
+    }
+    if (state.language === "th") {
+      return `${count} จอง`;
+    }
+    return `${count} ${t("booked")}`;
   }
 
   function roomDisplayName(roomId) {
     const room = getRoom(roomId);
-    return `${room.name} ${room.code}`;
+    return `${localizedRoomName(room)} ${room.code}`;
   }
 
   function coveragePhrase(difficulty) {
     const parts = [];
+    const judgeCount = difficulty.judges.length;
+
+    if (state.language === "ro") {
+      if (difficulty.videoCount) {
+        parts.push(`${difficulty.videoCount} ${difficulty.videoCount === 1 ? "client video" : "clienți video"}`);
+      }
+      if (difficulty.photoCount) {
+        parts.push(`${difficulty.photoCount} ${difficulty.photoCount === 1 ? "client doar foto" : "clienți doar foto"}`);
+      }
+      let phrase = parts.join(" și ");
+      if (judgeCount) {
+        const judgePhrase = `${judgeCount} ${judgeCount === 1 ? "oprire la jurat" : "opriri la jurați"}`;
+        phrase = phrase ? `${phrase} plus ${judgePhrase}` : judgePhrase;
+      }
+      return phrase;
+    }
+
+    if (state.language === "th") {
+      if (difficulty.videoCount) parts.push(`${difficulty.videoCount} ลูกค้าวิดีโอ`);
+      if (difficulty.photoCount) parts.push(`${difficulty.photoCount} ลูกค้าภาพนิ่งเท่านั้น`);
+      let phrase = parts.join(" และ ");
+      if (judgeCount) {
+        const judgePhrase = `${judgeCount} จุดเก็บภาพกรรมการ`;
+        phrase = phrase ? `${phrase} รวม ${judgePhrase}` : judgePhrase;
+      }
+      return phrase;
+    }
+
     if (difficulty.videoCount) {
       parts.push(`${difficulty.videoCount} video client${difficulty.videoCount === 1 ? "" : "s"}`);
     }
@@ -473,20 +677,80 @@
     }
 
     let phrase = parts.join(" and ");
-    if (difficulty.judges.length) {
-      const judgePhrase = `${difficulty.judges.length} judge grab${difficulty.judges.length === 1 ? "" : "s"}`;
+    if (judgeCount) {
+      const judgePhrase = `${judgeCount} judge grab${judgeCount === 1 ? "" : "s"}`;
       phrase = phrase ? `${phrase} plus ${judgePhrase}` : judgePhrase;
     }
     return phrase;
   }
 
   function difficultySummary(difficulty) {
+    const level = levelLabel(difficulty.level.key);
+
+    if (state.language === "ro") {
+      if (!difficulty.clients.length) {
+        return `${level}: nu sunt clienți rezervați în această rundă. Toate cele ${config.CAMERA_COUNT} camere sunt libere.`;
+      }
+      if (!difficulty.coverageClients.length) {
+        return `${level}: ${coveragePhrase(difficulty)}. Nu este nevoie de o cameră dedicată.`;
+      }
+
+      const roomCount = difficulty.occupiedRoomIds.length;
+      const spread = difficulty.floorCount > 1
+        ? `${roomCount} săli pe ${difficulty.floorCount} etaje`
+        : `${roomCount} ${roomCount === 1 ? "sală" : "săli"} la același etaj`;
+      let passPhrase = "June și Iulian pot rămâne complet pe fotografii";
+
+      if (difficulty.videoCount) {
+        if (difficulty.primaryPassesPerClient >= 3) {
+          passPhrase = "Sunt posibile cel puțin trei vizite video diferite pentru fiecare client";
+        } else if (difficulty.primaryPassesPerClient >= 2) {
+          passPhrase = "Sunt posibile două vizite video diferite pentru fiecare client";
+        } else if (difficulty.primaryPassesPerClient >= 1) {
+          passPhrase = "Planifică o vizită video clară pentru fiecare client";
+        } else {
+          passPhrase = "Unii clienți riscă să primească doar o vizită video foarte scurtă";
+        }
+      }
+
+      return `${level}: ${coveragePhrase(difficulty)} în ${spread}. ${passPhrase}.`;
+    }
+
+    if (state.language === "th") {
+      if (!difficulty.clients.length) {
+        return `${level}: รอบนี้ไม่มีลูกค้าที่จอง กล้องทั้ง ${config.CAMERA_COUNT} ตัวว่าง`;
+      }
+      if (!difficulty.coverageClients.length) {
+        return `${level}: ${coveragePhrase(difficulty)} ไม่ต้องใช้กล้องประจำ`;
+      }
+
+      const roomCount = difficulty.occupiedRoomIds.length;
+      const spread = difficulty.floorCount > 1
+        ? `${roomCount} ห้อง บน ${difficulty.floorCount} ชั้น`
+        : `${roomCount} ห้อง ในชั้นเดียว`;
+      let passPhrase = "June และ Iulian ทำงานภาพนิ่งได้เต็มที่";
+
+      if (difficulty.videoCount) {
+        if (difficulty.primaryPassesPerClient >= 3) {
+          passPhrase = "มีเวลาถ่ายวิดีโอต่างช่วงอย่างน้อยสามครั้งต่อคน";
+        } else if (difficulty.primaryPassesPerClient >= 2) {
+          passPhrase = "มีเวลาถ่ายวิดีโอต่างช่วงสองครั้งต่อคน";
+        } else if (difficulty.primaryPassesPerClient >= 1) {
+          passPhrase = "วางแผนถ่ายวิดีโอให้ครบคนละหนึ่งช่วง";
+        } else {
+          passPhrase = "ลูกค้าบางคนเสี่ยงได้วิดีโอเพียงช่วงสั้นมาก";
+        }
+      }
+
+      return `${level}: ${coveragePhrase(difficulty)} ใน ${spread} ${passPhrase}`;
+    }
+
     if (!difficulty.clients.length) {
-      return `${difficulty.level.label}: no booked clients this round, so all ${config.CAMERA_COUNT} cameras are free.`;
+      return `${level}: no booked clients this round, so all ${config.CAMERA_COUNT} cameras are free.`;
     }
 
     if (!difficulty.coverageClients.length) {
-      return `${difficulty.level.label}: ${coveragePhrase(difficulty)} with no dedicated camera needed.`;
+      return `${level}: ${coveragePhrase(difficulty)} with no dedicated camera needed.`;
     }
 
     const coverage = coveragePhrase(difficulty);
@@ -508,10 +772,36 @@
       }
     }
 
-    return `${difficulty.level.label}: ${coverage} in ${spread}. ${passPhrase}.`;
+    return `${level}: ${coverage} in ${spread}. ${passPhrase}.`;
   }
 
   function splitNeededMessage(difficulty, roundPlan) {
+    if (state.language === "ro") {
+      if (roundPlan?.neckCam) {
+        return "Camera de gât este planificată: Iulian ține etajul separat, iar Constantin protejează punctul principal.";
+      }
+      if (difficulty.helperRequired) {
+        return "Este recomandată a doua cameră video: Iulian primește camera de gât stabilizată în această rundă.";
+      }
+      if (difficulty.helperStandby) {
+        return "Ajutor video pregătit: camera stabilizată trebuie să fie gata pentru Iulian.";
+      }
+      return "Plan echipă: June urmărește fotografiile clienților, iar Iulian face fotografii de volum.";
+    }
+
+    if (state.language === "th") {
+      if (roundPlan?.neckCam) {
+        return "วางแผนใช้กล้องคล้องคอ: Iulian ดูอีกชั้น ส่วน Constantin ป้องกันจุดหลัก";
+      }
+      if (difficulty.helperRequired) {
+        return "ควรใช้วิดีโอตัวที่สอง: ให้ Iulian ใช้กล้องคล้องคอแบบกันสั่นในรอบนี้";
+      }
+      if (difficulty.helperStandby) {
+        return "เตรียมช่วยวิดีโอ: เตรียมกล้องกันสั่นไว้ให้ Iulian";
+      }
+      return "แผนทีม: June ตามถ่ายภาพนิ่งลูกค้า ส่วน Iulian ถ่ายภาพทุกคน";
+    }
+
     if (roundPlan?.neckCam) {
       return "Neck cam planned: Iulian owns the split floor while Constantin protects the anchor.";
     }
@@ -526,12 +816,26 @@
 
   function routeSummary(difficulty) {
     if (!difficulty.videoCount || !difficulty.route.priorityRoom) {
+      if (state.language === "ro") return "Nu este nevoie de o rută video dedicată.";
+      if (state.language === "th") return "ไม่ต้องมีเส้นทางวิดีโอเฉพาะ";
       return "No dedicated video route required.";
     }
     if (difficulty.routeMetres < 10) {
+      if (state.language === "ro") {
+        return `Rămâi în ${roomDisplayName(difficulty.route.priorityRoom)} · nu este nevoie să schimbi sala`;
+      }
+      if (state.language === "th") {
+        return `อยู่ที่ ${roomDisplayName(difficulty.route.priorityRoom)} · ไม่ต้องเปลี่ยนห้อง`;
+      }
       return `Hold ${roomDisplayName(difficulty.route.priorityRoom)} · no room change required`;
     }
     const routeMetres = Math.round(difficulty.routeMetres / 10) * 10;
+    if (state.language === "ro") {
+      return `Începe în ${roomDisplayName(difficulty.route.priorityRoom)} · aproximativ ${routeMetres} m în două tururi`;
+    }
+    if (state.language === "th") {
+      return `เริ่มที่ ${roomDisplayName(difficulty.route.priorityRoom)} · ประมาณ ${routeMetres} เมตร ในการวนสองรอบ`;
+    }
     return `Start ${roomDisplayName(difficulty.route.priorityRoom)} · approximately ${routeMetres} m over two coverage cycles`;
   }
 
@@ -556,8 +860,9 @@
   function renderControls() {
     elements.dayTabs.replaceChildren();
     data.days.forEach((day) => {
+      const dayText = localizedDay(day);
       elements.dayTabs.append(
-        makeButton("day-button", day.label, day.id === state.day, () => {
+        makeButton("day-button", dayText.label, day.id === state.day, () => {
           if (state.day === day.id) return;
           state.day = day.id;
           state.round = day.rounds[0].time;
@@ -570,13 +875,17 @@
     elements.dayHeatStrip.replaceChildren();
     getDayPressureProfile(state.day).forEach(({ round, difficulty }) => {
       const roundPlan = getRoundPlan(state.day, round.time);
+      const day = getDay(state.day);
+      const roundText = localizedRoundLabel(day, round);
+      const difficultyLabel = levelLabel(difficulty.level.key);
+      const difficultyShort = levelLabel(difficulty.level.key, true);
       const label = `
-        ${roundPlan?.neckCam ? '<span class="round-neck-cam" title="Neck cam planned">NC</span>' : ""}
-        <span class="round-button-label">${round.label}</span>
+        ${roundPlan?.neckCam ? `<span class="round-neck-cam" title="${t("neckCamPlanned")}">NC</span>` : ""}
+        <span class="round-button-label">${roundText}</span>
         <strong class="round-button-time">${round.time}</strong>
         <span class="round-difficulty-meta">
           <i class="difficulty-shape" aria-hidden="true"></i>
-          <span>${difficulty.level.shortLabel || difficulty.level.label}</span>
+          <span>${difficultyShort}</span>
           <b>#${difficulty.rank} · ${bookedCountLabel(difficulty.clients.length)}</b>
         </span>
         <span class="round-pressure-track" aria-hidden="true"><i></i></span>
@@ -590,7 +899,7 @@
       if (roundPlan?.neckCam) roundButton.dataset.neckCam = "true";
       roundButton.setAttribute(
         "aria-label",
-        `${round.label}, ${round.time}, ${difficulty.level.label}, ${bookedCountLabel(difficulty.clients.length)}, difficulty rank ${difficulty.rank} of ${difficulty.roundCount}${roundPlan?.neckCam ? ", neck cam planned" : ""}`,
+        `${roundText}, ${round.time}, ${difficultyLabel}, ${bookedCountLabel(difficulty.clients.length)}, ${t("difficultyRank")} ${difficulty.rank} ${t("ofToday", { count: difficulty.roundCount })}${roundPlan?.neckCam ? `, ${t("neckCamPlanned")}` : ""}`,
       );
       elements.roundTabs.append(roundButton);
 
@@ -600,15 +909,15 @@
       heatCell.setAttribute("aria-pressed", String(round.time === state.round));
       heatCell.setAttribute(
         "aria-label",
-        `${round.time}, ${difficulty.level.label}, ${bookedCountLabel(difficulty.clients.length)}, difficulty rank ${difficulty.rank} of ${difficulty.roundCount}${roundPlan?.neckCam ? ", neck cam planned" : ""}`,
+        `${round.time}, ${difficultyLabel}, ${bookedCountLabel(difficulty.clients.length)}, ${t("difficultyRank")} ${difficulty.rank} ${t("ofToday", { count: difficulty.roundCount })}${roundPlan?.neckCam ? `, ${t("neckCamPlanned")}` : ""}`,
       );
       setDifficultyStyle(heatCell, difficulty);
       if (roundPlan?.neckCam) heatCell.dataset.neckCam = "true";
       heatCell.innerHTML = `
         <span class="heat-cell-time">${round.time}<span>${roundPlan?.neckCam ? '<em class="neck-cam-mini">NC</em>' : ""}<b>#${difficulty.rank}</b></span></span>
         <span class="heat-bar" aria-hidden="true"><i></i></span>
-        <span class="heat-cell-level"><i class="difficulty-shape" aria-hidden="true"></i>${difficulty.level.shortLabel || difficulty.level.label}</span>
-        <span class="heat-cell-count">${difficulty.clients.length} booked · ${difficulty.videoCount} video</span>
+        <span class="heat-cell-level"><i class="difficulty-shape" aria-hidden="true"></i>${difficultyShort}</span>
+        <span class="heat-cell-count">${bookedCountLabel(difficulty.clients.length)} · ${difficulty.videoCount} ${t("video")}</span>
       `;
       heatCell.addEventListener("click", () => {
         if (state.round === round.time) return;
@@ -645,8 +954,9 @@
     appearances.forEach((appearance) => {
       const key = `${appearance.day}|${appearance.room}`;
       if (!groups.has(key)) {
+        const day = getDay(appearance.day);
         groups.set(key, {
-          day: appearance.day.toUpperCase(),
+          day: localizedDay(day).mini,
           room: getRoom(appearance.room).code,
           times: [],
         });
@@ -669,8 +979,8 @@
     if (appearances) card.classList.add("roster-card");
 
     const appearanceLabel = appearances
-      ? `${appearances.length} booked appearance${appearances.length === 1 ? "" : "s"}`
-      : `${client.category}, ${client.round}`;
+      ? `${appearances.length} ${t("bookedAppearances")}`
+      : `${localizedCategory(client.category)}, ${client.round}`;
     card.setAttribute("aria-label", `${client.name}, ${client.package}, ${appearanceLabel}`);
 
     if (options.interactive !== false) {
@@ -690,7 +1000,9 @@
 
     const ribbon = document.createElement("span");
     ribbon.className = "booked-ribbon";
-    ribbon.textContent = client.role === "Official event judge" ? "JUDGE" : "BOOKED";
+    ribbon.textContent = client.role === "Official event judge"
+      ? t("judgeRibbon")
+      : t("bookedRibbon");
 
     const portraitFrame = document.createElement("div");
     portraitFrame.className = "portrait-frame";
@@ -702,7 +1014,7 @@
 
     const image = document.createElement("img");
     image.src = `img/${client.portrait}`;
-    image.alt = `${client.name} portrait`;
+    image.alt = `${client.name} ${t("portrait")}`;
     image.loading = "eager";
     image.addEventListener("load", () => {
       card.classList.add("portrait-loaded");
@@ -713,19 +1025,21 @@
     const copy = document.createElement("div");
     copy.className = "card-copy";
     const categories = appearances
-      ? [...new Set(appearances.map((appearance) => appearance.category))]
+      ? [...new Set(appearances.map((appearance) => localizedCategory(appearance.category)))]
       : [client.category];
     const categoryText = categories.length > 1
-      ? `${categories.length} categories`
-      : categories[0];
+      ? `${categories.length} ${t("categories")}`
+      : localizedCategory(categories[0]);
     const roundText = appearances
-      ? `${appearances.length} slot${appearances.length === 1 ? "" : "s"}`
+      ? `${appearances.length} ${t("slots")}`
       : client.round;
     const tableText = appearances
       ? formatRosterAppearances(appearances)
       : officialEntry?.table
-        ? `Official schedule · Table ${officialEntry.table}`
-        : client.role || "Confirmed coverage client";
+        ? `${t("officialSchedule")} · ${t("table")} ${officialEntry.table}`
+        : client.role === "Official event judge"
+          ? t("officialJudge")
+          : t("confirmedClient");
     copy.innerHTML = `
       ${tier === "signature" ? '<span class="signature-mark" aria-hidden="true">◆</span>' : ""}
       <h5>${client.name}</h5>
@@ -764,7 +1078,7 @@
     cardOverlay.replaceChildren(zoomStage);
     cardOverlay.setAttribute(
       "aria-label",
-      `${client.name} enlarged card. Tap anywhere or press Escape to close.`,
+      `${client.name} ${t("enlargedCard")}. ${t("tapClose")}`,
     );
     cardOverlay.hidden = false;
     syncBodyLock();
@@ -819,7 +1133,7 @@
       heading.className = "roster-section-heading";
       heading.innerHTML = `
         <h3>${group.packageName}</h3>
-        <span>${group.people.length} client${group.people.length === 1 ? "" : "s"}</span>
+        <span>${group.people.length} ${group.people.length === 1 ? t("client") : t("clients")}</span>
       `;
 
       const grid = document.createElement("div");
@@ -856,11 +1170,11 @@
   function makeParticipantMarker(entry) {
     const marker = document.createElement("div");
     marker.className = "participant-marker";
-    marker.title = `${entry.name} · ${entry.country} · ${entry.category}`;
+    marker.title = `${entry.name} · ${localizedCountry(entry.country)} · ${localizedCategory(entry.category)}`;
     marker.innerHTML = `
       <span class="table-number">T${entry.table}</span>
       <strong>${entry.name}</strong>
-      <small>${entry.country}</small>
+      <small>${localizedCountry(entry.country)}</small>
     `;
     return marker;
   }
@@ -894,11 +1208,11 @@
       <div class="room-title">
         <span class="room-code">${room.code}</span>
         <div>
-          <h4>${room.name}</h4>
-          <p>${room.floorLabel}</p>
+          <h4>${localizedRoomName(room)}</h4>
+          <p>${localizedFloorLabel(room.floor)}</p>
         </div>
       </div>
-      <p class="room-count">${officialEntries.length} scheduled</p>
+      <p class="room-count">${officialEntries.length} ${t("scheduled")}</p>
     `;
 
     const body = document.createElement("div");
@@ -910,7 +1224,7 @@
       if (clients.length) {
         const note = document.createElement("span");
         note.className = "field-note";
-        note.textContent = "Also in this room";
+        note.textContent = t("alsoInRoom");
         body.append(note);
       }
       neutralEntries.forEach((entry) => body.append(makeParticipantMarker(entry)));
@@ -920,11 +1234,11 @@
       const empty = document.createElement("p");
       empty.className = "room-empty";
       if (state.videoIncludedOnly && bookedClients.length && !clients.length) {
-        empty.textContent = "No video-included clients this round";
+        empty.textContent = t("noVideoClients");
       } else {
         empty.textContent = officialEntries.length && !state.showField
-          ? "No booked clients this round"
-          : "No competitors scheduled";
+          ? t("noBookedClients")
+          : t("noCompetitors");
       }
       body.append(empty);
     }
@@ -934,7 +1248,7 @@
   }
 
   function renderRoundBriefing(roundPlan) {
-    const doctrine = data.doctrine
+    const doctrine = localizedDoctrine()
       .map((rule, index) => `<span><b>0${index + 1}</b>${rule}</span>`)
       .join("");
     const cameraPlan = data.crew
@@ -946,7 +1260,7 @@
               <span>${member.camera}</span>
               <div>
                 <h4>${member.name}</h4>
-                <small>${neckCamOperator ? "Stabilised neck-cam video" : member.role}</small>
+                <small>${localizedCrewRole(member, neckCamOperator)}</small>
               </div>
             </header>
             <p>${roundPlan.assignments[member.id]}</p>
@@ -963,38 +1277,41 @@
     elements.roundBriefing.innerHTML = `
       <header class="briefing-header">
         <div>
-          <p class="eyebrow">Round playbook · ${roundPlan.callout}</p>
+          <p class="eyebrow">${t("roundPlaybook")} · ${roundPlan.callout}</p>
           <h3 id="round-briefing-heading">${roundPlan.title}</h3>
         </div>
         <span class="neck-cam-status" data-active="${roundPlan.neckCam}">
-          <i aria-hidden="true"></i>${roundPlan.neckCam ? "Neck cam on" : "Neck cam off"}
+          <i aria-hidden="true"></i>${roundPlan.neckCam ? t("neckCamOn") : t("neckCamOff")}
         </span>
       </header>
-      <div class="doctrine-strip" aria-label="Standing filming rules">${doctrine}</div>
+      <div class="doctrine-strip" aria-label="${t("filmingRules")}">${doctrine}</div>
       <div class="briefing-command">
         <section class="briefing-anchor">
-          <span>Anchor</span>
+          <span>${t("anchor")}</span>
           <strong>${roundPlan.anchor}</strong>
           <p>${roundPlan.objective}</p>
         </section>
         <section class="briefing-loop">
-          <span>Loop order</span>
+          <span>${t("loopOrder")}</span>
           <strong>${roundPlan.loop}</strong>
         </section>
       </div>
-      <div class="camera-plan" aria-label="Camera assignments">${cameraPlan}</div>
+      <div class="camera-plan" aria-label="${t("cameraAssignments")}">${cameraPlan}</div>
       <ul class="briefing-tips">${tips}</ul>
     `;
   }
 
   function renderVenue() {
     const day = getDay(state.day);
+    const dayText = localizedDay(day);
     const pressureEntry = getDayPressureProfile(state.day).find(
       (entry) => entry.round.time === state.round,
     );
     const round = pressureEntry.round;
+    const roundText = localizedRoundLabel(day, round);
     const difficulty = pressureEntry.difficulty;
-    const roundPlan = getRoundPlan(state.day, state.round);
+    const roundPlan = localizedRoundPlan(state.day, state.round);
+    const difficultyText = levelLabel(difficulty.level.key);
     const filledSegments = difficulty.visualPercent > 0
       ? Math.max(1, Math.ceil((difficulty.visualPercent / 100) * config.METER_SEGMENTS))
       : 0;
@@ -1005,12 +1322,12 @@
     const plannedSecondVideo = roundPlan.neckCam;
     const helperDisplayKey = plannedSecondVideo ? "required" : difficulty.helperMode.key;
     const iulianLabel = plannedSecondVideo
-      ? "Neck-cam video"
+      ? t("neckCamVideo")
       : difficulty.helperRequired
-        ? "Second video"
+        ? t("secondVideo")
         : difficulty.helperStandby
-          ? "Video standby"
-          : "Volume photos";
+          ? t("videoStandby")
+          : t("volumePhotos");
 
     elements.videoFilterButton.setAttribute(
       "aria-pressed",
@@ -1019,8 +1336,8 @@
     elements.videoFilterButton.setAttribute(
       "aria-label",
       state.videoIncludedOnly
-        ? "Showing video-included clients only. Show all booked clients"
-        : "Show video-included clients only",
+        ? t("showAllBooked")
+        : t("showVideoOnly"),
     );
 
     setDifficultyStyle(elements.activeRound, difficulty);
@@ -1028,20 +1345,20 @@
     elements.activeRound.innerHTML = `
       <div class="active-round-top">
         <div class="active-round-time">
-          <span>${day.shortLabel} · ${round.label}</span>
+          <span>${dayText.shortLabel} · ${roundText}</span>
           <strong>${round.time}</strong>
         </div>
-        <span class="difficulty-badge"><i class="difficulty-shape" aria-hidden="true"></i>${difficulty.level.label}</span>
-        <span class="pressure-rank"><b>#${difficulty.rank}</b> ${difficulty.rank === 1 ? "hardest today" : `of ${difficulty.roundCount} today`}</span>
-        <span class="coverage-quality" data-quality="${difficulty.quality.key}">${difficulty.quality.label}</span>
+        <span class="difficulty-badge"><i class="difficulty-shape" aria-hidden="true"></i>${difficultyText}</span>
+        <span class="pressure-rank"><b>#${difficulty.rank}</b> ${difficulty.rank === 1 ? t("hardestToday") : t("ofToday", { count: difficulty.roundCount })}</span>
+        <span class="coverage-quality" data-quality="${difficulty.quality.key}">${qualityLabel(difficulty.quality.key)}</span>
       </div>
-      <div class="pressure-meter-heading"><span>Coverage pressure</span><strong>#${difficulty.rank} today</strong></div>
-      <div class="difficulty-meter" aria-label="Coverage pressure: ${difficulty.level.label}, rank ${difficulty.rank} of ${difficulty.roundCount}">${meterSegments}</div>
+      <div class="pressure-meter-heading"><span>${t("coveragePressure")}</span><strong>#${difficulty.rank} ${t("today")}</strong></div>
+      <div class="difficulty-meter" aria-label="${t("coveragePressure")}: ${difficultyText}, ${t("difficultyRank")} ${difficulty.rank} ${t("ofToday", { count: difficulty.roundCount })}">${meterSegments}</div>
       <p class="difficulty-summary">${difficultySummary(difficulty)}</p>
-      <div class="crew-strip" data-helper="${helperDisplayKey}" aria-label="Crew allocation">
-        <span><b>C1</b>${config.TEAM.PRIMARY_VIDEO_NAME} · Cinema</span>
+      <div class="crew-strip" data-helper="${helperDisplayKey}" aria-label="${t("crewAllocation")}">
+        <span><b>C1</b>${config.TEAM.PRIMARY_VIDEO_NAME} · ${t("cinema")}</span>
         <span><b>C2</b>${config.TEAM.VOLUME_PHOTO_NAME} · ${iulianLabel}</span>
-        <span><b>C3</b>${config.TEAM.CLIENT_PHOTO_NAME} · Client stills</span>
+        <span><b>C3</b>${config.TEAM.CLIENT_PHOTO_NAME} · ${t("clientStills")}</span>
       </div>
       <p class="route-note">${routeSummary(difficulty)}</p>
       <p class="split-needed" data-helper="${helperDisplayKey}"><i aria-hidden="true"></i>${splitMessage}</p>
@@ -1059,10 +1376,24 @@
   }
 
   function render() {
+    applyStaticTranslations();
     renderControls();
     renderVenue();
     updateUrl();
   }
+
+  elements.languageSelect.addEventListener("change", () => {
+    const nextLanguage = elements.languageSelect.value;
+    if (!Object.hasOwn(i18n, nextLanguage) || nextLanguage === state.language) return;
+    state.language = nextLanguage;
+    try {
+      window.localStorage.setItem("coverage-board-language", nextLanguage);
+    } catch {
+      // The board still works when storage is unavailable.
+    }
+    render();
+    if (!rosterOverlay.hidden) renderRoster();
+  });
 
   elements.fieldToggle.addEventListener("change", () => {
     state.showField = elements.fieldToggle.checked;
