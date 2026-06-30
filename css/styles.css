@@ -40,12 +40,22 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
 button {
   color: inherit;
+}
+
+html[lang="th"] body {
+  font-family: "Noto Sans Thai", "Montserrat", Arial, sans-serif;
+}
+
+html[lang="th"] .wordmark,
+html[lang="th"] .card-package {
+  font-family: "Montserrat", Arial, sans-serif;
 }
 
 .blueprint-grid {
@@ -161,12 +171,60 @@ footer {
   text-transform: uppercase;
 }
 
+.live-status b {
+  font: inherit;
+}
+
 .live-status span {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: var(--gold-bright);
   box-shadow: 0 0 0 4px rgba(232, 200, 102, 0.08), 0 0 16px rgba(232, 200, 102, 0.55);
+}
+
+.header-actions {
+  display: grid;
+  justify-items: end;
+  gap: 11px;
+  justify-self: end;
+}
+
+.language-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.language-picker > span {
+  color: #77756d;
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.language-picker select {
+  min-width: 112px;
+  height: 34px;
+  padding: 6px 9px;
+  border: 1px solid rgba(218, 184, 94, 0.28);
+  border-radius: 2px;
+  background: #11110f;
+  color: var(--gold-pale);
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.language-picker select:hover {
+  border-color: rgba(232, 200, 102, 0.55);
+}
+
+.language-picker select:focus-visible {
+  outline: 2px solid var(--gold-pale);
+  outline-offset: 3px;
 }
 
 main {
@@ -1286,6 +1344,10 @@ main {
   background: transparent;
 }
 
+.video-filter-button > b {
+  font: inherit;
+}
+
 .video-filter-button:hover {
   border-color: rgba(183, 201, 166, 0.58);
   color: #c2d0b5;
@@ -2061,7 +2123,7 @@ footer strong {
     text-align: left;
   }
 
-  .live-status {
+  .header-actions {
     grid-column: 2;
     grid-row: 1;
   }
@@ -2147,6 +2209,19 @@ footer strong {
 
   .live-status {
     font-size: 0;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  .language-picker > span {
+    display: none;
+  }
+
+  .language-picker select {
+    min-width: 100px;
+    height: 32px;
   }
 
   .control-deck {
@@ -2257,6 +2332,13 @@ footer strong {
     height: 29px;
   }
 
+  .language-picker select {
+    min-width: 88px;
+    max-width: 96px;
+    padding-inline: 7px;
+    font-size: 0.57rem;
+  }
+
   .event-lockup h1 {
     font-size: 1rem;
   }
@@ -2340,6 +2422,22 @@ footer strong {
   .field-note {
     text-align: left;
   }
+}
+
+html[lang="th"] .eyebrow,
+html[lang="th"] .control-label,
+html[lang="th"] .round-button-label,
+html[lang="th"] .active-round-time span,
+html[lang="th"] .difficulty-badge,
+html[lang="th"] .pressure-rank,
+html[lang="th"] .coverage-quality,
+html[lang="th"] .pressure-meter-heading,
+html[lang="th"] .floor-label p,
+html[lang="th"] .video-filter-button,
+html[lang="th"] .field-note,
+html[lang="th"] .room-empty,
+html[lang="th"] .booked-ribbon {
+  letter-spacing: 0.04em;
 }
 
 @media print {
