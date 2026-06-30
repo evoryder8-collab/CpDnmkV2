@@ -61,6 +61,7 @@
     footerSchedule: document.querySelector("#footer-schedule"),
     footerBuiltFor: document.querySelector("#footer-built-for"),
     databaseButton: document.querySelector("#database-button"),
+    easiestButton: document.querySelector("#easiest-button"),
   };
 
   const urlState = new URLSearchParams(window.location.search);
@@ -152,7 +153,23 @@
     </section>
   `;
 
-  document.body.append(cardOverlay, rosterOverlay, databaseOverlay);
+  const easiestOverlay = document.createElement("div");
+  easiestOverlay.className = "easiest-overlay";
+  easiestOverlay.hidden = true;
+  easiestOverlay.innerHTML = `
+    <section class="easiest-panel" role="dialog" aria-modal="true" aria-labelledby="easiest-heading">
+      <header class="easiest-header">
+        <div>
+          <p class="eyebrow" id="easiest-eyebrow">Sales targets</p>
+          <h2 id="easiest-heading">Easiest additions</h2>
+        </div>
+        <button class="easiest-close" type="button" aria-label="Close easiest additions">Close</button>
+      </header>
+      <div class="easiest-content" id="easiest-content"></div>
+    </section>
+  `;
+
+  document.body.append(cardOverlay, rosterOverlay, databaseOverlay, easiestOverlay);
 
   const rosterContent = rosterOverlay.querySelector("#roster-content");
   const rosterClose = rosterOverlay.querySelector(".roster-close");
@@ -160,12 +177,16 @@
   const databaseSearch = databaseOverlay.querySelector("#database-search");
   const databaseSuggestions = databaseOverlay.querySelector("#database-suggestions");
   const databaseResult = databaseOverlay.querySelector("#database-result");
+  const easiestClose = easiestOverlay.querySelector(".easiest-close");
+  const easiestContent = easiestOverlay.querySelector("#easiest-content");
   let cardOverlayTimer;
   let rosterOverlayTimer;
   let databaseOverlayTimer;
+  let easiestOverlayTimer;
   let cardReturnFocus;
   let rosterReturnFocus;
   let databaseReturnFocus;
+  let easiestReturnFocus;
   let selectedDatabasePerson = null;
 
   function languagePack() {
@@ -300,6 +321,7 @@
     setText(elements.footerSchedule, t("footerSchedule"));
     setText(elements.footerBuiltFor, t("builtFor"));
     setText(elements.databaseButton, t("database"));
+    setText(elements.easiestButton, t("easiestAdditions"));
     setText(rosterOverlay.querySelector(".roster-header .eyebrow"), t("bookedCoverage"));
     setText(rosterOverlay.querySelector("#roster-heading"), t("allClients"));
     setText(rosterClose, t("close"));
@@ -311,6 +333,10 @@
     databaseSearch.placeholder = t("databasePlaceholder");
     setText(databaseClose, t("close"));
     databaseClose.setAttribute("aria-label", t("closeDatabase"));
+    setText(easiestOverlay.querySelector("#easiest-eyebrow"), t("easiestEyebrow"));
+    setText(easiestOverlay.querySelector("#easiest-heading"), t("easiestTitle"));
+    setText(easiestClose, t("close"));
+    easiestClose.setAttribute("aria-label", t("closeEasiest"));
   }
 
   function getDay(dayId) {
@@ -1133,7 +1159,7 @@
   function syncBodyLock() {
     document.body.classList.toggle(
       "modal-open",
-      !cardOverlay.hidden || !rosterOverlay.hidden || !databaseOverlay.hidden,
+      !cardOverlay.hidden || !rosterOverlay.hidden || !databaseOverlay.hidden || !easiestOverlay.hidden,
     );
   }
 
@@ -1334,6 +1360,84 @@
     return t("hardAdd");
   }
 
+  function fitTone(score) {
+    if (score >= 78) return "green";
+    if (score >= 52) return "orange";
+    return "red";
+  }
+
+  function fitColor(score) {
+    if (score >= 78) return "#45c6b8";
+    if (score >= 52) return "#e58a3a";
+    return "#d94a35";
+  }
+
+  function detailChronology(detail) {
+    const dayIndex = data.days.findIndex((day) => day.id === detail.dayId);
+    const roundIndex = getDay(detail.dayId).rounds.findIndex(
+      (round) => round.time === detail.roundTime,
+    );
+    return dayIndex * 100 + roundIndex;
+  }
+
+  function roundFitScore(detail, isPhotoOnly) {
+    const after = detail.after;
+    const totalClients = detail.totalAfterAdd;
+    const videoCount = after.videoCount;
+    const roomCount = after.occupiedRoomIds.length;
+    const easyVideoCapacity = config.CAMERA_COUNT * 3;
+    const difficultRankPenalty = detail.rank === 1 ? 2 : detail.rank === 2 ? 1 : 0;
+
+    if (isPhotoOnly) {
+      const crowdPenalty =
+        Math.max(0, totalClients - 10) * 1.4 +
+        Math.max(0, totalClients - 16) * 5.5;
+      const roomPenalty = Math.max(0, roomCount - 4) * 2;
+      const floorPenalty = after.floorCount > 1 ? 2 : 0;
+      const pressurePenalty = Math.max(0, after.ratio - 0.9) * 8;
+      const rankPenalty = detail.rank === 1 ? 2 : detail.rank === 2 ? 1 : 0;
+
+      return clamp(
+        Math.round(98 - crowdPenalty - roomPenalty - floorPenalty - pressurePenalty - rankPenalty),
+        8,
+        99,
+      );
+    }
+
+    const normalLoadPenalty = Math.max(0, videoCount - config.CAMERA_COUNT) * 0.8;
+    const overflowPenalty = Math.max(0, videoCount - easyVideoCapacity) * 18;
+    const totalCrowdPenalty = Math.max(0, totalClients - easyVideoCapacity - 2) * 1.5;
+    const roomPenalty = Math.max(0, roomCount - config.CAMERA_COUNT) * 2.5;
+    const floorPenalty = after.videoFloorCount > 1 ? 3 : 0;
+    const routePenalty =
+      after.routeMetres > 900 ? 5 :
+        after.routeMetres > 650 ? 4 :
+          after.routeMetres > 380 ? 2 : 0;
+    const helperPenalty = after.helperRequired ? 2 : after.helperStandby ? 1 : 0;
+    const qualityPenalty =
+      after.quality.key === "thin" ? 6 :
+        after.quality.key === "disciplined" ? 1 : 0;
+    const deltaPenalty = Math.max(0, detail.delta) * 8;
+
+    return clamp(
+      Math.round(
+        96 -
+          normalLoadPenalty -
+          overflowPenalty -
+          totalCrowdPenalty -
+          roomPenalty -
+          floorPenalty -
+          routePenalty -
+          helperPenalty -
+          qualityPenalty -
+          deltaPenalty -
+          difficultRankPenalty,
+      ),
+      5,
+      99,
+    );
+  }
+
   function computeDatabaseImpact(person, packageName) {
     const additions = candidateClientsForPerson(person, packageName);
 
@@ -1342,6 +1446,8 @@
         packageName,
         score: 100,
         label: t("alreadyBooked"),
+        tone: "green",
+        fitColor: "#45c6b8",
         noNewImpact: true,
         details: [],
         worst: null,
@@ -1373,26 +1479,20 @@
       };
     });
 
-    const worst = [...details].sort(
-      (detailA, detailB) =>
-        detailB.after.ratio - detailA.after.ratio ||
-        detailB.delta - detailA.delta ||
-        detailA.rank - detailB.rank,
-    )[0];
-    const totalDelta = details.reduce((total, detail) => total + detail.delta, 0);
     const isPhotoOnly = packageName === "Essential";
-    const basePenalty = (worst.after.ratio / config.METER_MAX_RATIO) * (isPhotoOnly ? 48 : 66);
-    const deltaPenalty = totalDelta * (isPhotoOnly ? 70 : 118);
-    const rankPenalty = worst.rank === 1
-      ? (isPhotoOnly ? 6 : 13)
-      : worst.rank === 2
-        ? (isPhotoOnly ? 3 : 8)
-        : 0;
-    const helperPenalty = worst.after.helperRequired ? (isPhotoOnly ? 4 : 12) : 0;
-    const floorPenalty = worst.after.videoFloorCount > 1 ? (isPhotoOnly ? 0 : 8) : 0;
-    const leniency = isPhotoOnly ? 14 : 0;
+    const scoredDetails = details.map((detail) => ({
+      ...detail,
+      roundScore: roundFitScore(detail, isPhotoOnly),
+    }));
+    const worst = [...scoredDetails].sort(
+      (detailA, detailB) =>
+        detailA.roundScore - detailB.roundScore ||
+        detailB.after.ratio - detailA.after.ratio ||
+        detailChronology(detailA) - detailChronology(detailB),
+    )[0];
+    const multiRoundPenalty = Math.max(0, scoredDetails.length - 1) * (isPhotoOnly ? 0.5 : 1);
     const score = clamp(
-      Math.round(100 - basePenalty - deltaPenalty - rankPenalty - helperPenalty - floorPenalty + leniency),
+      Math.round(Math.min(...scoredDetails.map((detail) => detail.roundScore)) - multiRoundPenalty),
       3,
       99,
     );
@@ -1401,8 +1501,10 @@
       packageName,
       score,
       label: fitLabel(score),
+      tone: fitTone(score),
+      fitColor: fitColor(score),
       noNewImpact: false,
-      details,
+      details: scoredDetails,
       worst,
     };
   }
@@ -1434,11 +1536,7 @@
 
   function renderDatabaseRoundCrowd(impact) {
     const roundItems = [...impact.details]
-      .sort(
-        (detailA, detailB) =>
-          detailB.after.ratio - detailA.after.ratio ||
-          detailB.otherBookedCount - detailA.otherBookedCount,
-      )
+      .sort((detailA, detailB) => detailChronology(detailA) - detailChronology(detailB))
       .map((detail) => `
         <li>
           <b>${escapeHtml(databaseRoundLabel(detail))}</b>
@@ -1458,7 +1556,7 @@
   function renderDatabaseImpactCard(impact, title) {
     if (impact.noNewImpact) {
       return `
-        <article class="database-impact-card" style="--fit-percent: 100%; --difficulty-color: #45c6b8;">
+        <article class="database-impact-card" data-fit="${impact.tone}" style="--fit-percent: 100%; --difficulty-color: ${impact.fitColor};">
           <header><span>${escapeHtml(title)}</span><strong>100%</strong></header>
           <div class="database-fit-meter" aria-hidden="true"><i></i></div>
           <b>${escapeHtml(impact.label)}</b>
@@ -1473,7 +1571,7 @@
     const afterLevel = levelLabel(worst.after.level.key, true);
 
     return `
-      <article class="database-impact-card" style="--fit-percent: ${impact.score}%; --difficulty-color: ${worst.after.level.color};">
+      <article class="database-impact-card" data-fit="${impact.tone}" style="--fit-percent: ${impact.score}%; --difficulty-color: ${impact.fitColor};">
         <header><span>${escapeHtml(title)}</span><strong>${impact.score}%</strong></header>
         <div class="database-fit-meter" aria-label="${escapeHtml(title)} ${impact.score}%"><i></i></div>
         <b>${escapeHtml(impact.label)}</b>
@@ -1594,6 +1692,93 @@
       databaseOverlay.hidden = true;
       syncBodyLock();
       if (databaseReturnFocus?.isConnected) databaseReturnFocus.focus();
+    }, 140);
+  }
+
+  function renderEasiestRoundChips(impact) {
+    return [...impact.details]
+      .sort((detailA, detailB) => detailChronology(detailA) - detailChronology(detailB))
+      .map((detail) => `
+        <span>
+          ${escapeHtml(databaseRoundLabel(detail))}
+          <b>${detail.totalAfterAdd}</b>
+        </span>
+      `)
+      .join("");
+  }
+
+  function getEasiestAdditionRows() {
+    return getDatabasePeople()
+      .filter((person) => !person.alreadyBooked && candidateClientsForPerson(person, "Showcase").length)
+      .map((person) => {
+        const photoImpact = computeDatabaseImpact(person, "Essential");
+        const videoImpact = computeDatabaseImpact(person, "Showcase");
+        return { person, photoImpact, videoImpact };
+      })
+      .sort(
+        (rowA, rowB) =>
+          rowB.videoImpact.score - rowA.videoImpact.score ||
+          rowB.photoImpact.score - rowA.photoImpact.score ||
+          rowA.person.name.localeCompare(rowB.person.name),
+      );
+  }
+
+  function renderEasiestAdditions() {
+    const rows = getEasiestAdditionRows();
+
+    if (!rows.length) {
+      easiestContent.innerHTML = `<p class="database-empty">${escapeHtml(t("noEasiestAdditions"))}</p>`;
+      return;
+    }
+
+    easiestContent.innerHTML = `
+      <p class="easiest-hint">${escapeHtml(t("easiestHint"))}</p>
+      <ol class="easiest-list" aria-label="${escapeHtml(t("bestAdditions"))}">
+        ${rows.map((row, index) => {
+          const countries = row.person.countries.map(localizedCountry).join(" · ");
+          const categories = row.person.categories.map(localizedCategory).join(" · ");
+          return `
+            <li class="easiest-item" data-fit="${row.videoImpact.tone}">
+              <span class="easiest-rank">${index + 1}</span>
+              <div class="easiest-person">
+                <strong>${escapeHtml(row.person.name)}</strong>
+                <small>${escapeHtml(countries || categories)}</small>
+              </div>
+              <div class="easiest-score">
+                <b>${row.videoImpact.score}%</b>
+                <span>${escapeHtml(t("videoFitShort"))}</span>
+              </div>
+              <div class="easiest-score is-muted">
+                <b>${row.photoImpact.score}%</b>
+                <span>${escapeHtml(t("photoFitShort"))}</span>
+              </div>
+              <div class="easiest-rounds" aria-label="${escapeHtml(t("affectedRounds"))}">
+                ${renderEasiestRoundChips(row.videoImpact)}
+              </div>
+            </li>
+          `;
+        }).join("")}
+      </ol>
+    `;
+  }
+
+  function openEasiest() {
+    window.clearTimeout(easiestOverlayTimer);
+    easiestReturnFocus = document.activeElement;
+    renderEasiestAdditions();
+    easiestOverlay.hidden = false;
+    syncBodyLock();
+    window.requestAnimationFrame(() => easiestOverlay.classList.add("is-open"));
+    easiestClose.focus();
+  }
+
+  function closeEasiest() {
+    if (easiestOverlay.hidden) return;
+    easiestOverlay.classList.remove("is-open");
+    easiestOverlayTimer = window.setTimeout(() => {
+      easiestOverlay.hidden = true;
+      syncBodyLock();
+      if (easiestReturnFocus?.isConnected) easiestReturnFocus.focus();
     }, 140);
   }
 
@@ -1907,6 +2092,7 @@
         if (currentPerson) renderDatabaseResult(currentPerson);
       }
     }
+    if (!easiestOverlay.hidden) renderEasiestAdditions();
   });
 
   elements.fieldToggle.addEventListener("change", () => {
@@ -1916,6 +2102,7 @@
 
   elements.allClientsButton.addEventListener("click", openRoster);
   elements.databaseButton.addEventListener("click", openDatabase);
+  elements.easiestButton?.addEventListener("click", openEasiest);
   elements.videoFilterButton.addEventListener("click", () => {
     state.videoIncludedOnly = !state.videoIncludedOnly;
     renderVenue();
@@ -1923,11 +2110,15 @@
   cardOverlay.addEventListener("click", closeCardOverlay);
   rosterClose.addEventListener("click", closeRoster);
   databaseClose.addEventListener("click", closeDatabase);
+  easiestClose.addEventListener("click", closeEasiest);
   rosterOverlay.addEventListener("click", (event) => {
     if (event.target === rosterOverlay) closeRoster();
   });
   databaseOverlay.addEventListener("click", (event) => {
     if (event.target === databaseOverlay) closeDatabase();
+  });
+  easiestOverlay.addEventListener("click", (event) => {
+    if (event.target === easiestOverlay) closeEasiest();
   });
   databaseSearch.addEventListener("input", renderDatabaseSuggestions);
   databaseSearch.addEventListener("keydown", (event) => {
@@ -1945,6 +2136,8 @@
       closeRoster();
     } else if (!databaseOverlay.hidden) {
       closeDatabase();
+    } else if (!easiestOverlay.hidden) {
+      closeEasiest();
     }
   });
 
