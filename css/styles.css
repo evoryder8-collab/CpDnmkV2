@@ -2396,6 +2396,50 @@ main {
   line-height: 1.45;
 }
 
+.database-round-crowd {
+  display: grid;
+  gap: 6px;
+  margin-top: 2px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--difficulty-color), transparent 74%);
+}
+
+.database-round-crowd > strong {
+  color: color-mix(in srgb, var(--difficulty-color), white 24%);
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.database-round-crowd ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.database-round-crowd li {
+  display: grid;
+  gap: 2px;
+  padding: 7px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.database-round-crowd b {
+  color: #d9d4c8;
+  font-size: 0.56rem;
+}
+
+.database-round-crowd span {
+  color: #8f8c84;
+  font-size: 0.54rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
 .roster-section {
   --section-color: var(--muted);
 }
