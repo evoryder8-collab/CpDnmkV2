@@ -108,70 +108,249 @@
     return roomA.distToStairs + config.STAIR_COST + roomB.distToStairs;
   }
 
+  function packagePriority(packageName) {
+    return config.PACKAGE_PRIORITY[packageName] || 0;
+  }
+
+  function routePoint(roomId) {
+    const room = getVenueRoom(roomId);
+    return {
+      id: roomId,
+      floor: room.floor,
+      distToStairs: room.distToStairs,
+    };
+  }
+
+  function pointTravelCost(pointA, pointB) {
+    if (!pointA || !pointB) return 0;
+    if (pointA.id === pointB.id) return 0;
+    if (pointA.floor === pointB.floor) {
+      return Math.abs(pointA.distToStairs - pointB.distToStairs);
+    }
+    return pointA.distToStairs + config.STAIR_COST + pointB.distToStairs;
+  }
+
+  function maxRoomBridge(roomIds) {
+    const bridge = { cost: 0, roomA: null, roomB: null };
+
+    for (let index = 0; index < roomIds.length; index += 1) {
+      for (let compare = index + 1; compare < roomIds.length; compare += 1) {
+        const cost = travelCost(roomIds[index], roomIds[compare]);
+        if (cost > bridge.cost) {
+          bridge.cost = cost;
+          bridge.roomA = roomIds[index];
+          bridge.roomB = roomIds[compare];
+        }
+      }
+    }
+
+    return bridge;
+  }
+
+  function estimatePrimaryRoute(videoClients) {
+    const roomGroups = new Map();
+
+    videoClients.forEach((client) => {
+      if (!roomGroups.has(client.room)) roomGroups.set(client.room, []);
+      roomGroups.get(client.room).push(client);
+    });
+
+    const roomIds = [...roomGroups.keys()];
+    if (!roomIds.length) {
+      return { metres: 0, priorityRoom: null, sequence: [], scoutStops: 0 };
+    }
+
+    const roomMeta = roomIds.map((roomId) => {
+      const venue = getVenueRoom(roomId);
+      const clients = roomGroups.get(roomId);
+      return {
+        id: roomId,
+        floor: venue.floor,
+        distToStairs: venue.distToStairs,
+        priority: Math.max(...clients.map((client) => packagePriority(client.package))),
+        clientCount: clients.length,
+      };
+    });
+    const priorityRoom = [...roomMeta].sort(
+      (roomA, roomB) =>
+        roomB.priority - roomA.priority ||
+        roomB.clientCount - roomA.clientCount ||
+        roomB.distToStairs - roomA.distToStairs,
+    )[0];
+    const videoRoomSet = new Set(roomIds);
+    const sequence = [];
+    let currentPoint = null;
+    let metres = 0;
+    let scoutStops = 0;
+
+    function visit(roomId, scout = false) {
+      const nextPoint = routePoint(roomId);
+      metres += pointTravelCost(currentPoint, nextPoint);
+      currentPoint = nextPoint;
+      sequence.push(roomId);
+      if (scout) scoutStops += 1;
+    }
+
+    function roomById(roomId) {
+      return roomMeta.find((room) => room.id === roomId);
+    }
+
+    visit(priorityRoom.id);
+
+    const sameFloorFirstCycle = roomMeta
+      .filter((room) => room.floor === priorityRoom.floor && room.id !== priorityRoom.id)
+      .sort(
+        (roomA, roomB) =>
+          roomB.priority - roomA.priority ||
+          Math.abs(roomA.distToStairs - currentPoint.distToStairs) -
+            Math.abs(roomB.distToStairs - currentPoint.distToStairs),
+      );
+    sameFloorFirstCycle.forEach((room) => visit(room.id));
+
+    const otherFloorFirstCycle = roomMeta.filter(
+      (room) => room.floor !== priorityRoom.floor,
+    );
+    if (otherFloorFirstCycle.length) {
+      if (otherFloorFirstCycle[0].floor === "ground") {
+        if (!videoRoomSet.has("b086")) visit("b086", true);
+        otherFloorFirstCycle
+          .sort((roomA, roomB) => roomB.distToStairs - roomA.distToStairs)
+          .forEach((room) => visit(room.id));
+      } else {
+        otherFloorFirstCycle
+          .sort(
+            (roomA, roomB) =>
+              roomB.priority - roomA.priority ||
+              roomA.distToStairs - roomB.distToStairs,
+          )
+          .forEach((room) => visit(room.id));
+      }
+    }
+
+    const secondFloorRooms = roomIds
+      .filter((roomId) => getVenueRoom(roomId).floor === "second")
+      .sort(
+        (roomA, roomB) =>
+          getVenueRoom(roomA).distToStairs - getVenueRoom(roomB).distToStairs,
+      );
+    secondFloorRooms.forEach((roomId) => visit(roomId));
+    if (secondFloorRooms.length) {
+      metres += currentPoint.distToStairs;
+      currentPoint = { id: "second-stairs", floor: "second", distToStairs: 0 };
+    }
+
+    const groundFloorRooms = roomIds
+      .filter((roomId) => getVenueRoom(roomId).floor === "ground")
+      .sort(
+        (roomA, roomB) =>
+          getVenueRoom(roomB).distToStairs - getVenueRoom(roomA).distToStairs,
+      );
+    if (groundFloorRooms.length) {
+      if (!videoRoomSet.has("b086")) visit("b086", true);
+      groundFloorRooms.forEach((roomId) => visit(roomId));
+    }
+
+    return {
+      metres,
+      priorityRoom: priorityRoom.id,
+      sequence,
+      scoutStops,
+      roomMeta: roomIds.map(roomById),
+    };
+  }
+
   function computeRoundDifficulty(dayId, roundTime) {
+    const model = config.COVERAGE_MODEL;
     const clients = data.clients.filter(
       (client) => client.day === dayId && client.round === roundTime,
     );
     const judges = clients.filter((client) => client.role === "Official event judge");
     const coverageClients = clients.filter((client) => client.role !== "Official event judge");
-    let photoCount = 0;
-    let videoCount = 0;
-    let coverageDemand = 0;
-    let tierBump = 0;
-
-    coverageClients.forEach((client) => {
-      const photoOnly = client.package === "Essential";
-      const weight = photoOnly ? config.PHOTO_WEIGHT : config.VIDEO_WEIGHT;
-      coverageDemand += weight;
-      tierBump += config.TIER_BUMP[client.package] || 0;
-      if (photoOnly) photoCount += 1;
-      else videoCount += 1;
-    });
-
-    const demand = coverageDemand + tierBump + judges.length * config.JUDGE_WEIGHT;
+    const videoClients = coverageClients.filter((client) => client.package !== "Essential");
+    const photoOnlyClients = coverageClients.filter((client) => client.package === "Essential");
+    const videoCount = videoClients.length;
+    const photoCount = photoOnlyClients.length;
     const occupiedRoomIds = [...new Set(coverageClients.map((client) => client.room))];
+    const videoRoomIds = [...new Set(videoClients.map((client) => client.room))];
     const occupiedFloors = new Set(
       occupiedRoomIds.map((roomId) => getVenueRoom(roomId).floor),
     );
-    const bridge = { cost: 0, roomA: null, roomB: null };
-
-    for (let index = 0; index < occupiedRoomIds.length; index += 1) {
-      for (let compare = index + 1; compare < occupiedRoomIds.length; compare += 1) {
-        const roomA = occupiedRoomIds[index];
-        const roomB = occupiedRoomIds[compare];
-        const cost = travelCost(roomA, roomB);
-        if (cost > bridge.cost) {
-          const venueA = getVenueRoom(roomA);
-          const venueB = getVenueRoom(roomB);
-          const swapForReading =
-            (venueA.floor === venueB.floor && venueA.distToStairs > venueB.distToStairs) ||
-            (venueA.floor === "ground" && venueB.floor === "second");
-          bridge.cost = cost;
-          bridge.roomA = swapForReading ? roomB : roomA;
-          bridge.roomB = swapForReading ? roomA : roomB;
-        }
-      }
-    }
-
-    // Tier nudges and opportunistic judge grabs shape the level without
-    // manufacturing an extra dedicated camera.
-    const camerasNeeded = Math.max(occupiedRoomIds.length, Math.ceil(coverageDemand));
-    const travelPressure = Math.max(1, camerasNeeded / config.CAMERA_COUNT);
-    const travelLoad =
-      (bridge.cost / config.METRES_PER_UNIT) * config.BRIDGE_WEIGHT * travelPressure;
-    const load = demand + travelLoad;
-    const ratio = load / config.CAMERA_COUNT;
-    const bridgeRooms = bridge.roomA && bridge.roomB
-      ? [getVenueRoom(bridge.roomA), getVenueRoom(bridge.roomB)]
-      : [];
-    const crossesFloors =
-      bridgeRooms.length === 2 && bridgeRooms[0].floor !== bridgeRooms[1].floor;
-    const reachesFarAuditorium =
-      bridgeRooms.length === 2 &&
-      [bridge.roomA, bridge.roomB].includes("b086") &&
-      bridge.cost >= config.FAR_GAP_METRES;
-    const overCapacity =
-      camerasNeeded > config.CAMERA_COUNT || crossesFloors || reachesFarAuditorium;
+    const videoFloors = new Set(videoRoomIds.map((roomId) => getVenueRoom(roomId).floor));
+    const route = estimatePrimaryRoute(videoClients);
+    const bridge = maxRoomBridge(videoRoomIds);
+    const photoBridge = maxRoomBridge(occupiedRoomIds);
+    const routeMinutes = route.metres / model.RUN_METRES_PER_MINUTE;
+    const videoServiceMinutes = videoClients.reduce(
+      (total, client) => total + model.VIDEO_MINUTES_BY_PACKAGE[client.package],
+      0,
+    );
+    const awardReserveMinutes =
+      videoCount * model.AWARD_RESERVE_MINUTES_PER_VIDEO_CLIENT;
+    const roomReentryMinutes =
+      videoRoomIds.length * model.TARGET_ROOM_CYCLES * model.ROOM_REENTRY_MINUTES;
+    const varietyReserveMinutes = videoCount ? model.VARIETY_RESERVE_MINUTES : 0;
+    const judgeMinutes = judges.length * model.JUDGE_GRAB_MINUTES;
+    const scoutMinutes = route.scoutStops * model.EMPTY_AUDITORIUM_SCOUT_MINUTES;
+    const videoWorkloadMinutes =
+      videoServiceMinutes +
+      awardReserveMinutes +
+      roomReentryMinutes +
+      varietyReserveMinutes +
+      judgeMinutes +
+      scoutMinutes +
+      routeMinutes;
+    const primaryPressure = videoWorkloadMinutes / model.ROUND_WORK_MINUTES;
+    const photoTravelMinutes = photoBridge.cost / model.RUN_METRES_PER_MINUTE;
+    const photoWorkloadMinutes =
+      coverageClients.length * model.PHOTO_MINUTES_PER_CLIENT + photoTravelMinutes;
+    const photoPressure =
+      photoWorkloadMinutes /
+      (model.PHOTO_ROUND_MINUTES * config.TEAM.CLIENT_PHOTO_OPERATORS);
+    const coordinationPressure =
+      Math.max(0, coverageClients.length - config.CAMERA_COUNT) *
+        model.COORDINATION_PER_EXTRA_CLIENT +
+      Math.max(0, occupiedRoomIds.length - 2) * model.COORDINATION_PER_EXTRA_ROOM +
+      (occupiedFloors.size > 1 ? model.CROSS_FLOOR_COORDINATION : 0);
+    const ratio =
+      primaryPressure + photoPressure * model.PHOTO_PRESSURE_SHARE + coordinationPressure;
+    const nonCaptureMinutes =
+      routeMinutes +
+      roomReentryMinutes +
+      varietyReserveMinutes +
+      awardReserveMinutes +
+      judgeMinutes +
+      scoutMinutes;
+    const primaryCaptureMinutes = Math.max(0, model.ROUND_WORK_MINUTES - nonCaptureMinutes);
+    const primaryPassesPerClient = videoCount
+      ? primaryCaptureMinutes / videoCount / model.VIDEO_VISIT_MINUTES
+      : 0;
+    const helperRequired =
+      videoCount > 0 &&
+      (ratio >= model.HELPER_REQUIRED_PRESSURE ||
+        primaryPassesPerClient < model.MIN_DIVERSE_PASSES);
+    const helperStandby =
+      videoCount > 0 && !helperRequired && ratio >= model.HELPER_STANDBY_PRESSURE;
+    const surgeVideoMinutes =
+      model.ROUND_WORK_MINUTES * config.TEAM.SURGE_VIDEO_OPERATOR_SHARE;
+    const supportedPassesPerClient = videoCount
+      ? (primaryCaptureMinutes + (helperRequired ? surgeVideoMinutes : 0)) /
+        videoCount /
+        model.VIDEO_VISIT_MINUTES
+      : 0;
+    const quality =
+      !videoCount
+        ? { key: "photo-only", label: "Photo operation only" }
+        : primaryPassesPerClient >= model.HEALTHY_DIVERSE_PASSES
+          ? { key: "diverse", label: "Diverse repeat coverage likely" }
+          : primaryPassesPerClient >= model.MIN_DIVERSE_PASSES
+            ? { key: "disciplined", label: "Two-pass discipline needed" }
+            : { key: "thin", label: "Single-pass coverage risk" };
+    const helperMode = helperRequired
+      ? { key: "required", label: "Second video recommended" }
+      : helperStandby
+        ? { key: "standby", label: "Video assist on standby" }
+        : { key: "primary", label: "Primary video route" };
+    const crossesFloors = videoFloors.size > 1;
     const level =
       config.LEVELS.find((item) => ratio <= item.maxRatio) ||
       config.LEVELS[config.LEVELS.length - 1];
@@ -180,17 +359,36 @@
       clients,
       judges,
       coverageClients,
+      videoClients,
+      photoOnlyClients,
       photoCount,
       videoCount,
-      demand,
+      demand: videoServiceMinutes,
       occupiedRoomIds,
+      videoRoomIds,
       floorCount: occupiedFloors.size,
+      videoFloorCount: videoFloors.size,
       bridge,
       crossesFloors,
-      camerasNeeded,
-      load,
+      route,
+      routeMetres: route.metres,
+      routeMinutes,
+      videoServiceMinutes,
+      videoWorkloadMinutes,
+      photoWorkloadMinutes,
+      photoPressure,
+      coordinationPressure,
+      primaryPressure,
+      primaryPassesPerClient,
+      supportedPassesPerClient,
+      surgeVideoMinutes,
+      helperRequired,
+      helperStandby,
+      helperMode,
+      quality,
+      load: videoWorkloadMinutes,
       ratio,
-      overCapacity,
+      overCapacity: helperRequired,
       level,
     };
   }
@@ -200,6 +398,53 @@
   function setDifficultyStyle(element, difficulty) {
     element.dataset.level = difficulty.level.key;
     element.style.setProperty("--difficulty-color", difficulty.level.color);
+    element.style.setProperty(
+      "--pressure-percent",
+      `${difficulty.visualPercent ?? Math.min(100, (difficulty.ratio / config.METER_MAX_RATIO) * 100)}%`,
+    );
+  }
+
+  function getDayPressureProfile(dayId) {
+    const day = getDay(dayId);
+    const entries = day.rounds.map((round) => ({
+      round,
+      difficulty: computeRoundDifficulty(dayId, round.time),
+    }));
+    const ranked = [...entries].sort(
+      (entryA, entryB) =>
+        entryB.difficulty.ratio - entryA.difficulty.ratio ||
+        entryB.difficulty.clients.length - entryA.difficulty.clients.length,
+    );
+    const rankByTime = new Map(
+      ranked.map((entry, index) => [entry.round.time, index + 1]),
+    );
+    const ratios = entries.map((entry) => entry.difficulty.ratio);
+    const maximum = Math.max(...ratios, 0);
+    const minimum = Math.min(...ratios);
+    const spread = maximum - minimum;
+
+    return entries.map((entry) => {
+      const absolutePressure = Math.min(
+        1,
+        entry.difficulty.ratio / config.METER_MAX_RATIO,
+      );
+      const relativePressure = spread
+        ? (entry.difficulty.ratio - minimum) / spread
+        : absolutePressure;
+      const visualPercent = entry.difficulty.clients.length
+        ? Math.max(10, Math.round((absolutePressure * 0.68 + relativePressure * 0.32) * 100))
+        : 0;
+
+      return {
+        ...entry,
+        difficulty: {
+          ...entry.difficulty,
+          rank: rankByTime.get(entry.round.time),
+          roundCount: entries.length,
+          visualPercent,
+        },
+      };
+    });
   }
 
   function bookedCountLabel(count) {
@@ -217,7 +462,7 @@
       parts.push(`${difficulty.videoCount} video client${difficulty.videoCount === 1 ? "" : "s"}`);
     }
     if (difficulty.photoCount) {
-      parts.push(`${difficulty.photoCount} photo client${difficulty.photoCount === 1 ? "" : "s"}`);
+      parts.push(`${difficulty.photoCount} photo-only client${difficulty.photoCount === 1 ? "" : "s"}`);
     }
 
     let phrase = parts.join(" and ");
@@ -238,32 +483,46 @@
     }
 
     const coverage = coveragePhrase(difficulty);
-    const rooms = difficulty.occupiedRoomIds;
-    let spread;
+    const roomCount = difficulty.occupiedRoomIds.length;
+    const spread = difficulty.floorCount > 1
+      ? `${roomCount} rooms across ${difficulty.floorCount} floors`
+      : `${roomCount} room${roomCount === 1 ? "" : "s"} on one floor`;
+    let passPhrase = "The assistants can stay fully on photos";
 
-    if (rooms.length === 1) {
-      spread = `in ${roomDisplayName(rooms[0])}`;
-    } else if (difficulty.floorCount > 1) {
-      spread = `across ${difficulty.floorCount} floors`;
-    } else {
-      const floor = getVenueRoom(rooms[0]).floor === "second" ? "second-floor" : "ground-floor";
-      spread = `across ${rooms.length} ${floor} rooms`;
+    if (difficulty.videoCount) {
+      if (difficulty.primaryPassesPerClient >= 3) {
+        passPhrase = "Three or more varied video passes each are realistic";
+      } else if (difficulty.primaryPassesPerClient >= 2) {
+        passPhrase = "Two varied video passes each are realistic";
+      } else if (difficulty.primaryPassesPerClient >= 1) {
+        passPhrase = "Plan one deliberate video pass per client";
+      } else {
+        passPhrase = "Some clients risk receiving only a flash video pass";
+      }
     }
 
-    if (!difficulty.bridge.roomA) {
-      return `${difficulty.level.label}: ${coverage} ${spread}, with no room change.`;
-    }
-
-    const route = difficulty.crossesFloors ? "via the stairs" : "along the hallway";
-    return `${difficulty.level.label}: ${coverage} ${spread}, longest hop ${roomDisplayName(difficulty.bridge.roomA)} to ${roomDisplayName(difficulty.bridge.roomB)} (~${Math.round(difficulty.bridge.cost)} m ${route}).`;
+    return `${difficulty.level.label}: ${coverage} in ${spread}. ${passPhrase}.`;
   }
 
   function splitNeededMessage(difficulty) {
-    if (!difficulty.overCapacity) return "";
-    if (difficulty.bridge.roomA) {
-      return `Split needed: hold ${roomDisplayName(difficulty.bridge.roomA)} and ${roomDisplayName(difficulty.bridge.roomB)} with separate operators.`;
+    if (difficulty.helperRequired) {
+      return "Second video recommended: give the volume photographer the stabilised camera for this round.";
     }
-    return `Split needed: assign ${difficulty.camerasNeeded} camera positions for this round.`;
+    if (difficulty.helperStandby) {
+      return "Video assist on standby: keep the stabilised camera on the volume photographer.";
+    }
+    return "Crew plan: one assistant targets booked photos while the other keeps full-field photo volume.";
+  }
+
+  function routeSummary(difficulty) {
+    if (!difficulty.videoCount || !difficulty.route.priorityRoom) {
+      return "No dedicated video route required.";
+    }
+    if (difficulty.routeMetres < 10) {
+      return `Hold ${roomDisplayName(difficulty.route.priorityRoom)} · no room change required`;
+    }
+    const routeMetres = Math.round(difficulty.routeMetres / 10) * 10;
+    return `Start ${roomDisplayName(difficulty.route.priorityRoom)} · approximately ${routeMetres} m over two coverage cycles`;
   }
 
   function updateUrl() {
@@ -299,16 +558,16 @@
 
     elements.roundTabs.replaceChildren();
     elements.dayHeatStrip.replaceChildren();
-    getDay(state.day).rounds.forEach((round) => {
-      const difficulty = computeRoundDifficulty(state.day, round.time);
+    getDayPressureProfile(state.day).forEach(({ round, difficulty }) => {
       const label = `
         <span class="round-button-label">${round.label}</span>
         <strong class="round-button-time">${round.time}</strong>
         <span class="round-difficulty-meta">
           <i class="difficulty-shape" aria-hidden="true"></i>
           <span>${difficulty.level.shortLabel || difficulty.level.label}</span>
-          <b>${bookedCountLabel(difficulty.clients.length)}</b>
+          <b>#${difficulty.rank} · ${bookedCountLabel(difficulty.clients.length)}</b>
         </span>
+        <span class="round-pressure-track" aria-hidden="true"><i></i></span>
       `;
       const roundButton = makeButton("round-button", label, round.time === state.round, () => {
         if (state.round === round.time) return;
@@ -318,25 +577,24 @@
       setDifficultyStyle(roundButton, difficulty);
       roundButton.setAttribute(
         "aria-label",
-        `${round.label}, ${round.time}, ${difficulty.level.label}, ${bookedCountLabel(difficulty.clients.length)}`,
+        `${round.label}, ${round.time}, ${difficulty.level.label}, ${bookedCountLabel(difficulty.clients.length)}, difficulty rank ${difficulty.rank} of ${difficulty.roundCount}`,
       );
       elements.roundTabs.append(roundButton);
 
       const heatCell = document.createElement("button");
-      const heatPercent = Math.min(100, (difficulty.ratio / config.METER_MAX_RATIO) * 100);
       heatCell.type = "button";
       heatCell.className = "heat-cell";
       heatCell.setAttribute("aria-pressed", String(round.time === state.round));
       heatCell.setAttribute(
         "aria-label",
-        `${round.time}, ${difficulty.level.label}, ${bookedCountLabel(difficulty.clients.length)}`,
+        `${round.time}, ${difficulty.level.label}, ${bookedCountLabel(difficulty.clients.length)}, difficulty rank ${difficulty.rank} of ${difficulty.roundCount}`,
       );
-      heatCell.style.setProperty("--difficulty-heat", `${Math.max(difficulty.clients.length ? 18 : 8, heatPercent)}%`);
       setDifficultyStyle(heatCell, difficulty);
       heatCell.innerHTML = `
-        <span class="heat-cell-time">${round.time}</span>
+        <span class="heat-cell-time">${round.time}<b>#${difficulty.rank}</b></span>
         <span class="heat-bar" aria-hidden="true"><i></i></span>
         <span class="heat-cell-level"><i class="difficulty-shape" aria-hidden="true"></i>${difficulty.level.shortLabel || difficulty.level.label}</span>
+        <span class="heat-cell-count">${difficulty.clients.length} booked · ${difficulty.videoCount} video</span>
       `;
       heatCell.addEventListener("click", () => {
         if (state.round === round.time) return;
@@ -663,15 +921,23 @@
 
   function renderVenue() {
     const day = getDay(state.day);
-    const round = day.rounds.find((item) => item.time === state.round);
-    const difficulty = computeRoundDifficulty(state.day, state.round);
-    const filledSegments = difficulty.ratio > 0
-      ? Math.max(1, Math.ceil((difficulty.ratio / config.METER_MAX_RATIO) * config.METER_SEGMENTS))
+    const pressureEntry = getDayPressureProfile(state.day).find(
+      (entry) => entry.round.time === state.round,
+    );
+    const round = pressureEntry.round;
+    const difficulty = pressureEntry.difficulty;
+    const filledSegments = difficulty.visualPercent > 0
+      ? Math.max(1, Math.ceil((difficulty.visualPercent / 100) * config.METER_SEGMENTS))
       : 0;
     const meterSegments = Array.from({ length: config.METER_SEGMENTS }, (_, index) =>
       `<i class="${index < Math.min(config.METER_SEGMENTS, filledSegments) ? "is-filled" : ""}"></i>`,
     ).join("");
     const splitMessage = splitNeededMessage(difficulty);
+    const assistantTwoLabel = difficulty.helperRequired
+      ? "Second video"
+      : difficulty.helperStandby
+        ? "Video standby"
+        : "Volume photos";
 
     elements.videoFilterButton.setAttribute(
       "aria-pressed",
@@ -693,10 +959,19 @@
           <strong>${round.time}</strong>
         </div>
         <span class="difficulty-badge"><i class="difficulty-shape" aria-hidden="true"></i>${difficulty.level.label}</span>
+        <span class="pressure-rank"><b>#${difficulty.rank}</b> ${difficulty.rank === 1 ? "hardest today" : `of ${difficulty.roundCount} today`}</span>
+        <span class="coverage-quality" data-quality="${difficulty.quality.key}">${difficulty.quality.label}</span>
       </div>
-      <div class="difficulty-meter" aria-label="Difficulty meter: ${difficulty.level.label}">${meterSegments}</div>
+      <div class="pressure-meter-heading"><span>Coverage pressure</span><strong>#${difficulty.rank} today</strong></div>
+      <div class="difficulty-meter" aria-label="Coverage pressure: ${difficulty.level.label}, rank ${difficulty.rank} of ${difficulty.roundCount}">${meterSegments}</div>
       <p class="difficulty-summary">${difficultySummary(difficulty)}</p>
-      ${splitMessage ? `<p class="split-needed"><i aria-hidden="true"></i>${splitMessage}</p>` : ""}
+      <div class="crew-strip" data-helper="${difficulty.helperMode.key}" aria-label="Crew allocation">
+        <span><b>You</b>Primary video</span>
+        <span><b>A1</b>Client photos</span>
+        <span><b>A2</b>${assistantTwoLabel}</span>
+      </div>
+      <p class="route-note">${routeSummary(difficulty)}</p>
+      <p class="split-needed" data-helper="${difficulty.helperMode.key}"><i aria-hidden="true"></i>${splitMessage}</p>
     `;
 
     elements.secondFloor.replaceChildren();
