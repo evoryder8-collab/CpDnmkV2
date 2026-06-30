@@ -62,6 +62,7 @@
     footerBuiltFor: document.querySelector("#footer-built-for"),
     databaseButton: document.querySelector("#database-button"),
     easiestButton: document.querySelector("#easiest-button"),
+    financeButton: document.querySelector("#finance-button"),
   };
 
   const urlState = new URLSearchParams(window.location.search);
@@ -169,7 +170,34 @@
     </section>
   `;
 
-  document.body.append(cardOverlay, rosterOverlay, databaseOverlay, easiestOverlay);
+  const financeOverlay = document.createElement("div");
+  financeOverlay.className = "finance-overlay";
+  financeOverlay.hidden = true;
+  financeOverlay.innerHTML = `
+    <section class="finance-panel" role="dialog" aria-modal="true" aria-labelledby="finance-heading">
+      <header class="finance-header">
+        <div>
+          <p class="eyebrow" id="finance-eyebrow">Confidential</p>
+          <h2 id="finance-heading">Private totals</h2>
+        </div>
+        <button class="finance-close" type="button" aria-label="Close private totals">Close</button>
+      </header>
+      <div class="finance-content">
+        <form class="finance-gate" id="finance-gate">
+          <label class="database-search-label" for="finance-password">
+            <span id="finance-password-label">Password</span>
+            <input id="finance-password" type="password" autocomplete="off" placeholder="Private password">
+          </label>
+          <p class="database-hint" id="finance-hint">Enter the private password to see gross income, expenses, and net income.</p>
+          <p class="finance-error" id="finance-error" hidden>Wrong password</p>
+          <button class="database-button finance-unlock" id="finance-unlock" type="submit">Unlock totals</button>
+        </form>
+        <div class="finance-body" id="finance-body" hidden></div>
+      </div>
+    </section>
+  `;
+
+  document.body.append(cardOverlay, rosterOverlay, databaseOverlay, easiestOverlay, financeOverlay);
 
   const rosterContent = rosterOverlay.querySelector("#roster-content");
   const rosterClose = rosterOverlay.querySelector(".roster-close");
@@ -179,14 +207,23 @@
   const databaseResult = databaseOverlay.querySelector("#database-result");
   const easiestClose = easiestOverlay.querySelector(".easiest-close");
   const easiestContent = easiestOverlay.querySelector("#easiest-content");
+  const financeClose = financeOverlay.querySelector(".finance-close");
+  const financeGate = financeOverlay.querySelector("#finance-gate");
+  const financePassword = financeOverlay.querySelector("#finance-password");
+  const financeError = financeOverlay.querySelector("#finance-error");
+  const financeUnlock = financeOverlay.querySelector("#finance-unlock");
+  const financeBody = financeOverlay.querySelector("#finance-body");
   let cardOverlayTimer;
   let rosterOverlayTimer;
   let databaseOverlayTimer;
   let easiestOverlayTimer;
+  let financeOverlayTimer;
   let cardReturnFocus;
   let rosterReturnFocus;
   let databaseReturnFocus;
   let easiestReturnFocus;
+  let financeReturnFocus;
+  let financeUnlocked = false;
   let selectedDatabasePerson = null;
 
   function languagePack() {
@@ -322,6 +359,7 @@
     setText(elements.footerBuiltFor, t("builtFor"));
     setText(elements.databaseButton, t("database"));
     setText(elements.easiestButton, t("easiestAdditions"));
+    setText(elements.financeButton, t("privateTotals"));
     setText(rosterOverlay.querySelector(".roster-header .eyebrow"), t("bookedCoverage"));
     setText(rosterOverlay.querySelector("#roster-heading"), t("allClients"));
     setText(rosterClose, t("close"));
@@ -337,6 +375,15 @@
     setText(easiestOverlay.querySelector("#easiest-heading"), t("easiestTitle"));
     setText(easiestClose, t("close"));
     easiestClose.setAttribute("aria-label", t("closeEasiest"));
+    setText(financeOverlay.querySelector("#finance-eyebrow"), t("financeEyebrow"));
+    setText(financeOverlay.querySelector("#finance-heading"), t("financeTitle"));
+    setText(financeOverlay.querySelector("#finance-password-label"), t("financePasswordLabel"));
+    setText(financeOverlay.querySelector("#finance-hint"), t("financeHint"));
+    setText(financeError, t("financeError"));
+    setText(financeUnlock, t("unlockFinance"));
+    financePassword.placeholder = t("financePasswordPlaceholder");
+    setText(financeClose, t("close"));
+    financeClose.setAttribute("aria-label", t("closeFinance"));
   }
 
   function getDay(dayId) {
@@ -1159,7 +1206,7 @@
   function syncBodyLock() {
     document.body.classList.toggle(
       "modal-open",
-      !cardOverlay.hidden || !rosterOverlay.hidden || !databaseOverlay.hidden || !easiestOverlay.hidden,
+      !cardOverlay.hidden || !rosterOverlay.hidden || !databaseOverlay.hidden || !easiestOverlay.hidden || !financeOverlay.hidden,
     );
   }
 
@@ -1744,13 +1791,15 @@
                 <strong>${escapeHtml(row.person.name)}</strong>
                 <small>${escapeHtml(countries || categories)}</small>
               </div>
-              <div class="easiest-score">
-                <b>${row.videoImpact.score}%</b>
-                <span>${escapeHtml(t("videoFitShort"))}</span>
-              </div>
-              <div class="easiest-score is-muted">
-                <b>${row.photoImpact.score}%</b>
-                <span>${escapeHtml(t("photoFitShort"))}</span>
+              <div class="easiest-scores">
+                <div class="easiest-score">
+                  <b>${row.videoImpact.score}%</b>
+                  <span>${escapeHtml(t("videoFitShort"))}</span>
+                </div>
+                <div class="easiest-score is-muted">
+                  <b>${row.photoImpact.score}%</b>
+                  <span>${escapeHtml(t("photoFitShort"))}</span>
+                </div>
               </div>
               <div class="easiest-rounds" aria-label="${escapeHtml(t("affectedRounds"))}">
                 ${renderEasiestRoundChips(row.videoImpact)}
@@ -1780,6 +1829,158 @@
       syncBodyLock();
       if (easiestReturnFocus?.isConnected) easiestReturnFocus.focus();
     }, 140);
+  }
+
+  function formatChf(value) {
+    return `${value.toLocaleString("en-CH", {
+      minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+      maximumFractionDigits: 2,
+    })} CHF`;
+  }
+
+  function getAccountingSummary() {
+    const prices = config.FINANCE.PACKAGE_PRICES_CHF;
+    const packageOrder = ["Signature", "Showcase", "Authority", "Essential"];
+    const people = new Map();
+
+    data.clients.forEach((client) => {
+      const key = normalize(client.officialName || client.name);
+      const current = people.get(key);
+      if (!current || (prices[client.package] || 0) > (prices[current.package] || 0)) {
+        people.set(key, client);
+      }
+    });
+
+    const counts = Object.fromEntries(packageOrder.map((packageName) => [packageName, 0]));
+    [...people.values()].forEach((client) => {
+      counts[client.package] = (counts[client.package] || 0) + 1;
+    });
+
+    const packageRows = packageOrder.map((packageName) => {
+      const count = counts[packageName] || 0;
+      const price = prices[packageName] || 0;
+      return {
+        packageName,
+        count,
+        price,
+        subtotal: count * price,
+      };
+    });
+    const gross = packageRows.reduce((total, row) => total + row.subtotal, 0);
+    const expenseGroups = config.FINANCE.EXPENSE_GROUPS.map((group) => ({
+      ...group,
+      total: group.costs.reduce((total, cost) => total + cost, 0),
+    }));
+    const expenses = expenseGroups.reduce((total, group) => total + group.total, 0);
+
+    return {
+      totalClients: people.size,
+      packageRows,
+      expenseGroups,
+      gross,
+      expenses,
+      net: gross - expenses,
+    };
+  }
+
+  function renderFinanceTotals() {
+    const summary = getAccountingSummary();
+    const packageRows = summary.packageRows
+      .map((row) => `
+        <li data-package="${row.packageName.toLowerCase()}">
+          <span>${escapeHtml(row.packageName)}</span>
+          <b>${row.count}</b>
+          <small>${formatChf(row.price)} ${escapeHtml(t("priceEach"))}</small>
+          <strong>${formatChf(row.subtotal)}</strong>
+        </li>
+      `)
+      .join("");
+    const expenseRows = summary.expenseGroups
+      .map((group) => `
+        <li>
+          <span>${escapeHtml(group.label)}</span>
+          <small>${group.costs.map(formatChf).join(" + ")}</small>
+          <strong>${formatChf(group.total)}</strong>
+        </li>
+      `)
+      .join("");
+
+    financeBody.innerHTML = `
+      <section class="finance-totals">
+        <article>
+          <span>${escapeHtml(t("totalClients"))}</span>
+          <strong>${summary.totalClients}</strong>
+        </article>
+        <article>
+          <span>${escapeHtml(t("grossIncome"))}</span>
+          <strong>${formatChf(summary.gross)}</strong>
+        </article>
+        <article>
+          <span>${escapeHtml(t("totalExpenses"))}</span>
+          <strong>${formatChf(summary.expenses)}</strong>
+        </article>
+        <article class="is-net">
+          <span>${escapeHtml(t("netIncome"))}</span>
+          <strong>${formatChf(summary.net)}</strong>
+        </article>
+      </section>
+      <section class="finance-breakdown">
+        <h3>${escapeHtml(t("packageBreakdown"))}</h3>
+        <ul>${packageRows}</ul>
+      </section>
+      <section class="finance-breakdown">
+        <h3>${escapeHtml(t("expenseBreakdown"))}</h3>
+        <ul>${expenseRows}</ul>
+      </section>
+    `;
+  }
+
+  function openFinance() {
+    window.clearTimeout(financeOverlayTimer);
+    financeReturnFocus = document.activeElement;
+    financeOverlay.hidden = false;
+    financeError.hidden = true;
+    if (financeUnlocked) {
+      financeGate.hidden = true;
+      financeBody.hidden = false;
+      renderFinanceTotals();
+    } else {
+      financeGate.hidden = false;
+      financeBody.hidden = true;
+      financePassword.value = "";
+    }
+    syncBodyLock();
+    window.requestAnimationFrame(() => financeOverlay.classList.add("is-open"));
+    if (financeUnlocked) {
+      financeClose.focus();
+    } else {
+      financePassword.focus();
+    }
+  }
+
+  function closeFinance() {
+    if (financeOverlay.hidden) return;
+    financeOverlay.classList.remove("is-open");
+    financeOverlayTimer = window.setTimeout(() => {
+      financeOverlay.hidden = true;
+      syncBodyLock();
+      if (financeReturnFocus?.isConnected) financeReturnFocus.focus();
+    }, 140);
+  }
+
+  function unlockFinance() {
+    if (financePassword.value !== config.FINANCE.ACCESS_CODE) {
+      financeError.hidden = false;
+      financePassword.select();
+      return;
+    }
+
+    financeUnlocked = true;
+    financeError.hidden = true;
+    financeGate.hidden = true;
+    financeBody.hidden = false;
+    renderFinanceTotals();
+    financeClose.focus();
   }
 
   function makeParticipantMarker(entry) {
@@ -2093,6 +2294,7 @@
       }
     }
     if (!easiestOverlay.hidden) renderEasiestAdditions();
+    if (!financeOverlay.hidden && financeUnlocked) renderFinanceTotals();
   });
 
   elements.fieldToggle.addEventListener("change", () => {
@@ -2103,6 +2305,7 @@
   elements.allClientsButton.addEventListener("click", openRoster);
   elements.databaseButton.addEventListener("click", openDatabase);
   elements.easiestButton?.addEventListener("click", openEasiest);
+  elements.financeButton?.addEventListener("click", openFinance);
   elements.videoFilterButton.addEventListener("click", () => {
     state.videoIncludedOnly = !state.videoIncludedOnly;
     renderVenue();
@@ -2111,6 +2314,11 @@
   rosterClose.addEventListener("click", closeRoster);
   databaseClose.addEventListener("click", closeDatabase);
   easiestClose.addEventListener("click", closeEasiest);
+  financeClose.addEventListener("click", closeFinance);
+  financeGate.addEventListener("submit", (event) => {
+    event.preventDefault();
+    unlockFinance();
+  });
   rosterOverlay.addEventListener("click", (event) => {
     if (event.target === rosterOverlay) closeRoster();
   });
@@ -2119,6 +2327,9 @@
   });
   easiestOverlay.addEventListener("click", (event) => {
     if (event.target === easiestOverlay) closeEasiest();
+  });
+  financeOverlay.addEventListener("click", (event) => {
+    if (event.target === financeOverlay) closeFinance();
   });
   databaseSearch.addEventListener("input", renderDatabaseSuggestions);
   databaseSearch.addEventListener("keydown", (event) => {
@@ -2138,6 +2349,8 @@
       closeDatabase();
     } else if (!easiestOverlay.hidden) {
       closeEasiest();
+    } else if (!financeOverlay.hidden) {
+      closeFinance();
     }
   });
 
