@@ -1368,6 +1368,8 @@
         rank: profileEntry?.difficulty.rank || 1,
         delta: Math.max(0, after.ratio - before.ratio),
         additions: roundAdditions,
+        otherBookedCount: before.coverageClients.length,
+        totalAfterAdd: after.coverageClients.length,
       };
     });
 
@@ -1411,6 +1413,48 @@
     return `${localizedDay(day).mini} ${detail.roundTime} · ${localizedRoundLabel(day, round)}`;
   }
 
+  function databaseRoundCrowdLine(detail) {
+    const other = detail.otherBookedCount;
+    const total = detail.totalAfterAdd;
+
+    if (state.language === "ro") {
+      return other === 1
+        ? `Pică lângă 1 alt participant rezervat, ${total} în total după adăugare.`
+        : `Pică lângă ${other} alți participanți rezervați, ${total} în total după adăugare.`;
+    }
+
+    if (state.language === "th") {
+      return `อยู่พร้อมกับลูกค้าที่จองอีก ${other} คน, รวม ${total} คนหลังเพิ่ม`;
+    }
+
+    return other === 1
+      ? `Lands alongside 1 other booked participant, ${total} total after add.`
+      : `Lands alongside ${other} other booked participants, ${total} total after add.`;
+  }
+
+  function renderDatabaseRoundCrowd(impact) {
+    const roundItems = [...impact.details]
+      .sort(
+        (detailA, detailB) =>
+          detailB.after.ratio - detailA.after.ratio ||
+          detailB.otherBookedCount - detailA.otherBookedCount,
+      )
+      .map((detail) => `
+        <li>
+          <b>${escapeHtml(databaseRoundLabel(detail))}</b>
+          <span>${escapeHtml(databaseRoundCrowdLine(detail))}</span>
+        </li>
+      `)
+      .join("");
+
+    return `
+      <div class="database-round-crowd">
+        <strong>${escapeHtml(t("roundCrowd"))}</strong>
+        <ul>${roundItems}</ul>
+      </div>
+    `;
+  }
+
   function renderDatabaseImpactCard(impact, title) {
     if (impact.noNewImpact) {
       return `
@@ -1436,6 +1480,7 @@
         <p>${escapeHtml(t("worstLanding"))}: ${escapeHtml(databaseRoundLabel(worst))} · ${escapeHtml(worstRoom)}</p>
         <p>${escapeHtml(t("current"))}: ${escapeHtml(currentLevel)} · ${escapeHtml(t("afterAdding"))}: ${escapeHtml(afterLevel)}</p>
         <small>${escapeHtml(t("affectsRounds", { count: impact.details.length }))}</small>
+        ${renderDatabaseRoundCrowd(impact)}
       </article>
     `;
   }
