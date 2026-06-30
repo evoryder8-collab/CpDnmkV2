@@ -105,6 +105,7 @@
     role: hasSavedRole ? savedRole : defaultRoleByLanguage[initialLanguage],
     rolePinned: hasSavedRole,
     briefingExpanded: false,
+    easiestSortMode: "fit",
   };
 
   const cardOverlay = document.createElement("div");
@@ -1419,6 +1420,74 @@
     return "#d94a35";
   }
 
+  function splitCountryMarketParts(country) {
+    return String(country || "")
+      .split(/\s*&\s*|\s+and\s+|,\s*/i)
+      .map((part) => part.trim())
+      .filter(Boolean);
+  }
+
+  function countryMarketScore(country) {
+    const market = config.MARKET_PRICING || {};
+    const scores = market.COUNTRY_SCORES || {};
+
+    if (Object.hasOwn(scores, country)) return scores[country];
+
+    const parts = splitCountryMarketParts(country);
+    const partScores = parts
+      .filter((part) => Object.hasOwn(scores, part))
+      .map((part) => scores[part]);
+
+    if (partScores.length) {
+      return Math.round(partScores.reduce((sum, score) => sum + score, 0) / partScores.length);
+    }
+
+    return market.DEFAULT_SCORE || 52;
+  }
+
+  function personMarketProfile(person) {
+    const countries = person.countries.length ? person.countries : [""];
+    const countryScores = countries.map((country) => ({
+      country,
+      score: countryMarketScore(country),
+    }));
+    const score = Math.round(
+      countryScores.reduce((sum, entry) => sum + entry.score, 0) / countryScores.length,
+    );
+    const strongest = [...countryScores].sort((entryA, entryB) => entryB.score - entryA.score)[0];
+
+    return {
+      score,
+      strongestCountry: strongest?.country || "",
+      tone: fitTone(score),
+    };
+  }
+
+  function marketFitScore(row) {
+    const market = config.MARKET_PRICING || {};
+    const fitWeight = market.FIT_WEIGHT ?? 0.68;
+    const marketWeight = market.MARKET_WEIGHT ?? 0.27;
+    const photoWeight = market.PHOTO_WEIGHT ?? 0.05;
+    const videoFit = row.videoImpact.score;
+    const photoFit = row.photoImpact.score;
+    const marketScore = row.marketProfile.score;
+    const fitGate =
+      videoFit < 52 ? -18 :
+        videoFit < 64 ? -8 :
+          videoFit < 78 ? -2 : 0;
+
+    return clamp(
+      Math.round(
+        videoFit * fitWeight +
+          marketScore * marketWeight +
+          photoFit * photoWeight +
+          fitGate,
+      ),
+      3,
+      99,
+    );
+  }
+
   function detailChronology(detail) {
     const dayIndex = data.days.findIndex((day) => day.id === detail.dayId);
     const roundIndex = getDay(detail.dayId).rounds.findIndex(
@@ -1755,23 +1824,39 @@
   }
 
   function getEasiestAdditionRows() {
-    return getDatabasePeople()
+    const rows = getDatabasePeople()
       .filter((person) => !person.alreadyBooked && candidateClientsForPerson(person, "Showcase").length)
       .map((person) => {
         const photoImpact = computeDatabaseImpact(person, "Essential");
         const videoImpact = computeDatabaseImpact(person, "Showcase");
-        return { person, photoImpact, videoImpact };
-      })
-      .sort(
+        const marketProfile = personMarketProfile(person);
+        const row = { person, photoImpact, videoImpact, marketProfile };
+        return { ...row, valueScore: marketFitScore(row) };
+      });
+
+    if (state.easiestSortMode === "market") {
+      return rows.sort(
         (rowA, rowB) =>
+          rowB.valueScore - rowA.valueScore ||
           rowB.videoImpact.score - rowA.videoImpact.score ||
+          rowB.marketProfile.score - rowA.marketProfile.score ||
           rowB.photoImpact.score - rowA.photoImpact.score ||
           rowA.person.name.localeCompare(rowB.person.name),
       );
+    }
+
+    return rows.sort(
+        (rowA, rowB) =>
+          rowB.videoImpact.score - rowA.videoImpact.score ||
+          rowB.photoImpact.score - rowA.photoImpact.score ||
+          rowB.marketProfile.score - rowA.marketProfile.score ||
+          rowA.person.name.localeCompare(rowB.person.name),
+    );
   }
 
   function renderEasiestAdditions() {
     const rows = getEasiestAdditionRows();
+    const isMarketMode = state.easiestSortMode === "market";
 
     if (!rows.length) {
       easiestContent.innerHTML = `<p class="database-empty">${escapeHtml(t("noEasiestAdditions"))}</p>`;
@@ -1779,19 +1864,34 @@
     }
 
     easiestContent.innerHTML = `
-      <p class="easiest-hint">${escapeHtml(t("easiestHint"))}</p>
+      <div class="easiest-topbar">
+        <p class="easiest-hint">${escapeHtml(isMarketMode ? t("easiestMarketHint") : t("easiestHint"))}</p>
+        <div class="easiest-sort-toggle" role="group" aria-label="${escapeHtml(t("easiestSortLabel"))}">
+          <button class="easiest-sort-button" type="button" data-easiest-sort="fit" aria-pressed="${state.easiestSortMode === "fit"}">
+            ${escapeHtml(t("easiestSortFit"))}
+          </button>
+          <button class="easiest-sort-button" type="button" data-easiest-sort="market" aria-pressed="${state.easiestSortMode === "market"}">
+            ${escapeHtml(t("easiestSortMarket"))}
+          </button>
+        </div>
+      </div>
       <ol class="easiest-list" aria-label="${escapeHtml(t("bestAdditions"))}">
         ${rows.map((row, index) => {
           const countries = row.person.countries.map(localizedCountry).join(" · ");
           const categories = row.person.categories.map(localizedCategory).join(" · ");
+          const rowTone = isMarketMode ? fitTone(row.valueScore) : row.videoImpact.tone;
           return `
-            <li class="easiest-item" data-fit="${row.videoImpact.tone}">
+            <li class="easiest-item" data-fit="${rowTone}">
               <span class="easiest-rank">${index + 1}</span>
               <div class="easiest-person">
                 <strong>${escapeHtml(row.person.name)}</strong>
-                <small>${escapeHtml(countries || categories)}</small>
+                <small>${escapeHtml(countries || categories)} · ${escapeHtml(t("marketSignal"))}: ${row.marketProfile.score}/100</small>
               </div>
               <div class="easiest-scores">
+                <div class="easiest-score${isMarketMode ? "" : " is-muted"}">
+                  <b>${row.valueScore}%</b>
+                  <span>${escapeHtml(t("dmFitShort"))}</span>
+                </div>
                 <div class="easiest-score">
                   <b>${row.videoImpact.score}%</b>
                   <span>${escapeHtml(t("videoFitShort"))}</span>
@@ -1799,6 +1899,10 @@
                 <div class="easiest-score is-muted">
                   <b>${row.photoImpact.score}%</b>
                   <span>${escapeHtml(t("photoFitShort"))}</span>
+                </div>
+                <div class="easiest-score is-market">
+                  <b>${row.marketProfile.score}</b>
+                  <span>${escapeHtml(t("marketScoreShort"))}</span>
                 </div>
               </div>
               <div class="easiest-rounds" aria-label="${escapeHtml(t("affectedRounds"))}">
@@ -2327,6 +2431,12 @@
   });
   easiestOverlay.addEventListener("click", (event) => {
     if (event.target === easiestOverlay) closeEasiest();
+  });
+  easiestContent.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-easiest-sort]");
+    if (!button) return;
+    state.easiestSortMode = button.dataset.easiestSort === "market" ? "market" : "fit";
+    renderEasiestAdditions();
   });
   financeOverlay.addEventListener("click", (event) => {
     if (event.target === financeOverlay) closeFinance();
