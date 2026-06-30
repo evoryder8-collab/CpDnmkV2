@@ -8,36 +8,46 @@
     <title>iConstantine | Coverage Board</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=20260630-6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Noto+Sans+Thai:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=20260630-7">
   </head>
   <body>
     <div class="blueprint-grid" aria-hidden="true"></div>
 
     <header class="site-header">
-      <a class="wordmark" href="./" aria-label="iConstantine coverage board home">
+      <a class="wordmark" id="brand-home" href="./" aria-label="iConstantine coverage board home">
         <img class="brand-eye" src="img/iConstantine logo eye only flat.png" alt="">
         <span class="wordmark-text"><span class="wordmark-i">i</span>Constantine</span>
       </a>
       <div class="event-lockup">
-        <p class="eyebrow">Live coverage control</p>
-        <h1>World Championship in Massage</h1>
-        <p>Copenhagen <span aria-hidden="true">·</span> 4-5 July 2026 <span aria-hidden="true">·</span> CEST</p>
+        <p class="eyebrow" id="event-eyebrow">Live coverage control</p>
+        <h1 id="event-title">World Championship in Massage</h1>
+        <p id="event-meta">Copenhagen · 4-5 July 2026 · CEST</p>
       </div>
-      <div class="live-status"><span></span>Schedule locked</div>
+      <div class="header-actions">
+        <label class="language-picker" for="language-select">
+          <span id="language-label">Language</span>
+          <select id="language-select">
+            <option value="en">English</option>
+            <option value="ro">Română</option>
+            <option value="th">ไทย</option>
+          </select>
+        </label>
+        <div class="live-status"><span></span><b id="schedule-status">Schedule locked</b></div>
+      </div>
     </header>
 
     <main>
-      <section class="control-deck" aria-label="Schedule controls">
+      <section class="control-deck" id="control-deck" aria-label="Schedule controls">
         <div class="control-group">
-          <p class="control-label">Choose day</p>
+          <p class="control-label" id="choose-day-label">Choose day</p>
           <div class="day-tabs" id="day-tabs" role="tablist" aria-label="Event day"></div>
         </div>
 
         <div class="control-divider" aria-hidden="true"></div>
 
         <div class="control-group rounds-group">
-          <p class="control-label">Choose round</p>
+          <p class="control-label" id="choose-round-label">Choose round</p>
           <div class="round-tabs" id="round-tabs" role="tablist" aria-label="Round time"></div>
           <div class="day-heat-strip" id="day-heat-strip" aria-label="Day difficulty overview"></div>
         </div>
@@ -47,8 +57,8 @@
             <input id="field-toggle" type="checkbox" checked>
             <span class="toggle-track" aria-hidden="true"><span></span></span>
             <span>
-              <strong>Full field</strong>
-              <small>Show every competitor</small>
+              <strong id="field-toggle-title">Full field</strong>
+              <small id="field-toggle-subtitle">Show every competitor</small>
             </span>
           </label>
           <button class="all-clients-button" id="all-clients-button" type="button">All clients</button>
@@ -63,7 +73,7 @@
 
         <header class="venue-heading">
           <div>
-            <p class="eyebrow">Venue map</p>
+            <p class="eyebrow" id="venue-eyebrow">Venue map</p>
             <h2 id="venue-heading">Coverage positions</h2>
           </div>
           <div class="active-round" id="active-round" aria-live="polite"></div>
@@ -76,13 +86,13 @@
             <div class="floor-label">
               <span>02</span>
               <div>
-                <p>Second floor</p>
-                <small>Four competition rooms</small>
+                <p id="second-floor-label">Second floor</p>
+                <small id="second-floor-subtitle">Four competition rooms</small>
               </div>
             </div>
             <button class="video-filter-button" id="video-filter-button" type="button" aria-pressed="false" aria-label="Show video-included clients only">
               <span aria-hidden="true"></span>
-              Video-Included
+              <b id="video-filter-label">Video-Included</b>
             </button>
           </div>
           <h3 class="visually-hidden" id="second-floor-heading">Second floor rooms</h3>
@@ -95,8 +105,8 @@
             <i></i><i></i><i></i><i></i><i></i>
           </div>
           <div>
-            <strong>Stairs</strong>
-            <small>Ground floor below</small>
+            <strong id="stairs-label">Stairs</strong>
+            <small id="stairs-subtitle">Ground floor below</small>
           </div>
           <span class="bridge-line" aria-hidden="true"></span>
         </div>
@@ -105,8 +115,8 @@
           <div class="floor-label">
             <span>00</span>
             <div>
-              <p>Ground floor</p>
-              <small>Floor Hall and Auditorium</small>
+              <p id="ground-floor-label">Ground floor</p>
+              <small id="ground-floor-subtitle">Floor Hall and Auditorium</small>
             </div>
           </div>
           <h3 class="visually-hidden" id="ground-floor-heading">Ground floor rooms</h3>
@@ -116,11 +126,11 @@
     </main>
 
     <footer>
-      <p>Official schedule mapped from the 2026 event programme.</p>
-      <p>Built for <strong>iConstantine</strong></p>
+      <p id="footer-schedule">Official schedule mapped from the 2026 event programme.</p>
+      <p><span id="footer-built-for">Built for</span> <strong>iConstantine</strong></p>
     </footer>
 
-    <script src="js/data.js?v=20260630-6"></script>
-    <script src="js/app.js?v=20260630-6"></script>
+    <script src="js/data.js?v=20260630-7"></script>
+    <script src="js/app.js?v=20260630-7"></script>
   </body>
 </html>
