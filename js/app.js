@@ -4,6 +4,7 @@
   const data = window.BOARD_DATA;
   const config = window.BOARD_CONFIG;
   const i18n = window.BOARD_I18N;
+  const quickBriefs = window.BOARD_QUICK;
 
   if (!data) {
     throw new Error("BOARD_DATA is missing. Check js/data.js.");
@@ -15,6 +16,10 @@
 
   if (!i18n) {
     throw new Error("BOARD_I18N is missing. Check js/data.js.");
+  }
+
+  if (!quickBriefs) {
+    throw new Error("BOARD_QUICK is missing. Check js/data.js.");
   }
 
   const elements = {
@@ -40,6 +45,7 @@
     videoFilterButton: document.querySelector("#video-filter-button"),
     videoFilterLabel: document.querySelector("#video-filter-label"),
     activeRound: document.querySelector("#active-round"),
+    quickCommand: document.querySelector("#quick-command"),
     roundBriefing: document.querySelector("#round-briefing"),
     secondFloorLabel: document.querySelector("#second-floor-label"),
     secondFloorSubtitle: document.querySelector("#second-floor-subtitle"),
@@ -72,6 +78,20 @@
     }
   })();
   const initialLanguage = Object.hasOwn(i18n, savedLanguage) ? savedLanguage : "en";
+  const defaultRoleByLanguage = {
+    en: "constantin",
+    ro: "iulian",
+    th: "june",
+  };
+  const savedRole = (() => {
+    try {
+      return window.localStorage.getItem("coverage-board-role");
+    } catch {
+      return null;
+    }
+  })();
+  const crewIds = data.crew.map((member) => member.id);
+  const hasSavedRole = crewIds.includes(savedRole);
 
   const state = {
     day: initialDay,
@@ -79,6 +99,9 @@
     showField: true,
     videoIncludedOnly: false,
     language: initialLanguage,
+    role: hasSavedRole ? savedRole : defaultRoleByLanguage[initialLanguage],
+    rolePinned: hasSavedRole,
+    briefingExpanded: false,
   };
 
   const cardOverlay = document.createElement("div");
@@ -186,6 +209,12 @@
     };
   }
 
+  function localizedQuickBrief(dayId, roundTime, roleId) {
+    const languageBriefs = quickBriefs[state.language] || quickBriefs.en;
+    return languageBriefs?.[`${dayId}-${roundTime}`]?.[roleId]
+      || quickBriefs.en?.[`${dayId}-${roundTime}`]?.[roleId];
+  }
+
   function localizedDoctrine() {
     return languagePack().doctrine || data.doctrine;
   }
@@ -225,6 +254,7 @@
     setText(elements.venueEyebrow, t("venueMap"));
     setText(elements.venueHeading, t("coveragePositions"));
     elements.roundBriefing.setAttribute("aria-label", t("roundPlaybook"));
+    elements.quickCommand.setAttribute("aria-label", t("yourJobNow"));
     setText(elements.secondFloorLabel, t("secondFloor"));
     setText(elements.secondFloorSubtitle, t("fourRooms"));
     setText(elements.secondFloorHeading, t("secondFloorRooms"));
@@ -778,23 +808,23 @@
   function splitNeededMessage(difficulty, roundPlan) {
     if (state.language === "ro") {
       if (roundPlan?.neckCam) {
-        return "Camera de gât este planificată: Iulian ține etajul separat, iar Constantin protejează punctul principal.";
+        return "A doua cameră este pregătită: Iulian face clipuri scurte pe etajul separat, iar Constantin protejează punctul principal.";
       }
       if (difficulty.helperRequired) {
-        return "Este recomandată a doua cameră video: Iulian primește camera de gât stabilizată în această rundă.";
+        return "Este recomandată a doua cameră video: Iulian o folosește periodic pentru clipuri scurte.";
       }
       if (difficulty.helperStandby) {
-        return "Ajutor video pregătit: camera stabilizată trebuie să fie gata pentru Iulian.";
+        return "Ajutor video pregătit: a doua cameră trebuie să fie gata pentru Iulian.";
       }
       return "Plan echipă: June urmărește fotografiile clienților, iar Iulian face fotografii de volum.";
     }
 
     if (state.language === "th") {
       if (roundPlan?.neckCam) {
-        return "วางแผนใช้กล้องคล้องคอ: Iulian ดูอีกชั้น ส่วน Constantin ป้องกันจุดหลัก";
+        return "เตรียมกล้องตัวที่สอง: Iulian ถ่ายคลิปสั้นเป็นช่วงๆ ที่อีกชั้น ส่วน Constantin ดูจุดหลัก";
       }
       if (difficulty.helperRequired) {
-        return "ควรใช้วิดีโอตัวที่สอง: ให้ Iulian ใช้กล้องคล้องคอแบบกันสั่นในรอบนี้";
+        return "ควรใช้กล้องวิดีโอตัวที่สอง: Iulian ใช้ถ่ายคลิปสั้นเป็นช่วงๆ";
       }
       if (difficulty.helperStandby) {
         return "เตรียมช่วยวิดีโอ: เตรียมกล้องกันสั่นไว้ให้ Iulian";
@@ -803,10 +833,10 @@
     }
 
     if (roundPlan?.neckCam) {
-      return "Neck cam planned: Iulian owns the split floor while Constantin protects the anchor.";
+      return "Secondary camera ready: Iulian takes periodic short clips on the split floor while Constantin protects the anchor.";
     }
     if (difficulty.helperRequired) {
-      return "Second video recommended: give Iulian the stabilised neck camera for this round.";
+      return "Second video recommended: Iulian uses the secondary camera periodically for short clips.";
     }
     if (difficulty.helperStandby) {
       return "Video assist on standby: keep the stabilised camera ready for Iulian.";
@@ -866,6 +896,7 @@
           if (state.day === day.id) return;
           state.day = day.id;
           state.round = day.rounds[0].time;
+          state.briefingExpanded = false;
           render();
         }),
       );
@@ -880,7 +911,7 @@
       const difficultyLabel = levelLabel(difficulty.level.key);
       const difficultyShort = levelLabel(difficulty.level.key, true);
       const label = `
-        ${roundPlan?.neckCam ? `<span class="round-neck-cam" title="${t("neckCamPlanned")}">NC</span>` : ""}
+        ${roundPlan?.neckCam ? `<span class="round-neck-cam" title="${t("neckCamPlanned")}">2ND</span>` : ""}
         <span class="round-button-label">${roundText}</span>
         <strong class="round-button-time">${round.time}</strong>
         <span class="round-difficulty-meta">
@@ -893,6 +924,7 @@
       const roundButton = makeButton("round-button", label, round.time === state.round, () => {
         if (state.round === round.time) return;
         state.round = round.time;
+        state.briefingExpanded = false;
         render();
       });
       setDifficultyStyle(roundButton, difficulty);
@@ -914,7 +946,7 @@
       setDifficultyStyle(heatCell, difficulty);
       if (roundPlan?.neckCam) heatCell.dataset.neckCam = "true";
       heatCell.innerHTML = `
-        <span class="heat-cell-time">${round.time}<span>${roundPlan?.neckCam ? '<em class="neck-cam-mini">NC</em>' : ""}<b>#${difficulty.rank}</b></span></span>
+        <span class="heat-cell-time">${round.time}<span>${roundPlan?.neckCam ? '<em class="neck-cam-mini">2ND</em>' : ""}<b>#${difficulty.rank}</b></span></span>
         <span class="heat-bar" aria-hidden="true"><i></i></span>
         <span class="heat-cell-level"><i class="difficulty-shape" aria-hidden="true"></i>${difficultyShort}</span>
         <span class="heat-cell-count">${bookedCountLabel(difficulty.clients.length)} · ${difficulty.videoCount} ${t("video")}</span>
@@ -922,6 +954,7 @@
       heatCell.addEventListener("click", () => {
         if (state.round === round.time) return;
         state.round = round.time;
+        state.briefingExpanded = false;
         render();
       });
       elements.dayHeatStrip.append(heatCell);
@@ -1273,6 +1306,7 @@
       .join("");
 
     elements.roundBriefing.dataset.neckCam = String(roundPlan.neckCam);
+    elements.roundBriefing.dataset.expanded = String(state.briefingExpanded);
     elements.roundBriefing.setAttribute("aria-labelledby", "round-briefing-heading");
     elements.roundBriefing.innerHTML = `
       <header class="briefing-header">
@@ -1299,6 +1333,77 @@
       <div class="camera-plan" aria-label="${t("cameraAssignments")}">${cameraPlan}</div>
       <ul class="briefing-tips">${tips}</ul>
     `;
+  }
+
+  function renderQuickCommand(roundPlan) {
+    const activeMember = data.crew.find((member) => member.id === state.role) || data.crew[0];
+    const brief = localizedQuickBrief(state.day, state.round, activeMember.id);
+    const roleButtons = data.crew
+      .map((member) => `
+        <button type="button" class="quick-role-button" data-role="${member.id}" aria-pressed="${member.id === activeMember.id}">
+          <span>${member.camera.replace("CAM ", "C")}</span>
+          <b>${member.name}</b>
+        </button>
+      `)
+      .join("");
+    const secondaryNote = roundPlan.neckCam && activeMember.id === "iulian"
+      ? `<p class="quick-secondary-note"><i aria-hidden="true"></i>${t("secondaryCameraNote")}</p>`
+      : "";
+
+    elements.quickCommand.innerHTML = `
+      <header class="quick-command-header">
+        <div>
+          <p class="eyebrow">${t("yourJobNow")}</p>
+          <h3>${activeMember.name}</h3>
+          <small>${t("threeActionsOnly")}</small>
+        </div>
+        <span>${activeMember.camera}</span>
+      </header>
+      <div class="quick-role-picker" aria-label="${t("chooseCrewMember")}">${roleButtons}</div>
+      <div class="quick-actions">
+        <article data-step="1">
+          <span>1</span>
+          <div><small>${t("whereToGo")}</small><strong>${brief?.where || roundPlan.anchor}</strong></div>
+        </article>
+        <article data-step="2">
+          <span>2</span>
+          <div><small>${t("whatToDo")}</small><strong>${brief?.action || roundPlan.assignments[activeMember.id]}</strong></div>
+        </article>
+        <article data-step="3">
+          <span>!</span>
+          <div><small>${t("doNotMiss")}</small><strong>${brief?.watch || roundPlan.tips[0]}</strong></div>
+        </article>
+      </div>
+      ${secondaryNote}
+      <button class="briefing-toggle" type="button" aria-controls="round-briefing" aria-expanded="${state.briefingExpanded}">
+        ${state.briefingExpanded ? t("hideFullPlan") : t("viewFullPlan")}
+        <i aria-hidden="true"></i>
+      </button>
+    `;
+
+    elements.quickCommand.querySelectorAll(".quick-role-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        const nextRole = button.dataset.role;
+        if (!crewIds.includes(nextRole) || nextRole === state.role) return;
+        state.role = nextRole;
+        state.rolePinned = true;
+        try {
+          window.localStorage.setItem("coverage-board-role", nextRole);
+        } catch {
+          // The board still works when storage is unavailable.
+        }
+        renderQuickCommand(roundPlan);
+      });
+    });
+
+    elements.quickCommand.querySelector(".briefing-toggle").addEventListener("click", () => {
+      state.briefingExpanded = !state.briefingExpanded;
+      elements.roundBriefing.dataset.expanded = String(state.briefingExpanded);
+      renderQuickCommand(roundPlan);
+      if (state.briefingExpanded) {
+        elements.roundBriefing.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
   }
 
   function renderVenue() {
@@ -1341,6 +1446,7 @@
     );
 
     setDifficultyStyle(elements.activeRound, difficulty);
+    setDifficultyStyle(elements.quickCommand, difficulty);
     elements.activeRound.style.setProperty("--meter-segments", config.METER_SEGMENTS);
     elements.activeRound.innerHTML = `
       <div class="active-round-top">
@@ -1364,6 +1470,7 @@
       <p class="split-needed" data-helper="${helperDisplayKey}"><i aria-hidden="true"></i>${splitMessage}</p>
     `;
 
+    renderQuickCommand(roundPlan);
     renderRoundBriefing(roundPlan);
 
     elements.secondFloor.replaceChildren();
@@ -1386,6 +1493,9 @@
     const nextLanguage = elements.languageSelect.value;
     if (!Object.hasOwn(i18n, nextLanguage) || nextLanguage === state.language) return;
     state.language = nextLanguage;
+    if (!state.rolePinned) {
+      state.role = defaultRoleByLanguage[nextLanguage];
+    }
     try {
       window.localStorage.setItem("coverage-board-language", nextLanguage);
     } catch {
