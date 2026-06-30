@@ -1784,6 +1784,28 @@ window.BOARD_DATA = {
       "portrait": "Antoine.webp"
     },
     {
+      "id": "serena-sat-facial",
+      "name": "Serena Marie Licastro",
+      "officialName": "Serena Marie Licastro",
+      "package": "Authority",
+      "day": "sat",
+      "round": "12:35",
+      "room": "gryden",
+      "category": "Facial Massage",
+      "portrait": "Serena Marie Licastro.webp"
+    },
+    {
+      "id": "serena-sun-eastern",
+      "name": "Serena Marie Licastro",
+      "officialName": "Serena Marie Licastro",
+      "package": "Authority",
+      "day": "sun",
+      "round": "09:30",
+      "room": "b086",
+      "category": "Freestyle massage - Eastern inspired",
+      "portrait": "Serena Marie Licastro.webp"
+    },
+    {
       "id": "pitiprapada-sat-facial",
       "name": "Pitiprapada",
       "officialName": "Pitiprapada Srikaew",
