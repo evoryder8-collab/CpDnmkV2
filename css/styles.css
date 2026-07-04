@@ -2017,6 +2017,7 @@ main {
 
 .card-overlay,
 .roster-overlay,
+.event-schedule-overlay,
 .database-overlay,
 .easiest-overlay,
 .finance-overlay {
@@ -2030,6 +2031,7 @@ main {
 
 .card-overlay[hidden],
 .roster-overlay[hidden],
+.event-schedule-overlay[hidden],
 .database-overlay[hidden],
 .easiest-overlay[hidden],
 .finance-overlay[hidden] {
@@ -2046,6 +2048,7 @@ main {
 
 .card-overlay.is-open,
 .roster-overlay.is-open,
+.event-schedule-overlay.is-open,
 .database-overlay.is-open,
 .easiest-overlay.is-open,
 .finance-overlay.is-open {
@@ -2081,6 +2084,13 @@ main {
   place-items: center;
 }
 
+.event-schedule-overlay {
+  z-index: 111;
+  display: grid;
+  padding: 12px;
+  place-items: center;
+}
+
 .database-overlay,
 .easiest-overlay,
 .finance-overlay {
@@ -2098,6 +2108,22 @@ main {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background:
+    linear-gradient(145deg, rgba(20, 20, 17, 0.99), rgba(7, 7, 6, 0.99)),
+    var(--ink);
+  box-shadow: var(--shadow);
+  transition: transform 140ms ease;
+}
+
+.event-schedule-panel {
+  width: min(1040px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  overflow: hidden;
+  transform: scale(0.985);
+  border: 1px solid rgba(218, 184, 94, 0.26);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(circle at 0 0, rgba(232, 200, 102, 0.1), transparent 20rem),
+    radial-gradient(circle at 100% 5%, rgba(69, 198, 184, 0.06), transparent 22rem),
     linear-gradient(145deg, rgba(20, 20, 17, 0.99), rgba(7, 7, 6, 0.99)),
     var(--ink);
   box-shadow: var(--shadow);
@@ -2153,6 +2179,7 @@ main {
   transform: scale(1);
 }
 
+.event-schedule-overlay.is-open .event-schedule-panel,
 .database-overlay.is-open .database-panel,
 .easiest-overlay.is-open .easiest-panel,
 .finance-overlay.is-open .finance-panel {
@@ -2160,6 +2187,7 @@ main {
 }
 
 .roster-header,
+.event-schedule-header,
 .database-header,
 .easiest-header,
 .finance-header {
@@ -2172,6 +2200,7 @@ main {
 }
 
 .roster-header h2,
+.event-schedule-header h2,
 .database-header h2,
 .easiest-header h2,
 .finance-header h2 {
@@ -2182,6 +2211,7 @@ main {
 }
 
 .roster-close,
+.event-schedule-close,
 .database-close,
 .easiest-close,
 .finance-close,
@@ -2200,6 +2230,7 @@ main {
 }
 
 .roster-close:focus-visible,
+.event-schedule-close:focus-visible,
 .database-close:focus-visible,
 .easiest-close:focus-visible,
 .finance-close:focus-visible,
@@ -2209,6 +2240,7 @@ main {
 }
 
 .roster-content,
+.event-schedule-content,
 .database-content,
 .easiest-content,
 .finance-content {
@@ -2221,6 +2253,132 @@ main {
 .database-content {
   display: grid;
   gap: 14px;
+}
+
+.event-schedule-content {
+  display: grid;
+  gap: 15px;
+}
+
+.event-schedule-hint {
+  max-width: 58rem;
+  margin: 0;
+  color: #918e84;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.event-schedule-days {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.event-day-card {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+  border: 1px solid rgba(218, 184, 94, 0.18);
+  border-radius: 3px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.008)),
+    rgba(0, 0, 0, 0.18);
+  padding: 14px;
+}
+
+.event-day-card header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(218, 184, 94, 0.16);
+}
+
+.event-day-card h3 {
+  margin: 0;
+  color: #f3eee1;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.event-day-card header span {
+  color: var(--gold-bright);
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.event-timeline {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.event-timeline li {
+  --event-accent: #d5b65d;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  min-height: 42px;
+  padding: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-left: 3px solid color-mix(in srgb, var(--event-accent), transparent 20%);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--event-accent), transparent 92%), transparent 42%),
+    rgba(0, 0, 0, 0.16);
+}
+
+.event-timeline li[data-type="rounds"],
+.event-timeline li[data-type="final"] {
+  --event-accent: #45c6b8;
+}
+
+.event-timeline li[data-type="awards"],
+.event-timeline li[data-type="ceremony"] {
+  --event-accent: #e8c866;
+}
+
+.event-timeline li[data-type="break"],
+.event-timeline li[data-type="social"] {
+  --event-accent: #9d70ff;
+}
+
+.event-timeline time {
+  color: color-mix(in srgb, var(--event-accent), white 12%);
+  font-size: 0.55rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+}
+
+.event-timeline strong,
+.event-timeline small {
+  display: block;
+}
+
+.event-timeline strong {
+  color: #e8e2d3;
+  font-size: 0.66rem;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.event-timeline small {
+  margin-top: 3px;
+  color: #77746c;
+  font-size: 0.52rem;
+  font-weight: 750;
+  line-height: 1.3;
 }
 
 .easiest-content {
@@ -2884,11 +3042,13 @@ main {
 @media (prefers-reduced-motion: reduce) {
   .card-overlay,
   .roster-overlay,
+  .event-schedule-overlay,
   .database-overlay,
   .easiest-overlay,
   .finance-overlay,
   .card-zoom-stage,
   .roster-panel,
+  .event-schedule-panel,
   .database-panel,
   .easiest-panel,
   .finance-panel {
@@ -3121,8 +3281,16 @@ footer strong {
   }
 
   .control-actions {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: center;
+    width: 100%;
+  }
+
+  .control-actions .field-toggle {
+    grid-column: 1 / -1;
+  }
+
+  .control-actions .all-clients-button {
     width: 100%;
   }
 
@@ -3252,6 +3420,14 @@ footer strong {
 
   .database-suggestions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .event-schedule-days {
+    grid-template-columns: 1fr;
+  }
+
+  .event-timeline li {
+    grid-template-columns: 78px minmax(0, 1fr);
   }
 
   .database-appearance-list,
