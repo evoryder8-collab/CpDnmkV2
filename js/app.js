@@ -447,12 +447,26 @@
 
     const roomA = getVenueRoom(roomAId);
     const roomB = getVenueRoom(roomBId);
+    const directCost = directRoomCost(roomAId, roomBId);
+    if (directCost !== null) return directCost;
 
     if (roomA.floor === roomB.floor) {
       return Math.abs(roomA.distToStairs - roomB.distToStairs);
     }
 
-    return roomA.distToStairs + config.STAIR_COST + roomB.distToStairs;
+    return stairAccessDistance(roomA) + config.STAIR_COST + stairAccessDistance(roomB);
+  }
+
+  function directRoomCost(roomAId, roomBId) {
+    const directCosts = config.DIRECT_ROOM_COSTS || {};
+    const key = [roomAId, roomBId].sort().join(":");
+    return Number.isFinite(directCosts[key]) ? directCosts[key] : null;
+  }
+
+  function stairAccessDistance(room) {
+    return Number.isFinite(room.crossFloorAccessToStairs)
+      ? room.crossFloorAccessToStairs
+      : room.distToStairs;
   }
 
   function packagePriority(packageName) {
@@ -465,16 +479,19 @@
       id: roomId,
       floor: room.floor,
       distToStairs: room.distToStairs,
+      crossFloorAccessToStairs: room.crossFloorAccessToStairs,
     };
   }
 
   function pointTravelCost(pointA, pointB) {
     if (!pointA || !pointB) return 0;
     if (pointA.id === pointB.id) return 0;
+    const directCost = directRoomCost(pointA.id, pointB.id);
+    if (directCost !== null) return directCost;
     if (pointA.floor === pointB.floor) {
       return Math.abs(pointA.distToStairs - pointB.distToStairs);
     }
-    return pointA.distToStairs + config.STAIR_COST + pointB.distToStairs;
+    return stairAccessDistance(pointA) + config.STAIR_COST + stairAccessDistance(pointB);
   }
 
   function maxRoomBridge(roomIds) {
@@ -495,6 +512,7 @@
   }
 
   function estimatePrimaryRoute(videoClients) {
+    const model = config.COVERAGE_MODEL;
     const roomGroups = new Map();
 
     videoClients.forEach((client) => {
@@ -551,6 +569,13 @@
       }
     }
 
+    function visitDiversityRooms(roomIdsToScout = []) {
+      roomIdsToScout.forEach((roomId) => {
+        if (!roomId || videoRoomSet.has(roomId) || !config.VENUE[roomId]) return;
+        visit(roomId, true);
+      });
+    }
+
     visit(priorityRoom.id);
 
     const sameFloorFirstCycle = roomMeta
@@ -604,6 +629,23 @@
     if (groundFloorRooms.length) {
       scoutFarthestGroundIfEmpty();
       groundFloorRooms.forEach((roomId) => visit(roomId));
+    }
+
+    if (model.ALWAYS_CROSS_FLOOR_DIVERSITY_PASS) {
+      const hasSecondFloorVideo = roomIds.some(
+        (roomId) => getVenueRoom(roomId).floor === "second",
+      );
+      const hasGroundFloorVideo = roomIds.some(
+        (roomId) => getVenueRoom(roomId).floor === "ground",
+      );
+
+      if (hasSecondFloorVideo && !hasGroundFloorVideo) {
+        visitDiversityRooms(model.GROUND_DIVERSITY_ROOMS);
+      }
+
+      if (hasGroundFloorVideo && !hasSecondFloorVideo) {
+        visitDiversityRooms(model.SECOND_FLOOR_DIVERSITY_ROOMS);
+      }
     }
 
     return {
