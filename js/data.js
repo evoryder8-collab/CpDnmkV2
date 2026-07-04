@@ -49,6 +49,9 @@ window.BOARD_CONFIG = {
     HELPER_REQUIRED_PRESSURE: 1.08,
     MIN_DIVERSE_PASSES: 1.35,
     HEALTHY_DIVERSE_PASSES: 2.2,
+    ALWAYS_CROSS_FLOOR_DIVERSITY_PASS: true,
+    GROUND_DIVERSITY_ROOMS: ["b086", "gryden"],
+    SECOND_FLOOR_DIVERSITY_ROOMS: ["c233", "d245"],
   },
   PACKAGE_PRIORITY: {
     Essential: 0,
@@ -149,7 +152,10 @@ window.BOARD_CONFIG = {
     d223: { floor: "second", distToStairs: 125 },
     d245: { floor: "second", distToStairs: 180 },
     gryden: { floor: "ground", distToStairs: 105 },
-    b086: { floor: "ground", distToStairs: 65 },
+    b086: { floor: "ground", distToStairs: 65, crossFloorAccessToStairs: 45 },
+  },
+  DIRECT_ROOM_COSTS: {
+    "b086:gryden": 50,
   },
 };
 
@@ -636,18 +642,18 @@ window.BOARD_I18N = {
       },
       "sat-11:15": {
         callout: "Calm",
-        title: "Tururi pe un singur etaj",
+        title: "Clienți sus plus tur scurt jos",
         anchor: "Antonio · Occidental D245",
-        loop: "Antonio și Gogutsa în D245 → Bella în C275 → Hege în C233 → repetă",
-        objective: "Fără scări. Fă 3 sau 4 tururi pe tot coridorul. Începe fiecare tur cu Antonio, apoi Bella și Hege.",
+        loop: "Antonio și Gogutsa în D245 → Bella în C275 → Hege în C233 → tur scurt B086/Gryden → repetă",
+        objective: "Clienții sunt sus, dar Constantin face și un tur scurt jos pentru diversitate de eveniment. Începe fiecare tur cu Antonio, apoi Bella și Hege.",
         assignments: {
           constantin: "Începe cu Antonio și ia juratul din aceeași sală, apoi treci prin Bella și Hege și repetă.",
           iulian: "Rămâi pe fotografie de volum în toate sălile de sus.",
           june: "Alternează fotografiile lui Antonio, Bella și Hege. Antonio este primul la fiecare tur nou.",
         },
         tips: [
-          "Trei clienți sus, fără scări",
-          "Nu pierzi timp pe scări",
+          "Trei clienți sus, dar Constantin tot coboară scurt",
+          "Auditoriul are scurtătură bună la coborâre",
           "Folosește alt unghi la fiecare revenire",
         ],
       },
@@ -708,16 +714,16 @@ window.BOARD_I18N = {
         callout: "Stabil",
         title: "Circuit sus cu Authority primul",
         anchor: "Antoine · Sportiv D223",
-        loop: "Antoine în D223 → Gogutsa în D245 → Pitiprapada în C275 → repetă",
-        objective: "Fă 3 sau 4 tururi sus. Antoine începe fiecare tur, apoi Pitiprapada primește următoarea vizită video.",
+        loop: "Antoine în D223 → Gogutsa în D245 → Pitiprapada în C275 → tur scurt B086/Gryden → repetă",
+        objective: "Fă 3 sau 4 tururi de clienți, cu un tur scurt jos pentru diversitate între cicluri. Antoine începe fiecare tur, apoi Pitiprapada primește următoarea vizită video.",
         assignments: {
-          constantin: "Începe cu Antoine, ia juratul imediat după el, apoi mergi înapoi spre Pitiprapada.",
+          constantin: "Începe cu Antoine, ia juratul imediat după el, mergi spre Pitiprapada, apoi coboară scurt pentru diversitate.",
           iulian: "Rămâi pe fotografii de volum în toate sălile de sus.",
           june: "Alternează clienții rezervați și începe fiecare tur nou cu Antoine.",
         },
         tips: [
-          "Fără scări în această rundă",
-          "Authority și Showcase sunt ușor de ciclat sus",
+          "Clienții sunt sus, dar Constantin face și un tur scurt jos",
+          "Authority și Showcase sunt ușor de ciclat pe coridor",
           "Schimbă momentul la fiecare tur",
         ],
       },
@@ -1065,18 +1071,18 @@ window.BOARD_I18N = {
       },
       "sat-11:15": {
         callout: "สบาย",
-        title: "วนตามทางเดินชั้นเดียว",
+        title: "ลูกค้าชั้น 2 แล้วลงสั้นๆ ชั้นล่าง",
         anchor: "Antonio · เวสเทิร์น D245",
-        loop: "Antonio และ Gogutsa ที่ D245 → Bella ที่ C275 → Hege ที่ C233 → ทำซ้ำ",
-        objective: "ไม่ต้องใช้บันได เดินวน 3 หรือ 4 รอบ เริ่มที่ Antonio แล้วไป Bella และ Hege",
+        loop: "Antonio และ Gogutsa ที่ D245 → Bella ที่ C275 → Hege ที่ C233 → ลง B086/Gryden สั้นๆ → ทำซ้ำ",
+        objective: "ลูกค้าอยู่ชั้น 2 แต่ Constantin ยังลงชั้นล่างสั้นๆ เพื่อเก็บบรรยากาศงาน เริ่มที่ Antonio แล้วไป Bella และ Hege",
         assignments: {
           constantin: "เริ่มที่ Antonio และเก็บกรรมการในห้องเดียวกัน แล้วผ่าน Bella และ Hege จากนั้นทำซ้ำ",
           iulian: "ถ่ายภาพทุกคนในห้องชั้น 2",
           june: "สลับถ่าย Antonio, Bella และ Hege และเริ่มที่ Antonio ในรอบใหม่",
         },
         tips: [
-          "ลูกค้าสามคนอยู่ชั้น 2 ไม่ต้องลงบันได",
-          "ไม่เสียเวลาที่บันได",
+          "ลูกค้าสามคนอยู่ชั้น 2 แต่ Constantin ลงสั้นๆ ด้วย",
+          "Auditorium มีทางลัดตอนลงจากชั้น 2",
           "กลับไปแต่ละครั้งให้เปลี่ยนมุม",
         ],
       },
@@ -1137,16 +1143,16 @@ window.BOARD_I18N = {
         callout: "ปกติ",
         title: "วนชั้น 2 เริ่ม Authority ก่อน",
         anchor: "Antoine · กีฬา D223",
-        loop: "Antoine ที่ D223 → Gogutsa ที่ D245 → Pitiprapada ที่ C275 → ทำซ้ำ",
-        objective: "วนชั้น 2 ให้ได้ 3 หรือ 4 รอบ เริ่มที่ Antoine แล้วต่อด้วย Pitiprapada",
+        loop: "Antoine ที่ D223 → Gogutsa ที่ D245 → Pitiprapada ที่ C275 → ลง B086/Gryden สั้นๆ → ทำซ้ำ",
+        objective: "วนลูกค้าที่จองให้ได้ 3 หรือ 4 รอบ และลงชั้นล่างสั้นๆ เพื่อเก็บบรรยากาศระหว่างรอบ เริ่มที่ Antoine แล้วต่อด้วย Pitiprapada",
         assignments: {
-          constantin: "เริ่มที่ Antoine เก็บกรรมการต่อจากเขา แล้วเดินกลับไปทาง Pitiprapada",
+          constantin: "เริ่มที่ Antoine เก็บกรรมการต่อจากเขา ไปทาง Pitiprapada แล้วลงชั้นล่างสั้นๆ เพื่อเก็บบรรยากาศ",
           iulian: "ถ่ายภาพทุกคนในห้องชั้น 2",
           june: "สลับถ่ายลูกค้าที่จอง และเริ่มรอบใหม่ที่ Antoine",
         },
         tips: [
-          "รอบนี้ไม่ต้องใช้บันได",
-          "Authority และ Showcase วนได้ง่ายบนชั้นเดียว",
+          "ลูกค้าอยู่ชั้น 2 แต่ Constantin ลงชั้นล่างสั้นๆ ด้วย",
+          "Authority และ Showcase วนได้ง่ายบนทางเดิน",
           "แต่ละรอบให้ถ่ายคนละช่วง",
         ],
       },
@@ -1216,7 +1222,7 @@ window.BOARD_QUICK = {
       june: { where: "Gryden → C275 → C233 → D223", action: "Finish Gof's stills first, then photograph Victor, Henry, and Franky (Essential).", watch: "Franky is photo-only light work." },
     },
     "sat-11:15": {
-      constantin: { where: "D245 → C275 → C233", action: "Film Antonio and Gogutsa first, then Bella and Hege.", watch: "Repeat 3 or 4 hallway loops. No stairs." },
+      constantin: { where: "D245 → C275 → C233 → B086/Gryden scout", action: "Film Antonio and Gogutsa first, then Bella and Hege, then take a short ground-floor diversity pass.", watch: "Never get stuck upstairs. Use the Auditorium shortcut on the descent." },
       iulian: { where: "All upstairs rooms", action: "Shoot high-volume photos only.", watch: "Stay photo-first all round." },
       june: { where: "D245 → C275 → C233", action: "Alternate Antonio, Bella, and Hege stills.", watch: "Start each new loop with Antonio." },
     },
@@ -1236,9 +1242,9 @@ window.BOARD_QUICK = {
       june: { where: "B086 first, then C275", action: "Photograph Antonio and Serena, then Marie.", watch: "Do not leave B086 before the shared room is covered." },
     },
     "sun-10:50": {
-      constantin: { where: "D223 → D245 → C275", action: "Film Antoine first, then Gogutsa and Pitiprapada.", watch: "Repeat 3 or 4 loops. No stairs." },
+      constantin: { where: "D223 → D245 → C275 → B086/Gryden scout", action: "Film Antoine first, then Gogutsa and Pitiprapada, then take a short ground-floor diversity pass.", watch: "Never get stuck upstairs. Use the Auditorium shortcut on the descent." },
       iulian: { where: "All upstairs rooms", action: "Shoot high-volume photos only.", watch: "Stay photo-first all round." },
-      june: { where: "D223 ↔ C275", action: "Photograph Antoine first each loop, then Pitiprapada.", watch: "Stay upstairs." },
+      june: { where: "D223 ↔ C275", action: "Photograph Antoine first each loop, then Pitiprapada.", watch: "Stay with booked client stills." },
     },
     "sun-12:10": {
       constantin: { where: "B086 → Gryden → D245 and D223 → ground", action: "Give Victor a strong block, touch Bella in Gryden, then make one upstairs loop.", watch: "Victor still receives the most coverage." },
@@ -1263,7 +1269,7 @@ window.BOARD_QUICK = {
       june: { where: "Gryden → C275 → C233 → D223", action: "Termină fotografiile lui Gof, apoi Victor, Henry și Franky (Essential).", watch: "Franky este muncă foto ușoară." },
     },
     "sat-11:15": {
-      constantin: { where: "D245 → C275 → C233", action: "Filmează Antonio și Gogutsa, apoi Bella și Hege.", watch: "Repetă 3 sau 4 tururi. Fără scări." },
+      constantin: { where: "D245 → C275 → C233 → B086/Gryden scurt", action: "Filmează Antonio și Gogutsa, apoi Bella și Hege, apoi fă un tur scurt jos pentru diversitate.", watch: "Nu rămâne blocat sus. Folosește scurtătura prin Auditoriu la coborâre." },
       iulian: { where: "Toate sălile de sus", action: "Fă doar fotografii de volum.", watch: "Rămâi foto-first toată runda." },
       june: { where: "D245 → C275 → C233", action: "Alternează fotografiile lui Antonio, Bella și Hege.", watch: "Începe fiecare tur cu Antonio." },
     },
@@ -1283,9 +1289,9 @@ window.BOARD_QUICK = {
       june: { where: "B086 întâi, apoi C275", action: "Fotografiază Antonio și Serena, apoi Marie.", watch: "Nu pleca din B086 înainte să fie acoperiți amândoi." },
     },
     "sun-10:50": {
-      constantin: { where: "D223 → D245 → C275", action: "Filmează Antoine primul, apoi Gogutsa și Pitiprapada.", watch: "Repetă 3 sau 4 tururi. Fără scări." },
+      constantin: { where: "D223 → D245 → C275 → B086/Gryden scurt", action: "Filmează Antoine primul, apoi Gogutsa și Pitiprapada, apoi fă un tur scurt jos pentru diversitate.", watch: "Nu rămâne blocat sus. Folosește scurtătura prin Auditoriu la coborâre." },
       iulian: { where: "Toate sălile de sus", action: "Fă doar fotografii de volum.", watch: "Rămâi foto-first toată runda." },
-      june: { where: "D223 ↔ C275", action: "Fotografiază Antoine primul la fiecare tur, apoi Pitiprapada.", watch: "Rămâi sus." },
+      june: { where: "D223 ↔ C275", action: "Fotografiază Antoine primul la fiecare tur, apoi Pitiprapada.", watch: "Rămâi pe fotografiile clienților rezervați." },
     },
     "sun-12:10": {
       constantin: { where: "B086 → Gryden → D245 și D223 → jos", action: "Filmează bine Victor, atinge Bella în Gryden, apoi fă un tur sus.", watch: "Victor primește în continuare cel mai mult." },
@@ -1310,7 +1316,7 @@ window.BOARD_QUICK = {
       june: { where: "Gryden → C275 → C233 → D223", action: "ถ่ายภาพ Gof ให้ครบ แล้วถ่าย Victor, Henry และ Franky (Essential)", watch: "Franky เป็นงานภาพนิ่งเบาๆ" },
     },
     "sat-11:15": {
-      constantin: { where: "D245 → C275 → C233", action: "ถ่าย Antonio กับ Gogutsa ก่อน แล้วถ่าย Bella และ Hege", watch: "วน 3 หรือ 4 รอบ ไม่ต้องลงบันได" },
+      constantin: { where: "D245 → C275 → C233 → B086/Gryden สั้นๆ", action: "ถ่าย Antonio กับ Gogutsa ก่อน แล้วถ่าย Bella และ Hege จากนั้นลงชั้นล่างสั้นๆ เพื่อเก็บบรรยากาศ", watch: "อย่าติดอยู่ชั้น 2 ใช้ทางลัด Auditorium ตอนลง" },
       iulian: { where: "ทุกห้องชั้น 2", action: "ถ่ายภาพนิ่งจำนวนมากเท่านั้น", watch: "เน้นภาพนิ่งทั้งรอบ" },
       june: { where: "D245 → C275 → C233", action: "สลับถ่ายภาพ Antonio, Bella และ Hege", watch: "เริ่มแต่ละรอบที่ Antonio" },
     },
@@ -1330,9 +1336,9 @@ window.BOARD_QUICK = {
       june: { where: "B086 ก่อน แล้ว C275", action: "ถ่าย Antonio และ Serena แล้วถ่าย Marie", watch: "อย่าออกจาก B086 ก่อนสองคนนี้ได้ภาพครบ" },
     },
     "sun-10:50": {
-      constantin: { where: "D223 → D245 → C275", action: "ถ่าย Antoine ก่อน แล้วถ่าย Gogutsa กับ Pitiprapada", watch: "วน 3 หรือ 4 รอบ ไม่ต้องลงบันได" },
+      constantin: { where: "D223 → D245 → C275 → B086/Gryden สั้นๆ", action: "ถ่าย Antoine ก่อน แล้วถ่าย Gogutsa กับ Pitiprapada จากนั้นลงชั้นล่างสั้นๆ เพื่อเก็บบรรยากาศ", watch: "อย่าติดอยู่ชั้น 2 ใช้ทางลัด Auditorium ตอนลง" },
       iulian: { where: "ทุกห้องชั้น 2", action: "ถ่ายภาพนิ่งจำนวนมากเท่านั้น", watch: "เน้นภาพนิ่งทั้งรอบ" },
-      june: { where: "D223 ↔ C275", action: "ถ่าย Antoine ก่อนในแต่ละรอบ แล้วถ่าย Pitiprapada", watch: "อยู่ชั้น 2" },
+      june: { where: "D223 ↔ C275", action: "ถ่าย Antoine ก่อนในแต่ละรอบ แล้วถ่าย Pitiprapada", watch: "อยู่กับภาพนิ่งของลูกค้าที่จอง" },
     },
     "sun-12:10": {
       constantin: { where: "B086 → Gryden → D245 และ D223 → ชั้นล่าง", action: "ถ่าย Victor ชุดใหญ่ แตะ Bella ที่ Gryden แล้วขึ้นชั้น 2 หนึ่งรอบ", watch: "Victor ยังต้องได้งานมากที่สุด" },
@@ -1549,19 +1555,19 @@ window.BOARD_DATA = {
       "day": "sat",
       "round": "11:15",
       "callout": "Calm",
-      "title": "One-floor hallway loops",
+      "title": "Upstairs client core plus ground pass",
       "neckCam": false,
       "anchor": "Antonio · Western D245",
-      "loop": "Antonio plus Gogutsa in D245 → Bella in C275 → Hege in C233 → repeat",
-      "objective": "No stairs. Use the full hallway for 3 or 4 loops, returning to Antonio first each time, then Bella and Hege.",
+      "loop": "Antonio plus Gogutsa in D245 → Bella in C275 → Hege in C233 → short B086/Gryden diversity pass → repeat",
+      "objective": "The booked clients are upstairs, but Constantin still makes a short ground-floor diversity pass. Start each client loop with Antonio, then Bella and Hege.",
       "assignments": {
         "constantin": "Open on Antonio and collect the judge in the same room, then work back through Bella and Hege before repeating.",
         "iulian": "Stay on volume photo across all upstairs rooms.",
         "june": "Alternate Antonio, Bella, and Hege stills, with Antonio first on each fresh cycle."
       },
       "tips": [
-        "Three upstairs clients, no stairs",
-        "No stair time to protect",
+        "Three upstairs clients, but Constantin still drops down briefly",
+        "Auditorium has the fast backdoor route from upstairs",
         "Use each return for a new angle"
       ]
     },
@@ -1631,19 +1637,19 @@ window.BOARD_DATA = {
       "day": "sun",
       "round": "10:50",
       "callout": "Steady",
-      "title": "Authority-led upstairs circuit",
+      "title": "Authority-led upstairs circuit plus ground pass",
       "neckCam": false,
       "anchor": "Antoine · Sports D223",
-      "loop": "Antoine in D223 → Gogutsa in D245 → Pitiprapada in C275 → repeat",
-      "objective": "Run 3 or 4 upstairs loops. Antoine starts each fresh loop, then Pitiprapada gets the next video touch.",
+      "loop": "Antoine in D223 → Gogutsa in D245 → Pitiprapada in C275 → short B086/Gryden diversity pass → repeat",
+      "objective": "Run 3 or 4 upstairs client loops, with a fast ground-floor diversity pass between cycles. Antoine starts each fresh loop, then Pitiprapada gets the next video touch.",
       "assignments": {
-        "constantin": "Open on Antoine, pass the judge just beyond him, then work back toward Pitiprapada.",
+        "constantin": "Open on Antoine, pass the judge just beyond him, work back toward Pitiprapada, then drop down briefly for event diversity.",
         "iulian": "Stay on full-field sales photos upstairs.",
         "june": "Alternate booked stills with Antoine first on each new cycle."
       },
       "tips": [
-        "No stairs this round",
-        "Authority and Showcase stay easy to cycle upstairs",
+        "Clients are upstairs, but Constantin still drops down briefly",
+        "Authority and Showcase stay easy to cycle on the hallway",
         "Change the story beat every loop"
       ]
     },
