@@ -40,6 +40,7 @@
     fieldToggleTitle: document.querySelector("#field-toggle-title"),
     fieldToggleSubtitle: document.querySelector("#field-toggle-subtitle"),
     allClientsButton: document.querySelector("#all-clients-button"),
+    eventScheduleButton: document.querySelector("#event-schedule-button"),
     venueEyebrow: document.querySelector("#venue-eyebrow"),
     venueHeading: document.querySelector("#venue-heading"),
     videoFilterButton: document.querySelector("#video-filter-button"),
@@ -131,6 +132,22 @@
     </section>
   `;
 
+  const eventScheduleOverlay = document.createElement("div");
+  eventScheduleOverlay.className = "event-schedule-overlay";
+  eventScheduleOverlay.hidden = true;
+  eventScheduleOverlay.innerHTML = `
+    <section class="event-schedule-panel" role="dialog" aria-modal="true" aria-labelledby="event-schedule-heading">
+      <header class="event-schedule-header">
+        <div>
+          <p class="eyebrow" id="event-schedule-eyebrow">Official programme</p>
+          <h2 id="event-schedule-heading">Full event schedule</h2>
+        </div>
+        <button class="event-schedule-close" type="button" aria-label="Close event schedule">Close</button>
+      </header>
+      <div class="event-schedule-content" id="event-schedule-content"></div>
+    </section>
+  `;
+
   const databaseOverlay = document.createElement("div");
   databaseOverlay.className = "database-overlay";
   databaseOverlay.hidden = true;
@@ -198,10 +215,12 @@
     </section>
   `;
 
-  document.body.append(cardOverlay, rosterOverlay, databaseOverlay, easiestOverlay, financeOverlay);
+  document.body.append(cardOverlay, rosterOverlay, eventScheduleOverlay, databaseOverlay, easiestOverlay, financeOverlay);
 
   const rosterContent = rosterOverlay.querySelector("#roster-content");
   const rosterClose = rosterOverlay.querySelector(".roster-close");
+  const eventScheduleContent = eventScheduleOverlay.querySelector("#event-schedule-content");
+  const eventScheduleClose = eventScheduleOverlay.querySelector(".event-schedule-close");
   const databaseClose = databaseOverlay.querySelector(".database-close");
   const databaseSearch = databaseOverlay.querySelector("#database-search");
   const databaseSuggestions = databaseOverlay.querySelector("#database-suggestions");
@@ -216,11 +235,13 @@
   const financeBody = financeOverlay.querySelector("#finance-body");
   let cardOverlayTimer;
   let rosterOverlayTimer;
+  let eventScheduleOverlayTimer;
   let databaseOverlayTimer;
   let easiestOverlayTimer;
   let financeOverlayTimer;
   let cardReturnFocus;
   let rosterReturnFocus;
+  let eventScheduleReturnFocus;
   let databaseReturnFocus;
   let easiestReturnFocus;
   let financeReturnFocus;
@@ -342,6 +363,7 @@
     setText(elements.fieldToggleTitle, t("fullField"));
     setText(elements.fieldToggleSubtitle, t("showEveryCompetitor"));
     setText(elements.allClientsButton, t("allClients"));
+    setText(elements.eventScheduleButton, t("eventSchedule"));
     setText(elements.venueEyebrow, t("venueMap"));
     setText(elements.venueHeading, t("coveragePositions"));
     elements.roundBriefing.setAttribute("aria-label", t("roundPlaybook"));
@@ -365,6 +387,10 @@
     setText(rosterOverlay.querySelector("#roster-heading"), t("allClients"));
     setText(rosterClose, t("close"));
     rosterClose.setAttribute("aria-label", t("closeAllClients"));
+    setText(eventScheduleOverlay.querySelector("#event-schedule-eyebrow"), t("eventScheduleEyebrow"));
+    setText(eventScheduleOverlay.querySelector("#event-schedule-heading"), t("eventScheduleTitle"));
+    setText(eventScheduleClose, t("close"));
+    eventScheduleClose.setAttribute("aria-label", t("closeEventSchedule"));
     setText(databaseOverlay.querySelector("#database-eyebrow"), t("databaseEyebrow"));
     setText(databaseOverlay.querySelector("#database-heading"), t("databaseTitle"));
     setText(databaseOverlay.querySelector("#database-search-label"), t("databaseSearchLabel"));
@@ -1207,7 +1233,7 @@
   function syncBodyLock() {
     document.body.classList.toggle(
       "modal-open",
-      !cardOverlay.hidden || !rosterOverlay.hidden || !databaseOverlay.hidden || !easiestOverlay.hidden || !financeOverlay.hidden,
+      !cardOverlay.hidden || !rosterOverlay.hidden || !eventScheduleOverlay.hidden || !databaseOverlay.hidden || !easiestOverlay.hidden || !financeOverlay.hidden,
     );
   }
 
@@ -1311,6 +1337,54 @@
       rosterOverlay.hidden = true;
       syncBodyLock();
       if (rosterReturnFocus?.isConnected) rosterReturnFocus.focus();
+    }, 140);
+  }
+
+  function renderEventSchedule() {
+    const days = data.eventProgram || [];
+    eventScheduleContent.innerHTML = `
+      <p class="event-schedule-hint">${escapeHtml(t("eventScheduleHint"))}</p>
+      <div class="event-schedule-days">
+        ${days.map((day) => `
+          <article class="event-day-card" data-day="${escapeHtml(day.id)}">
+            <header>
+              <span>${escapeHtml(day.date)}</span>
+              <h3>${escapeHtml(day.label)}</h3>
+            </header>
+            <ol class="event-timeline">
+              ${(day.items || []).map((item) => `
+                <li data-type="${escapeHtml(item.type || "general")}">
+                  <time>${escapeHtml(item.time)}</time>
+                  <div>
+                    <strong>${escapeHtml(item.title)}</strong>
+                    ${item.note ? `<small>${escapeHtml(item.note)}</small>` : ""}
+                  </div>
+                </li>
+              `).join("")}
+            </ol>
+          </article>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function openEventSchedule() {
+    window.clearTimeout(eventScheduleOverlayTimer);
+    eventScheduleReturnFocus = document.activeElement;
+    renderEventSchedule();
+    eventScheduleOverlay.hidden = false;
+    syncBodyLock();
+    window.requestAnimationFrame(() => eventScheduleOverlay.classList.add("is-open"));
+    eventScheduleClose.focus();
+  }
+
+  function closeEventSchedule() {
+    if (eventScheduleOverlay.hidden) return;
+    eventScheduleOverlay.classList.remove("is-open");
+    eventScheduleOverlayTimer = window.setTimeout(() => {
+      eventScheduleOverlay.hidden = true;
+      syncBodyLock();
+      if (eventScheduleReturnFocus?.isConnected) eventScheduleReturnFocus.focus();
     }, 140);
   }
 
@@ -2390,6 +2464,7 @@
     }
     render();
     if (!rosterOverlay.hidden) renderRoster();
+    if (!eventScheduleOverlay.hidden) renderEventSchedule();
     if (!databaseOverlay.hidden) {
       renderDatabaseSuggestions();
       if (selectedDatabasePerson) {
@@ -2407,6 +2482,7 @@
   });
 
   elements.allClientsButton.addEventListener("click", openRoster);
+  elements.eventScheduleButton?.addEventListener("click", openEventSchedule);
   elements.databaseButton.addEventListener("click", openDatabase);
   elements.easiestButton?.addEventListener("click", openEasiest);
   elements.financeButton?.addEventListener("click", openFinance);
@@ -2416,6 +2492,7 @@
   });
   cardOverlay.addEventListener("click", closeCardOverlay);
   rosterClose.addEventListener("click", closeRoster);
+  eventScheduleClose.addEventListener("click", closeEventSchedule);
   databaseClose.addEventListener("click", closeDatabase);
   easiestClose.addEventListener("click", closeEasiest);
   financeClose.addEventListener("click", closeFinance);
@@ -2425,6 +2502,9 @@
   });
   rosterOverlay.addEventListener("click", (event) => {
     if (event.target === rosterOverlay) closeRoster();
+  });
+  eventScheduleOverlay.addEventListener("click", (event) => {
+    if (event.target === eventScheduleOverlay) closeEventSchedule();
   });
   databaseOverlay.addEventListener("click", (event) => {
     if (event.target === databaseOverlay) closeDatabase();
@@ -2455,6 +2535,8 @@
       closeCardOverlay();
     } else if (!rosterOverlay.hidden) {
       closeRoster();
+    } else if (!eventScheduleOverlay.hidden) {
+      closeEventSchedule();
     } else if (!databaseOverlay.hidden) {
       closeDatabase();
     } else if (!easiestOverlay.hidden) {
