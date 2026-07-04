@@ -652,17 +652,17 @@ window.BOARD_I18N = {
         callout: "Misiune imposibilă",
         title: "Showcase și Authority, parter protejat",
         anchor: "Zoltán + Hubert sus, Pitiprapada + Serena jos",
-        loop: "D245 Antoine și Gogutsa → D223 Zoltán, Hubert, Harpa (Essential) → C233 Marie → Gryden Pitiprapada și Serena → repetă",
-        objective: "Constantin trebuie să atingă personal ambele etaje. Iulian protejează Gryden cu a doua cameră, ca Pitiprapada și Serena să nu rămână fără video între vizitele lui Constantin.",
+        loop: "D245 Antoine și Gogutsa → D223 Zoltán, Hubert, Harpa (Authority) → C233 Marie → Gryden Pitiprapada și Serena → repetă",
+        objective: "Constantin trebuie să atingă personal ambele etaje. Iulian protejează Gryden cu a doua cameră, ca Pitiprapada și Serena să nu rămână fără video între vizitele lui Constantin. Harpa este acum video-included în grupul D223.",
         assignments: {
-          constantin: "Fă turul Antoine plus juratul, Zoltán și Hubert, apoi Marie. Coboară clar pentru Pitiprapada și Serena înainte să revii sus.",
+          constantin: "Fă turul Antoine plus juratul, Zoltán, Hubert și Harpa, apoi Marie. Coboară clar pentru Pitiprapada și Serena înainte să revii sus.",
           iulian: "A DOUA CAMERĂ PREGĂTITĂ. Rămâi cu Pitiprapada și Serena în Gryden. Fă periodic clipuri scurte din mână și fotografii, nu filmare continuă.",
-          june: "Harpa (Essential) prima, fiindcă produsul ei este doar foto. Apoi Zoltán, Hubert, Marie, Antoine, Pitiprapada și Serena.",
+          june: "Harpa (Authority) cu grupul D223, apoi Zoltán, Hubert, Marie, Antoine, Pitiprapada și Serena.",
         },
         tips: [
           "Nu este Signature aici, dar sunt mulți clienți video",
           "Iulian ține parterul între vizitele lui Constantin",
-          "Harpa este Essential, nu rata fotografiile ei",
+          "Harpa este acum Authority, deci are nevoie și de video",
         ],
       },
       "sat-13:55": {
@@ -742,7 +742,7 @@ window.BOARD_I18N = {
         objective: "Finala și podiumul lui Gof sunt cadrele principale ale weekendului. În aceeași sală primești și Gerarda plus Christma fără deplasare.",
         assignments: {
           constantin: "Ține Auditoriul pentru Gof, Gerarda și Christma. Fă un tur personal sus pentru Hubert și Hege, apoi revino pentru final și podium.",
-          iulian: "A DOUA CAMERĂ PREGĂTITĂ. Fă periodic clipuri scurte cu Hubert în D245 și Hege în D223 și fotografiile lui Harpa (Essential) plus Franky (Essential).",
+          iulian: "A DOUA CAMERĂ PREGĂTITĂ. Fă periodic clipuri scurte cu Hubert în D245, Hege și Harpa (Authority) în D223, plus fotografiile lui Franky (Essential).",
           june: "Rămâi jos cu Gof, Gerarda și Christma. Protejează cadrul de podium înainte de orice altceva.",
         },
         tips: [
@@ -1076,17 +1076,17 @@ window.BOARD_I18N = {
         callout: "ยากมาก",
         title: "Showcase และ Authority แบ่งชั้น",
         anchor: "Zoltán + Hubert ชั้น 2, Pitiprapada + Serena ชั้นล่าง",
-        loop: "D245 Antoine และ Gogutsa → D223 Zoltán, Hubert, Harpa (Essential) → C233 Marie → Gryden Pitiprapada และ Serena → ทำซ้ำ",
-        objective: "Constantin ต้องแตะทั้งสองชั้นด้วยตัวเอง Iulian ดู Gryden ด้วยกล้องตัวที่สอง เพื่อให้ Pitiprapada และ Serena ไม่ขาดวิดีโอระหว่างที่ Constantin อยู่ชั้น 2",
+        loop: "D245 Antoine และ Gogutsa → D223 Zoltán, Hubert, Harpa (Authority) → C233 Marie → Gryden Pitiprapada และ Serena → ทำซ้ำ",
+        objective: "Constantin ต้องแตะทั้งสองชั้นด้วยตัวเอง Iulian ดู Gryden ด้วยกล้องตัวที่สอง เพื่อให้ Pitiprapada และ Serena ไม่ขาดวิดีโอระหว่างที่ Constantin อยู่ชั้น 2 Harpa เป็นลูกค้าวิดีโอแล้วในกลุ่ม D223",
         assignments: {
-          constantin: "วน Antoine กับกรรมการ ต่อด้วย Zoltán และ Hubert แล้ว Marie จากนั้นลงไปหา Pitiprapada และ Serena ก่อนกลับขึ้นชั้น 2",
+          constantin: "วน Antoine กับกรรมการ ต่อด้วย Zoltán, Hubert และ Harpa แล้ว Marie จากนั้นลงไปหา Pitiprapada และ Serena ก่อนกลับขึ้นชั้น 2",
           iulian: "เตรียมกล้องตัวที่สอง อยู่กับ Pitiprapada และ Serena ที่ Gryden ถ่ายคลิปสั้นเป็นช่วงๆ และภาพนิ่ง ห้ามถ่ายต่อเนื่อง",
-          june: "เริ่ม Harpa (Essential) ก่อน เพราะแพ็กเกจของเธอมีแค่ภาพนิ่ง จากนั้น Zoltán, Hubert, Marie, Antoine, Pitiprapada และ Serena",
+          june: "ถ่าย Harpa (Authority) กับกลุ่ม D223 แล้วถ่าย Zoltán, Hubert, Marie, Antoine, Pitiprapada และ Serena",
         },
         tips: [
           "ไม่มี Signature ในรอบนี้ แต่ลูกค้าวิดีโอเยอะ",
           "Iulian ดูชั้นล่างระหว่างที่ Constantin ไม่อยู่",
-          "Harpa เป็น Essential อย่าพลาดภาพนิ่ง",
+          "Harpa เป็น Authority แล้ว ต้องมีวิดีโอด้วย",
         ],
       },
       "sat-13:55": {
@@ -1166,7 +1166,7 @@ window.BOARD_I18N = {
         objective: "รอบสุดท้ายและโพเดียมของ Gof คือช็อตสำคัญที่สุดของสุดสัปดาห์ Gerarda และ Christma อยู่ห้องเดียวกันจึงถ่ายได้โดยไม่ต้องเดินเพิ่ม",
         assignments: {
           constantin: "อยู่หอประชุมกับ Gof, Gerarda และ Christma แล้วขึ้นไปแตะ Hubert และ Hege เองหนึ่งครั้ง จากนั้นกลับมาก่อนจบและโพเดียม",
-          iulian: "เตรียมกล้องตัวที่สอง ถ่ายคลิปสั้น Hubert ที่ D245 และ Hege ที่ D223 เป็นช่วงๆ พร้อมถ่าย Harpa (Essential) และ Franky (Essential)",
+          iulian: "เตรียมกล้องตัวที่สอง ถ่ายคลิปสั้น Hubert ที่ D245, Hege และ Harpa (Authority) ที่ D223 เป็นช่วงๆ พร้อมถ่าย Franky (Essential)",
           june: "อยู่ชั้นล่างกับ Gof, Gerarda และ Christma ภาพโพเดียมสำคัญกว่างานอื่น",
         },
         tips: [
@@ -1211,7 +1211,7 @@ window.BOARD_QUICK = {
     "sat-12:35": {
       constantin: { where: "D245 → D223 → C233 → Gryden → upstairs", action: "Film Antoine, Zoltán, Hubert, and Marie upstairs, then personally touch Pitiprapada and Serena downstairs.", watch: "Iulian protects Gryden between Constantin's visits." },
       iulian: { where: "Stay downstairs in Gryden", action: "Give Pitiprapada and Serena periodic short video clips plus stills.", watch: "Use the secondary camera in short bursts. Do not record continuously." },
-      june: { where: "D223 → D245 → C233 → Gryden", action: "Photograph Harpa (Essential) first, then Zoltán, Hubert, Marie, Antoine, Pitiprapada, and Serena.", watch: "Harpa is photo-only, do not miss her." },
+      june: { where: "D223 → D245 → C233 → Gryden", action: "Photograph Harpa (Authority) with the D223 group, then Zoltán, Hubert, Marie, Antoine, Pitiprapada, and Serena.", watch: "Harpa now needs video too." },
     },
     "sat-13:55": {
       constantin: { where: "D223 → D245 → Gryden", action: "Give Gerarda coverage, catch Gogutsa while passing, then drop to Christma.", watch: "Both Authority clients need personal video." },
@@ -1235,7 +1235,7 @@ window.BOARD_QUICK = {
     },
     "sun-13:30": {
       constantin: { where: "B086 anchor → D245 and D223 → B086", action: "Film Gof, Gerarda, and Christma, then personally touch Hubert and Hege upstairs once.", watch: "Return before the finish. Gof's podium comes first." },
-      iulian: { where: "Stay upstairs: D245 ↔ D223", action: "Take periodic short clips of Hubert and Hege. Photograph Harpa (Essential) and Franky (Essential) too.", watch: "Do not record continuously. Do not leave upstairs." },
+      iulian: { where: "Stay upstairs: D245 ↔ D223", action: "Take periodic short clips of Hubert, Hege, and Harpa (Authority). Photograph Franky (Essential) too.", watch: "Do not record continuously. Do not leave upstairs." },
       june: { where: "Auditorium B086", action: "Photograph Gof, Gerarda, and Christma.", watch: "Gof's podium is the shot of the weekend." },
     },
     "sun-13:55": {
@@ -1258,7 +1258,7 @@ window.BOARD_QUICK = {
     "sat-12:35": {
       constantin: { where: "D245 → D223 → C233 → Gryden → sus", action: "Filmează Antoine, Zoltán, Hubert și Marie sus, apoi atinge personal Pitiprapada și Serena jos.", watch: "Iulian protejează Gryden între vizitele lui Constantin." },
       iulian: { where: "Rămâi jos în Gryden", action: "Fă periodic clipuri video scurte cu Pitiprapada și Serena plus fotografii.", watch: "Folosește a doua cameră în reprize scurte. Nu filma continuu." },
-      june: { where: "D223 → D245 → C233 → Gryden", action: "Fotografiază Harpa (Essential) prima, apoi Zoltán, Hubert, Marie, Antoine, Pitiprapada și Serena.", watch: "Harpa are doar foto, nu o rata." },
+      june: { where: "D223 → D245 → C233 → Gryden", action: "Fotografiază Harpa (Authority) cu grupul D223, apoi Zoltán, Hubert, Marie, Antoine, Pitiprapada și Serena.", watch: "Harpa are acum nevoie și de video." },
     },
     "sat-13:55": {
       constantin: { where: "D223 → D245 → Gryden", action: "Filmează Gerarda, ia Gogutsa din mers, apoi coboară la Christma.", watch: "Ambele Authority au nevoie de video de la Constantin." },
@@ -1282,7 +1282,7 @@ window.BOARD_QUICK = {
     },
     "sun-13:30": {
       constantin: { where: "B086 principal → D245 și D223 → B086", action: "Filmează Gof, Gerarda și Christma, apoi atinge personal Hubert și Hege sus o dată.", watch: "Revino înainte de final. Podiumul lui Gof este primul." },
-      iulian: { where: "Rămâi sus: D245 ↔ D223", action: "Fă periodic clipuri scurte cu Hubert și Hege. Fotografiază Harpa (Essential) și Franky (Essential).", watch: "Nu filma continuu. Nu pleca de la etaj." },
+      iulian: { where: "Rămâi sus: D245 ↔ D223", action: "Fă periodic clipuri scurte cu Hubert, Hege și Harpa (Authority). Fotografiază și Franky (Essential).", watch: "Nu filma continuu. Nu pleca de la etaj." },
       june: { where: "Auditoriu B086", action: "Fotografiază Gof, Gerarda și Christma.", watch: "Podiumul lui Gof este cadrul weekendului." },
     },
     "sun-13:55": {
@@ -1305,7 +1305,7 @@ window.BOARD_QUICK = {
     "sat-12:35": {
       constantin: { where: "D245 → D223 → C233 → Gryden → กลับขึ้น", action: "ถ่าย Antoine, Zoltán, Hubert และ Marie ชั้น 2 แล้วลงไปหา Pitiprapada และ Serena", watch: "Iulian ดู Gryden ระหว่างที่ Constantin ไม่อยู่" },
       iulian: { where: "อยู่ชั้นล่างที่ Gryden", action: "ถ่ายคลิปสั้นของ Pitiprapada และ Serena เป็นช่วงๆ พร้อมภาพนิ่ง", watch: "ใช้กล้องตัวที่สองเป็นช่วงสั้นๆ ห้ามเปิดถ่ายต่อเนื่อง" },
-      june: { where: "D223 → D245 → C233 → Gryden", action: "ถ่าย Harpa (Essential) ก่อน แล้วถ่าย Zoltán, Hubert, Marie, Antoine, Pitiprapada และ Serena", watch: "Harpa มีแค่ภาพนิ่ง อย่าพลาด" },
+      june: { where: "D223 → D245 → C233 → Gryden", action: "ถ่าย Harpa (Authority) กับกลุ่ม D223 แล้วถ่าย Zoltán, Hubert, Marie, Antoine, Pitiprapada และ Serena", watch: "Harpa ต้องได้วิดีโอด้วย" },
     },
     "sat-13:55": {
       constantin: { where: "D223 → D245 → Gryden", action: "ถ่าย Gerarda เก็บ Gogutsa ตอนผ่าน แล้วลงไปหา Christma", watch: "Authority ทั้งสองคนต้องได้วิดีโอจาก Constantin" },
@@ -1329,7 +1329,7 @@ window.BOARD_QUICK = {
     },
     "sun-13:30": {
       constantin: { where: "ยึด B086 → D245 และ D223 → กลับ B086", action: "ถ่าย Gof, Gerarda และ Christma แล้วขึ้นไปแตะ Hubert กับ Hege หนึ่งครั้ง", watch: "กลับมาก่อนจบ โพเดียมของ Gof สำคัญที่สุด" },
-      iulian: { where: "อยู่ชั้น 2: D245 ↔ D223", action: "ถ่ายคลิปสั้น Hubert กับ Hege และถ่าย Harpa (Essential) กับ Franky (Essential)", watch: "ห้ามถ่ายต่อเนื่อง และห้ามลงจากชั้น 2" },
+      iulian: { where: "อยู่ชั้น 2: D245 ↔ D223", action: "ถ่ายคลิปสั้น Hubert, Hege และ Harpa (Authority) แล้วถ่าย Franky (Essential)", watch: "ห้ามถ่ายต่อเนื่อง และห้ามลงจากชั้น 2" },
       june: { where: "หอประชุม B086", action: "ถ่ายภาพ Gof, Gerarda และ Christma", watch: "โพเดียมของ Gof คือช็อตสำคัญที่สุด" },
     },
     "sun-13:55": {
@@ -1560,17 +1560,17 @@ window.BOARD_DATA = {
       "title": "Showcase and Authority split, downstairs protected",
       "neckCam": true,
       "anchor": "Zoltán + Hubert upstairs, Pitiprapada + Serena downstairs",
-      "loop": "D245 Antoine and Gogutsa → D223 Zoltán, Hubert, Harpa (Essential) → C233 Marie → Gryden Pitiprapada and Serena → repeat",
-      "objective": "Constantin must personally touch both floors. Iulian protects Gryden with the secondary camera so Pitiprapada and Serena are never starved while Constantin works the upstairs line.",
+      "loop": "D245 Antoine and Gogutsa → D223 Zoltán, Hubert, Harpa (Authority) → C233 Marie → Gryden Pitiprapada and Serena → repeat",
+      "objective": "Constantin must personally touch both floors. Iulian protects Gryden with the secondary camera so Pitiprapada and Serena are never starved while Constantin works the upstairs line. Harpa is now video-included in the D223 group.",
       "assignments": {
-        "constantin": "Loop Antoine plus the judge, Zoltán and Hubert, then Marie. Make at least one firm cinema descent for Pitiprapada and Serena before returning upstairs.",
+        "constantin": "Loop Antoine plus the judge, Zoltán, Hubert, and Harpa, then Marie. Make at least one firm cinema descent for Pitiprapada and Serena before returning upstairs.",
         "iulian": "SECONDARY CAMERA READY. Stay with Pitiprapada and Serena in Gryden. Capture periodic short handheld clips plus stills, not continuous video.",
-        "june": "Harpa (Essential) stills first because photo is her full product, then Zoltán, Hubert, Marie, Antoine, Pitiprapada, and Serena."
+        "june": "Harpa (Authority) with the D223 group, then Zoltán, Hubert, Marie, Antoine, Pitiprapada, and Serena."
       },
       "tips": [
         "No Signature here, but many video clients overlap",
         "Iulian protects the ground floor between Constantin's visits",
-        "Harpa is Essential, so do not let her stills disappear"
+        "Harpa is now Authority, so she needs video too"
       ]
     },
     {
@@ -1665,7 +1665,7 @@ window.BOARD_DATA = {
       "objective": "Gof's finale and podium are the shots of the weekend. The shared Auditorium gives Gerarda and Christma Authority coverage without moving.",
       "assignments": {
         "constantin": "Anchor the Auditorium for Gof, Gerarda, and Christma. Make one personal upstairs touch for Hubert and Hege, then return for the finish and podium.",
-        "iulian": "SECONDARY CAMERA READY. Take periodic short handheld clips of Hubert in D245 and Hege in D223, and collect Harpa (Essential) plus Franky (Essential) stills.",
+        "iulian": "SECONDARY CAMERA READY. Take periodic short handheld clips of Hubert in D245, Hege and Harpa (Authority) in D223, and collect Franky (Essential) stills.",
         "june": "Anchor downstairs on Gof, Gerarda, and Christma. Protect the podium shot above everything."
       },
       "tips": [
@@ -2016,7 +2016,7 @@ window.BOARD_DATA = {
       "id": "harpa-sat-sports",
       "name": "Harpa",
       "officialName": "Harpa Finnsdóttir",
-      "package": "Essential",
+      "package": "Authority",
       "day": "sat",
       "round": "12:35",
       "room": "d223",
@@ -2071,7 +2071,7 @@ window.BOARD_DATA = {
       "id": "franky-sat-sports",
       "name": "Judge Franky",
       "officialName": "Yan Hung sun Frank",
-      "package": "Essential",
+      "package": "Authority",
       "day": "sat",
       "round": "10:00",
       "room": "d223",
@@ -2093,7 +2093,7 @@ window.BOARD_DATA = {
       "id": "harpa-sun-sports",
       "name": "Harpa",
       "officialName": "Harpa Finnsdóttir",
-      "package": "Essential",
+      "package": "Authority",
       "day": "sun",
       "round": "13:30",
       "room": "d223",
