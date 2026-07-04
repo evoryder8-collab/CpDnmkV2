@@ -638,15 +638,15 @@ window.BOARD_I18N = {
         callout: "Calm",
         title: "Tururi pe un singur etaj",
         anchor: "Antonio · Occidental D245",
-        loop: "Antonio și Gogutsa în D245 → Hege în C233 → repetă",
-        objective: "Fără scări. Fă 3 sau 4 tururi pe tot coridorul și începe fiecare tur cu Antonio.",
+        loop: "Antonio și Gogutsa în D245 → Bella în C275 → Hege în C233 → repetă",
+        objective: "Fără scări. Fă 3 sau 4 tururi pe tot coridorul. Începe fiecare tur cu Antonio, apoi Bella și Hege.",
         assignments: {
-          constantin: "Începe cu Antonio și ia juratul din aceeași sală, apoi mergi spre Hege și repetă.",
+          constantin: "Începe cu Antonio și ia juratul din aceeași sală, apoi treci prin Bella și Hege și repetă.",
           iulian: "Rămâi pe fotografie de volum în toate sălile de sus.",
-          june: "Alternează fotografiile lui Antonio și Hege. Antonio este primul la fiecare tur nou.",
+          june: "Alternează fotografiile lui Antonio, Bella și Hege. Antonio este primul la fiecare tur nou.",
         },
         tips: [
-          "Este timp pentru acoperire mai lungă",
+          "Trei clienți sus, fără scări",
           "Nu pierzi timp pe scări",
           "Folosește alt unghi la fiecare revenire",
         ],
@@ -724,17 +724,18 @@ window.BOARD_I18N = {
       "sun-12:10": {
         callout: "Echipă împărțită",
         title: "Signature jos, a doua cameră sus",
-        anchor: "Victor · Auditoriu B086",
-        loop: "Constantin stă cu Victor → un tur video D245 și D223 → înapoi",
-        objective: "Signature izolat este punctul principal, dar Constantin face totuși un tur personal sus. June face clipuri video scurte la Zoltán și Henry sus, iar Iulian ține fotografiile de volum.",
+        anchor: "Victor + Bella · parter",
+        loop: "Victor în B086 → Bella în Gryden → un tur video D245 și D223 → înapoi",
+        objective: "Victor rămâne punctul Signature, dar Bella adaugă o oprire Authority în Gryden. Constantin acoperă ambii clienți video de jos înainte de turul sus. June face clipuri video scurte la Zoltán și Henry sus, iar Iulian ține fotografiile de volum.",
         assignments: {
-          constantin: "Fă un bloc puternic cu Victor, apoi urcă pentru Zoltán plus juratul și Henry, după care revino la Victor.",
+          constantin: "Fă un bloc puternic cu Victor, atinge Bella în Gryden, apoi urcă pentru Zoltán plus juratul și Henry, după care revino jos.",
           iulian: "Fă fotografii de volum și priorități foto. Stai aproape de acțiunea aglomerată, dar nu lua rolul de a doua cameră video.",
-          june: "A DOUA CAMERĂ PREGĂTITĂ. Fă întâi fotografiile lui Victor, apoi clipuri video scurte sus la Zoltán și Henry când Constantin este jos.",
+          june: "A DOUA CAMERĂ PREGĂTITĂ. Fă întâi fotografiile lui Victor și Bella, apoi clipuri video scurte sus la Zoltán și Henry când Constantin este jos.",
         },
         tips: [
           "Split lung între etaje duminică",
           "Victor trebuie să primească cel mai mult",
+          "Bella adaugă o oprire Authority în Gryden",
           "June elimină golurile video de sus",
           "Iulian ține fotografiile în mișcare",
         ],
@@ -1066,15 +1067,15 @@ window.BOARD_I18N = {
         callout: "สบาย",
         title: "วนตามทางเดินชั้นเดียว",
         anchor: "Antonio · เวสเทิร์น D245",
-        loop: "Antonio และ Gogutsa ที่ D245 → Hege ที่ C233 → ทำซ้ำ",
-        objective: "ไม่ต้องใช้บันได เดินวน 3 หรือ 4 รอบ และเริ่มที่ Antonio ทุกรอบ",
+        loop: "Antonio และ Gogutsa ที่ D245 → Bella ที่ C275 → Hege ที่ C233 → ทำซ้ำ",
+        objective: "ไม่ต้องใช้บันได เดินวน 3 หรือ 4 รอบ เริ่มที่ Antonio แล้วไป Bella และ Hege",
         assignments: {
-          constantin: "เริ่มที่ Antonio และเก็บกรรมการในห้องเดียวกัน แล้วเดินกลับไปหา Hege จากนั้นทำซ้ำ",
+          constantin: "เริ่มที่ Antonio และเก็บกรรมการในห้องเดียวกัน แล้วผ่าน Bella และ Hege จากนั้นทำซ้ำ",
           iulian: "ถ่ายภาพทุกคนในห้องชั้น 2",
-          june: "สลับถ่าย Antonio และ Hege และเริ่มที่ Antonio ในรอบใหม่",
+          june: "สลับถ่าย Antonio, Bella และ Hege และเริ่มที่ Antonio ในรอบใหม่",
         },
         tips: [
-          "มีเวลาถ่ายแต่ละคนได้นาน",
+          "ลูกค้าสามคนอยู่ชั้น 2 ไม่ต้องลงบันได",
           "ไม่เสียเวลาที่บันได",
           "กลับไปแต่ละครั้งให้เปลี่ยนมุม",
         ],
@@ -1152,17 +1153,18 @@ window.BOARD_I18N = {
       "sun-12:10": {
         callout: "แยกทีม",
         title: "Signature อยู่ล่าง กล้องตัวที่สองอยู่บน",
-        anchor: "Victor · หอประชุม B086",
-        loop: "Constantin อยู่กับ Victor → ขึ้นไปวน D245 และ D223 หนึ่งรอบ → กลับ",
-        objective: "Signature ที่อยู่ไกลเป็นจุดหลัก แต่ Constantin ยังต้องขึ้นไปหนึ่งรอบ June ถ่ายคลิปสั้นของ Zoltán และ Henry ชั้น 2 ส่วน Iulian ถ่ายภาพจำนวนมาก",
+        anchor: "Victor + Bella · ชั้นล่าง",
+        loop: "Victor ที่ B086 → Bella ที่ Gryden → ขึ้นไปวน D245 และ D223 หนึ่งรอบ → กลับ",
+        objective: "Victor ยังเป็นจุด Signature แต่ Bella เพิ่มจุด Authority ที่ Gryden Constantin ต้องถ่ายวิดีโอลูกค้าชั้นล่างทั้งสองคนก่อนขึ้นไปชั้น 2 June ถ่ายคลิปสั้นของ Zoltán และ Henry ชั้น 2 ส่วน Iulian ถ่ายภาพจำนวนมาก",
         assignments: {
-          constantin: "ถ่าย Victor ชุดใหญ่ก่อน แล้วขึ้นไปหา Zoltán กรรมการ และ Henry จากนั้นกลับมาหา Victor",
+          constantin: "ถ่าย Victor ชุดใหญ่ก่อน แตะ Bella ที่ Gryden แล้วขึ้นไปหา Zoltán กรรมการ และ Henry จากนั้นกลับลงมา",
           iulian: "ถ่ายภาพจำนวนมากและดูแลจุดที่ต้องการภาพนิ่ง อยู่ใกล้แอ็กชัน แต่ไม่ต้องรับบทกล้องวิดีโอตัวที่สอง",
-          june: "เตรียมกล้องตัวที่สอง ถ่ายภาพ Victor ก่อน แล้วขึ้นไปถ่ายคลิปสั้นของ Zoltán และ Henry ตอน Constantin อยู่ล่าง",
+          june: "เตรียมกล้องตัวที่สอง ถ่ายภาพ Victor และ Bella ก่อน แล้วขึ้นไปถ่ายคลิปสั้นของ Zoltán และ Henry ตอน Constantin อยู่ล่าง",
         },
         tips: [
           "เป็น split ข้ามชั้นที่ไกลในวันอาทิตย์",
           "Victor ยังต้องได้งานมากที่สุด",
+          "Bella เพิ่มจุด Authority ที่ Gryden",
           "June ปิดช่องว่างวิดีโอชั้น 2",
           "Iulian ถ่ายภาพให้ไหลตลอด",
         ],
@@ -1214,9 +1216,9 @@ window.BOARD_QUICK = {
       june: { where: "Gryden → C275 → C233 → D223", action: "Finish Gof's stills first, then photograph Victor, Henry, and Franky (Essential).", watch: "Franky is photo-only light work." },
     },
     "sat-11:15": {
-      constantin: { where: "D245 → C233", action: "Film Antonio and Gogutsa first, then Hege.", watch: "Repeat 3 or 4 hallway loops. No stairs." },
+      constantin: { where: "D245 → C275 → C233", action: "Film Antonio and Gogutsa first, then Bella and Hege.", watch: "Repeat 3 or 4 hallway loops. No stairs." },
       iulian: { where: "All upstairs rooms", action: "Shoot high-volume photos only.", watch: "Stay photo-first all round." },
-      june: { where: "D245 ↔ C233", action: "Alternate Antonio and Hege stills.", watch: "Start each new loop with Antonio." },
+      june: { where: "D245 → C275 → C233", action: "Alternate Antonio, Bella, and Hege stills.", watch: "Start each new loop with Antonio." },
     },
     "sat-12:35": {
       constantin: { where: "D245 → D223 → C233 → Gryden → upstairs", action: "Film Antoine, Zoltán, Hubert, and Marie upstairs, then personally touch Pitiprapada and Serena downstairs.", watch: "June covers short video gaps, but Constantin still visits both floors." },
@@ -1239,9 +1241,9 @@ window.BOARD_QUICK = {
       june: { where: "D223 ↔ C275", action: "Photograph Antoine first each loop, then Pitiprapada.", watch: "Stay upstairs." },
     },
     "sun-12:10": {
-      constantin: { where: "B086 → D245 and D223 → B086", action: "Give Victor a strong block first, then make one upstairs loop.", watch: "Victor must receive the most coverage." },
+      constantin: { where: "B086 → Gryden → D245 and D223 → ground", action: "Give Victor a strong block, touch Bella in Gryden, then make one upstairs loop.", watch: "Victor still receives the most coverage." },
       iulian: { where: "Whole field, busiest rooms first", action: "Shoot volume photos and protect photo priorities.", watch: "No secondary video role. Keep photos moving." },
-      june: { where: "B086 first, then D245 ↔ D223 bursts", action: "SECONDARY CAMERA READY. Cover Victor stills, then short upstairs video bursts for Zoltán and Henry.", watch: "Do not record continuously." },
+      june: { where: "B086 and Gryden first, then D245 ↔ D223 bursts", action: "SECONDARY CAMERA READY. Cover Victor and Bella stills, then short upstairs video bursts for Zoltán and Henry.", watch: "Do not record continuously." },
     },
     "sun-13:30": {
       constantin: { where: "B086 anchor → D245 and D223 → B086", action: "Film Gof, Gerarda, and Christma, then personally touch Hubert and Hege upstairs once.", watch: "Return before the finish. Gof's podium comes first." },
@@ -1261,9 +1263,9 @@ window.BOARD_QUICK = {
       june: { where: "Gryden → C275 → C233 → D223", action: "Termină fotografiile lui Gof, apoi Victor, Henry și Franky (Essential).", watch: "Franky este muncă foto ușoară." },
     },
     "sat-11:15": {
-      constantin: { where: "D245 → C233", action: "Filmează Antonio și Gogutsa, apoi Hege.", watch: "Repetă 3 sau 4 tururi. Fără scări." },
+      constantin: { where: "D245 → C275 → C233", action: "Filmează Antonio și Gogutsa, apoi Bella și Hege.", watch: "Repetă 3 sau 4 tururi. Fără scări." },
       iulian: { where: "Toate sălile de sus", action: "Fă doar fotografii de volum.", watch: "Rămâi foto-first toată runda." },
-      june: { where: "D245 ↔ C233", action: "Alternează fotografiile lui Antonio și Hege.", watch: "Începe fiecare tur cu Antonio." },
+      june: { where: "D245 → C275 → C233", action: "Alternează fotografiile lui Antonio, Bella și Hege.", watch: "Începe fiecare tur cu Antonio." },
     },
     "sat-12:35": {
       constantin: { where: "D245 → D223 → C233 → Gryden → sus", action: "Filmează Antoine, Zoltán, Hubert și Marie sus, apoi atinge personal Pitiprapada și Serena jos.", watch: "June acoperă golurile video, dar Constantin atinge ambele etaje." },
@@ -1286,9 +1288,9 @@ window.BOARD_QUICK = {
       june: { where: "D223 ↔ C275", action: "Fotografiază Antoine primul la fiecare tur, apoi Pitiprapada.", watch: "Rămâi sus." },
     },
     "sun-12:10": {
-      constantin: { where: "B086 → D245 și D223 → B086", action: "Filmează bine Victor primul, apoi fă un singur tur sus.", watch: "Victor trebuie să primească cel mai mult." },
+      constantin: { where: "B086 → Gryden → D245 și D223 → jos", action: "Filmează bine Victor, atinge Bella în Gryden, apoi fă un tur sus.", watch: "Victor primește în continuare cel mai mult." },
       iulian: { where: "Tot terenul, sălile aglomerate întâi", action: "Fă fotografii de volum și protejează prioritățile foto.", watch: "Nu ai rol video secundar. Ține fotografiile în mișcare." },
-      june: { where: "B086 întâi, apoi D245 ↔ D223 scurt", action: "A DOUA CAMERĂ PREGĂTITĂ. Fă fotografiile lui Victor, apoi clipuri scurte sus cu Zoltán și Henry.", watch: "Nu filma continuu." },
+      june: { where: "B086 și Gryden întâi, apoi D245 ↔ D223 scurt", action: "A DOUA CAMERĂ PREGĂTITĂ. Fă fotografiile lui Victor și Bella, apoi clipuri scurte sus cu Zoltán și Henry.", watch: "Nu filma continuu." },
     },
     "sun-13:30": {
       constantin: { where: "B086 principal → D245 și D223 → B086", action: "Filmează Gof, Gerarda și Christma, apoi atinge personal Hubert și Hege sus o dată.", watch: "Revino înainte de final. Podiumul lui Gof este primul." },
@@ -1308,9 +1310,9 @@ window.BOARD_QUICK = {
       june: { where: "Gryden → C275 → C233 → D223", action: "ถ่ายภาพ Gof ให้ครบ แล้วถ่าย Victor, Henry และ Franky (Essential)", watch: "Franky เป็นงานภาพนิ่งเบาๆ" },
     },
     "sat-11:15": {
-      constantin: { where: "D245 → C233", action: "ถ่าย Antonio กับ Gogutsa ก่อน แล้วถ่าย Hege", watch: "วน 3 หรือ 4 รอบ ไม่ต้องลงบันได" },
+      constantin: { where: "D245 → C275 → C233", action: "ถ่าย Antonio กับ Gogutsa ก่อน แล้วถ่าย Bella และ Hege", watch: "วน 3 หรือ 4 รอบ ไม่ต้องลงบันได" },
       iulian: { where: "ทุกห้องชั้น 2", action: "ถ่ายภาพนิ่งจำนวนมากเท่านั้น", watch: "เน้นภาพนิ่งทั้งรอบ" },
-      june: { where: "D245 ↔ C233", action: "สลับถ่ายภาพ Antonio กับ Hege", watch: "เริ่มแต่ละรอบที่ Antonio" },
+      june: { where: "D245 → C275 → C233", action: "สลับถ่ายภาพ Antonio, Bella และ Hege", watch: "เริ่มแต่ละรอบที่ Antonio" },
     },
     "sat-12:35": {
       constantin: { where: "D245 → D223 → C233 → Gryden → กลับขึ้น", action: "ถ่าย Antoine, Zoltán, Hubert และ Marie ชั้น 2 แล้วลงไปหา Pitiprapada และ Serena", watch: "June ปิดช่องว่างวิดีโอ แต่ Constantin ต้องแตะทั้งสองชั้น" },
@@ -1333,9 +1335,9 @@ window.BOARD_QUICK = {
       june: { where: "D223 ↔ C275", action: "ถ่าย Antoine ก่อนในแต่ละรอบ แล้วถ่าย Pitiprapada", watch: "อยู่ชั้น 2" },
     },
     "sun-12:10": {
-      constantin: { where: "B086 → D245 และ D223 → B086", action: "ถ่าย Victor ชุดใหญ่ก่อน แล้วขึ้นชั้น 2 หนึ่งรอบ", watch: "Victor ต้องได้งานมากที่สุด" },
+      constantin: { where: "B086 → Gryden → D245 และ D223 → ชั้นล่าง", action: "ถ่าย Victor ชุดใหญ่ แตะ Bella ที่ Gryden แล้วขึ้นชั้น 2 หนึ่งรอบ", watch: "Victor ยังต้องได้งานมากที่สุด" },
       iulian: { where: "ทั้งสนาม ห้องที่ยุ่งก่อน", action: "ถ่ายภาพจำนวนมากและดูแลจุดที่ต้องการภาพนิ่ง", watch: "ไม่ต้องรับวิดีโอตัวที่สอง ถ่ายภาพให้ต่อเนื่อง" },
-      june: { where: "B086 ก่อน แล้ว D245 ↔ D223 สั้นๆ", action: "เตรียมกล้องตัวที่สอง ถ่ายภาพ Victor ก่อน แล้วถ่ายคลิปสั้น Zoltán กับ Henry ชั้น 2", watch: "ห้ามถ่ายต่อเนื่อง" },
+      june: { where: "B086 และ Gryden ก่อน แล้ว D245 ↔ D223 สั้นๆ", action: "เตรียมกล้องตัวที่สอง ถ่ายภาพ Victor และ Bella ก่อน แล้วถ่ายคลิปสั้น Zoltán กับ Henry ชั้น 2", watch: "ห้ามถ่ายต่อเนื่อง" },
     },
     "sun-13:30": {
       constantin: { where: "ยึด B086 → D245 และ D223 → กลับ B086", action: "ถ่าย Gof, Gerarda และ Christma แล้วขึ้นไปแตะ Hubert กับ Hege หนึ่งครั้ง", watch: "กลับมาก่อนจบ โพเดียมของ Gof สำคัญที่สุด" },
@@ -1550,15 +1552,15 @@ window.BOARD_DATA = {
       "title": "One-floor hallway loops",
       "neckCam": false,
       "anchor": "Antonio · Western D245",
-      "loop": "Antonio plus Gogutsa in D245 → Hege in C233 → repeat",
-      "objective": "No stairs. Use the full hallway for 3 or 4 loops, returning to Antonio first each time.",
+      "loop": "Antonio plus Gogutsa in D245 → Bella in C275 → Hege in C233 → repeat",
+      "objective": "No stairs. Use the full hallway for 3 or 4 loops, returning to Antonio first each time, then Bella and Hege.",
       "assignments": {
-        "constantin": "Open on Antonio and collect the judge in the same room, then work back to Hege and repeat.",
+        "constantin": "Open on Antonio and collect the judge in the same room, then work back through Bella and Hege before repeating.",
         "iulian": "Stay on volume photo across all upstairs rooms.",
-        "june": "Alternate Antonio and Hege stills, with Antonio first on each fresh cycle."
+        "june": "Alternate Antonio, Bella, and Hege stills, with Antonio first on each fresh cycle."
       },
       "tips": [
-        "Signature-style patience is possible",
+        "Three upstairs clients, no stairs",
         "No stair time to protect",
         "Use each return for a new angle"
       ]
@@ -1651,17 +1653,18 @@ window.BOARD_DATA = {
       "callout": "Split",
       "title": "Signature downstairs, second camera upstairs",
       "neckCam": true,
-      "anchor": "Victor · Auditorium B086",
-      "loop": "Constantin anchors Victor → one personal D245 and D223 cinema loop → return",
-      "objective": "The isolated Signature wins the anchor, but Constantin still makes one personal upstairs loop. June gives Zoltán and Henry short periodic video visits upstairs while Iulian keeps volume photos moving.",
+      "anchor": "Victor + Bella · ground floor",
+      "loop": "Victor in B086 → Bella in Gryden → one personal D245 and D223 cinema loop → return",
+      "objective": "Victor is still the Signature anchor, but Bella adds an Authority stop in Gryden. Constantin covers both ground-floor video clients before the upstairs loop. June gives Zoltán and Henry short periodic video visits upstairs while Iulian keeps volume photos moving.",
       "assignments": {
-        "constantin": "Build a strong Victor block, then loop up for Zoltán plus the judge and Henry before returning to Victor.",
+        "constantin": "Build a strong Victor block, touch Bella in Gryden, then loop up for Zoltán plus the judge and Henry before returning downstairs.",
         "iulian": "Shoot full-field volume and photo priorities. Stay useful near the busiest action, but do not take the secondary video role.",
-        "june": "SECONDARY CAMERA READY. Cover Victor stills first, then take short upstairs video bursts of Zoltán and Henry when Constantin is downstairs."
+        "june": "SECONDARY CAMERA READY. Cover Victor and Bella stills first, then take short upstairs video bursts of Zoltán and Henry when Constantin is downstairs."
       },
       "tips": [
         "Long cross-floor split on Sunday",
         "Victor must still receive the most",
+        "Bella adds a Gryden Authority stop",
         "June prevents upstairs video gaps",
         "Iulian keeps photos flowing everywhere"
       ]
@@ -2123,6 +2126,28 @@ window.BOARD_DATA = {
       "room": "d245",
       "category": "Freestyle massage - Western inspired",
       "portrait": ""
+    },
+    {
+      "id": "bella-sat-wellness",
+      "name": "Bella Bayar",
+      "officialName": "Bella Bayar Enkhjargal",
+      "package": "Authority",
+      "day": "sat",
+      "round": "11:15",
+      "room": "c275",
+      "category": "Wellness massage",
+      "portrait": "Bella Bayar.webp"
+    },
+    {
+      "id": "bella-sun-facial",
+      "name": "Bella Bayar",
+      "officialName": "Bella Bayar Enkhjargal",
+      "package": "Authority",
+      "day": "sun",
+      "round": "12:10",
+      "room": "gryden",
+      "category": "Facial massage",
+      "portrait": "Bella Bayar.webp"
     },
     {
       "id": "harpa-sun-sports",
