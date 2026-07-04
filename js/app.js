@@ -525,6 +525,9 @@
         roomB.distToStairs - roomA.distToStairs,
     )[0];
     const videoRoomSet = new Set(roomIds);
+    const farthestGroundRoomId = Object.entries(config.VENUE)
+      .filter(([, room]) => room.floor === "ground")
+      .sort(([, roomA], [, roomB]) => roomB.distToStairs - roomA.distToStairs)[0]?.[0];
     const sequence = [];
     let currentPoint = null;
     let metres = 0;
@@ -540,6 +543,12 @@
 
     function roomById(roomId) {
       return roomMeta.find((room) => room.id === roomId);
+    }
+
+    function scoutFarthestGroundIfEmpty() {
+      if (farthestGroundRoomId && !videoRoomSet.has(farthestGroundRoomId)) {
+        visit(farthestGroundRoomId, true);
+      }
     }
 
     visit(priorityRoom.id);
@@ -559,7 +568,7 @@
     );
     if (otherFloorFirstCycle.length) {
       if (otherFloorFirstCycle[0].floor === "ground") {
-        if (!videoRoomSet.has("b086")) visit("b086", true);
+        scoutFarthestGroundIfEmpty();
         otherFloorFirstCycle
           .sort((roomA, roomB) => roomB.distToStairs - roomA.distToStairs)
           .forEach((room) => visit(room.id));
@@ -591,9 +600,9 @@
       .sort(
         (roomA, roomB) =>
           getVenueRoom(roomB).distToStairs - getVenueRoom(roomA).distToStairs,
-      );
+    );
     if (groundFloorRooms.length) {
-      if (!videoRoomSet.has("b086")) visit("b086", true);
+      scoutFarthestGroundIfEmpty();
       groundFloorRooms.forEach((roomId) => visit(roomId));
     }
 
@@ -948,40 +957,40 @@
   function splitNeededMessage(difficulty, roundPlan) {
     if (state.language === "ro") {
       if (roundPlan?.neckCam) {
-        return "A doua cameră este pregătită: Iulian face clipuri scurte pe etajul separat, iar Constantin protejează punctul principal.";
+        return "A doua cameră este pregătită: June face clipuri scurte pe etajul separat, iar Constantin protejează punctul principal. Iulian rămâne pe volum și clienți foto.";
       }
       if (difficulty.helperRequired) {
-        return "Este recomandată a doua cameră video: Iulian o folosește periodic pentru clipuri scurte.";
+        return "Este recomandată a doua cameră video: June o folosește periodic pentru clipuri scurte.";
       }
       if (difficulty.helperStandby) {
-        return "Ajutor video pregătit: a doua cameră trebuie să fie gata pentru Iulian.";
+        return "Ajutor video pregătit: a doua cameră trebuie să fie gata pentru June.";
       }
-      return "Plan echipă: June urmărește fotografiile clienților, iar Iulian face fotografii de volum.";
+      return "Plan echipă: June urmărește clienții, iar Iulian face volum și clienți foto.";
     }
 
     if (state.language === "th") {
       if (roundPlan?.neckCam) {
-        return "เตรียมกล้องตัวที่สอง: Iulian ถ่ายคลิปสั้นเป็นช่วงๆ ที่อีกชั้น ส่วน Constantin ดูจุดหลัก";
+        return "เตรียมกล้องตัวที่สอง: June ถ่ายคลิปสั้นเป็นช่วงๆ ที่อีกชั้น ส่วน Constantin ดูจุดหลัก และ Iulian ถ่ายภาพทุกคนกับลูกค้าภาพนิ่ง";
       }
       if (difficulty.helperRequired) {
-        return "ควรใช้กล้องวิดีโอตัวที่สอง: Iulian ใช้ถ่ายคลิปสั้นเป็นช่วงๆ";
+        return "ควรใช้กล้องวิดีโอตัวที่สอง: June ใช้ถ่ายคลิปสั้นเป็นช่วงๆ";
       }
       if (difficulty.helperStandby) {
-        return "เตรียมช่วยวิดีโอ: เตรียมกล้องกันสั่นไว้ให้ Iulian";
+        return "เตรียมช่วยวิดีโอ: เตรียมกล้องกันสั่นไว้ให้ June";
       }
-      return "แผนทีม: June ตามถ่ายภาพนิ่งลูกค้า ส่วน Iulian ถ่ายภาพทุกคน";
+      return "แผนทีม: June ตามลูกค้า ส่วน Iulian ถ่ายภาพทุกคนและลูกค้าภาพนิ่ง";
     }
 
     if (roundPlan?.neckCam) {
-      return "Secondary camera ready: Iulian takes periodic short clips on the split floor while Constantin protects the anchor.";
+      return "Secondary camera ready: June takes periodic short clips on the split floor while Constantin protects the anchor. Iulian stays on volume and photo clients.";
     }
     if (difficulty.helperRequired) {
-      return "Second video recommended: Iulian uses the secondary camera periodically for short clips.";
+      return "Second video recommended: June uses the secondary camera periodically for short clips.";
     }
     if (difficulty.helperStandby) {
-      return "Video assist on standby: keep the stabilised camera ready for Iulian.";
+      return "Video assist on standby: keep the stabilised camera ready for June.";
     }
-    return "Crew plan: June hunts booked stills while Iulian keeps full-field photo volume.";
+    return "Crew plan: June hunts booked stills while Iulian keeps full-field volume and photo clients.";
   }
 
   function routeSummary(difficulty) {
@@ -2247,7 +2256,7 @@
       .join("");
     const cameraPlan = data.crew
       .map((member) => {
-        const neckCamOperator = member.id === "iulian" && roundPlan.neckCam;
+        const neckCamOperator = member.id === "june" && roundPlan.neckCam;
         return `
           <article class="camera-assignment" data-camera="${member.id}" data-neck-cam="${neckCamOperator}">
             <header>
@@ -2307,7 +2316,7 @@
         </button>
       `)
       .join("");
-    const secondaryNote = roundPlan.neckCam && activeMember.id === "iulian"
+    const secondaryNote = roundPlan.neckCam && activeMember.id === "june"
       ? `<p class="quick-secondary-note"><i aria-hidden="true"></i>${t("secondaryCameraNote")}</p>`
       : "";
 
@@ -2387,13 +2396,14 @@
     const splitMessage = splitNeededMessage(difficulty, roundPlan);
     const plannedSecondVideo = roundPlan.neckCam;
     const helperDisplayKey = plannedSecondVideo ? "required" : difficulty.helperMode.key;
-    const iulianLabel = plannedSecondVideo
+    const juneLabel = plannedSecondVideo
       ? t("neckCamVideo")
       : difficulty.helperRequired
         ? t("secondVideo")
         : difficulty.helperStandby
           ? t("videoStandby")
-          : t("volumePhotos");
+          : t("clientStills");
+    const iulianLabel = t("volumePhotosPlusPhotoClients");
 
     elements.videoFilterButton.setAttribute(
       "aria-pressed",
@@ -2425,7 +2435,7 @@
       <div class="crew-strip" data-helper="${helperDisplayKey}" aria-label="${t("crewAllocation")}">
         <span><b>C1</b>${config.TEAM.PRIMARY_VIDEO_NAME} · ${t("cinema")}</span>
         <span><b>C2</b>${config.TEAM.VOLUME_PHOTO_NAME} · ${iulianLabel}</span>
-        <span><b>C3</b>${config.TEAM.CLIENT_PHOTO_NAME} · ${t("clientStills")}</span>
+        <span><b>C3</b>${config.TEAM.CLIENT_PHOTO_NAME} · ${juneLabel}</span>
       </div>
       <p class="route-note">${routeSummary(difficulty)}</p>
       <p class="split-needed" data-helper="${helperDisplayKey}"><i aria-hidden="true"></i>${splitMessage}</p>
