@@ -641,18 +641,18 @@ window.BOARD_I18N = {
         ],
       },
       "sat-11:15": {
-        callout: "Calm",
-        title: "Clienți sus plus tur scurt jos",
-        anchor: "Antonio · Occidental D245",
-        loop: "Antonio, Gogutsa și Anna în D245 → Bella în C275 → Hege în C233 → tur scurt B086/Gryden → repetă",
-        objective: "Clienții sunt sus, dar Constantin face și un tur scurt jos pentru diversitate de eveniment. Începe fiecare tur cu Antonio, apoi Bella și Hege.",
+        callout: "Ocupat",
+        title: "Clienți sus plus Rasa jos",
+        anchor: "Antonio + Rasa · D245/Gryden",
+        loop: "Antonio, Gogutsa și Anna în D245 → Bella în C275 → Hege în C233 → Rasa în Gryden → repetă",
+        objective: "Antonio, Bella și Hege sunt sus, iar Rasa este Authority jos în Gryden. Constantin face video personal pe ambele etaje, nu doar tur de diversitate.",
         assignments: {
-          constantin: "Începe cu Antonio și ia jurații din aceeași sală, apoi treci prin Bella și Hege și repetă.",
-          iulian: "Rămâi pe fotografie de volum în toate sălile de sus.",
-          june: "Alternează fotografiile lui Antonio, Bella și Hege. Antonio este primul la fiecare tur nou.",
+          constantin: "Începe cu Antonio și ia jurații din aceeași sală, treci prin Bella și Hege, apoi coboară clar la Rasa în Gryden.",
+          iulian: "Fă fotografii de volum în toate sălile, cu atenție și la Rasa când ești jos.",
+          june: "Alternează fotografiile lui Antonio, Bella, Hege și Rasa. Antonio începe fiecare tur nou.",
         },
         tips: [
-          "Trei clienți sus, dar Constantin tot coboară scurt",
+          "Rasa este Authority jos, deci primește video personal",
           "Auditoriul are scurtătură bună la coborâre",
           "Folosește alt unghi la fiecare revenire",
         ],
@@ -729,19 +729,20 @@ window.BOARD_I18N = {
       },
       "sun-12:10": {
         callout: "Echipă împărțită",
-        title: "Signature jos, a doua cameră sus",
-        anchor: "Victor + Bella · parter",
-        loop: "Victor în B086 → Bella în Gryden → un tur video D245 și D223 → înapoi",
-        objective: "Victor rămâne punctul Signature, dar Bella adaugă o oprire Authority în Gryden. Constantin acoperă ambii clienți video de jos înainte de turul sus. June face clipuri video scurte la Zoltán și Henry sus, iar Iulian ține fotografiile de volum.",
+        title: "Signature jos, Rasa și a doua cameră sus",
+        anchor: "Victor + Bella jos, Rasa sus",
+        loop: "Victor în B086 → Bella în Gryden → Rasa în C233 → D223/D245 → înapoi",
+        objective: "Victor rămâne punctul Signature, Bella adaugă Authority în Gryden, iar Rasa adaugă Authority sus în C233. Constantin acoperă personal parterul și face cel puțin un tur video sus.",
         assignments: {
-          constantin: "Fă un bloc puternic cu Victor, atinge Bella în Gryden, apoi urcă pentru Zoltán plus Gogutsa și Anna, apoi Henry, după care revino jos.",
+          constantin: "Fă un bloc puternic cu Victor, atinge Bella în Gryden, apoi urcă pentru Rasa în C233, Henry în D223, Zoltán plus Gogutsa și Anna în D245, după care revino jos.",
           iulian: "Fă fotografii de volum și priorități foto. Stai aproape de acțiunea aglomerată, dar nu lua rolul de a doua cameră video.",
-          june: "A DOUA CAMERĂ PREGĂTITĂ. Fă întâi fotografiile lui Victor și Bella, apoi clipuri video scurte sus la Zoltán și Henry când Constantin este jos.",
+          june: "A DOUA CAMERĂ PREGĂTITĂ. Fă întâi fotografiile lui Victor și Bella, apoi clipuri video scurte sus la Rasa, Zoltán și Henry când Constantin este jos.",
         },
         tips: [
           "Split lung între etaje duminică",
           "Victor trebuie să primească cel mai mult",
           "Bella adaugă o oprire Authority în Gryden",
+          "Rasa adaugă încă o oprire Authority sus",
           "June elimină golurile video de sus",
           "Iulian ține fotografiile în mișcare",
         ],
@@ -1070,18 +1071,18 @@ window.BOARD_I18N = {
         ],
       },
       "sat-11:15": {
-        callout: "สบาย",
-        title: "ลูกค้าชั้น 2 แล้วลงสั้นๆ ชั้นล่าง",
-        anchor: "Antonio · เวสเทิร์น D245",
-        loop: "Antonio, Gogutsa และ Anna ที่ D245 → Bella ที่ C275 → Hege ที่ C233 → ลง B086/Gryden สั้นๆ → ทำซ้ำ",
-        objective: "ลูกค้าอยู่ชั้น 2 แต่ Constantin ยังลงชั้นล่างสั้นๆ เพื่อเก็บบรรยากาศงาน เริ่มที่ Antonio แล้วไป Bella และ Hege",
+        callout: "ยุ่ง",
+        title: "ลูกค้าชั้น 2 และ Rasa ชั้นล่าง",
+        anchor: "Antonio + Rasa · D245/Gryden",
+        loop: "Antonio, Gogutsa และ Anna ที่ D245 → Bella ที่ C275 → Hege ที่ C233 → Rasa ที่ Gryden → ทำซ้ำ",
+        objective: "Antonio, Bella และ Hege อยู่ชั้น 2 แต่ Rasa เป็น Authority อยู่ Gryden ชั้นล่าง Constantin ต้องลงไปถ่ายวิดีโอให้เธอด้วย",
         assignments: {
-          constantin: "เริ่มที่ Antonio และเก็บกรรมการในห้องเดียวกัน แล้วผ่าน Bella และ Hege จากนั้นทำซ้ำ",
-          iulian: "ถ่ายภาพทุกคนในห้องชั้น 2",
-          june: "สลับถ่าย Antonio, Bella และ Hege และเริ่มที่ Antonio ในรอบใหม่",
+          constantin: "เริ่มที่ Antonio และเก็บกรรมการในห้องเดียวกัน แล้วผ่าน Bella และ Hege จากนั้นลงไปหา Rasa ที่ Gryden",
+          iulian: "ถ่ายภาพจำนวนมากทุกห้อง และช่วยดู Rasa ตอนอยู่ชั้นล่าง",
+          june: "สลับถ่าย Antonio, Bella, Hege และ Rasa เริ่มรอบใหม่ที่ Antonio",
         },
         tips: [
-          "ลูกค้าสามคนอยู่ชั้น 2 แต่ Constantin ลงสั้นๆ ด้วย",
+          "Rasa เป็น Authority ชั้นล่าง ต้องได้วิดีโอจาก Constantin",
           "Auditorium มีทางลัดตอนลงจากชั้น 2",
           "กลับไปแต่ละครั้งให้เปลี่ยนมุม",
         ],
@@ -1158,19 +1159,20 @@ window.BOARD_I18N = {
       },
       "sun-12:10": {
         callout: "แยกทีม",
-        title: "Signature อยู่ล่าง กล้องตัวที่สองอยู่บน",
-        anchor: "Victor + Bella · ชั้นล่าง",
-        loop: "Victor ที่ B086 → Bella ที่ Gryden → ขึ้นไปวน D245 และ D223 หนึ่งรอบ → กลับ",
-        objective: "Victor ยังเป็นจุด Signature แต่ Bella เพิ่มจุด Authority ที่ Gryden Constantin ต้องถ่ายวิดีโอลูกค้าชั้นล่างทั้งสองคนก่อนขึ้นไปชั้น 2 June ถ่ายคลิปสั้นของ Zoltán และ Henry ชั้น 2 ส่วน Iulian ถ่ายภาพจำนวนมาก",
+        title: "Signature อยู่ล่าง, Rasa อยู่ชั้น 2",
+        anchor: "Victor + Bella ล่าง, Rasa บน",
+        loop: "Victor ที่ B086 → Bella ที่ Gryden → Rasa ที่ C233 → D223/D245 → กลับ",
+        objective: "Victor ยังเป็นจุด Signature, Bella เป็น Authority ที่ Gryden และ Rasa เป็น Authority ที่ C233 Constantin ต้องแตะทั้งชั้นล่างและชั้น 2 ด้วยตัวเอง",
         assignments: {
-          constantin: "ถ่าย Victor ชุดใหญ่ก่อน แตะ Bella ที่ Gryden แล้วขึ้นไปหา Zoltán, Gogutsa, Anna และ Henry จากนั้นกลับลงมา",
+          constantin: "ถ่าย Victor ชุดใหญ่ก่อน แตะ Bella ที่ Gryden แล้วขึ้นไปหา Rasa ที่ C233, Henry ที่ D223, Zoltán, Gogutsa และ Anna ที่ D245 จากนั้นกลับลงมา",
           iulian: "ถ่ายภาพจำนวนมากและดูแลจุดที่ต้องการภาพนิ่ง อยู่ใกล้แอ็กชัน แต่ไม่ต้องรับบทกล้องวิดีโอตัวที่สอง",
-          june: "เตรียมกล้องตัวที่สอง ถ่ายภาพ Victor และ Bella ก่อน แล้วขึ้นไปถ่ายคลิปสั้นของ Zoltán และ Henry ตอน Constantin อยู่ล่าง",
+          june: "เตรียมกล้องตัวที่สอง ถ่ายภาพ Victor และ Bella ก่อน แล้วขึ้นไปถ่ายคลิปสั้นของ Rasa, Zoltán และ Henry ตอน Constantin อยู่ล่าง",
         },
         tips: [
           "เป็น split ข้ามชั้นที่ไกลในวันอาทิตย์",
           "Victor ยังต้องได้งานมากที่สุด",
           "Bella เพิ่มจุด Authority ที่ Gryden",
+          "Rasa เพิ่มจุด Authority ที่ C233",
           "June ปิดช่องว่างวิดีโอชั้น 2",
           "Iulian ถ่ายภาพให้ไหลตลอด",
         ],
@@ -1222,9 +1224,9 @@ window.BOARD_QUICK = {
       june: { where: "Gryden → C275 → C233 → D223", action: "Finish Gof's stills first, then photograph Victor, Henry, and Franky (Essential).", watch: "Franky is photo-only light work." },
     },
     "sat-11:15": {
-      constantin: { where: "D245 → C275 → C233 → B086/Gryden scout", action: "Film Antonio, Gogutsa, and Anna first, then Bella and Hege, then take a short ground-floor diversity pass.", watch: "Never get stuck upstairs. Use the Auditorium shortcut on the descent." },
-      iulian: { where: "All upstairs rooms", action: "Shoot high-volume photos only.", watch: "Stay photo-first all round." },
-      june: { where: "D245 → C275 → C233", action: "Alternate Antonio, Bella, and Hege stills.", watch: "Start each new loop with Antonio." },
+      constantin: { where: "D245 → C275 → C233 → Gryden", action: "Film Antonio, Gogutsa, and Anna first, then Bella and Hege, then Rasa in Gryden.", watch: "Rasa is Authority, not just a diversity pass." },
+      iulian: { where: "All rooms, upstairs then Gryden", action: "Shoot high-volume photos and grab Rasa when downstairs.", watch: "Stay photo-first all round." },
+      june: { where: "D245 → C275 → C233 → Gryden", action: "Alternate Antonio, Bella, Hege, and Rasa stills.", watch: "Start each new loop with Antonio." },
     },
     "sat-12:35": {
       constantin: { where: "D245 → D223 → C233 → Gryden → upstairs", action: "Film Antoine, Zoltán, Hubert, and Marie upstairs, then personally touch Pitiprapada and Serena downstairs.", watch: "June covers short video gaps, but Constantin still visits both floors." },
@@ -1247,9 +1249,9 @@ window.BOARD_QUICK = {
       june: { where: "D223 ↔ C275", action: "Photograph Antoine first each loop, then Pitiprapada.", watch: "Stay with booked client stills." },
     },
     "sun-12:10": {
-      constantin: { where: "B086 → Gryden → D245 and D223 → ground", action: "Give Victor a strong block, touch Bella in Gryden, then make one upstairs loop through Zoltán, Gogutsa, Anna, and Henry.", watch: "Victor still receives the most coverage." },
+      constantin: { where: "B086 → Gryden → C233 → D223/D245 → ground", action: "Give Victor a strong block, touch Bella, then loop upstairs through Rasa, Henry, Zoltán, Gogutsa, and Anna.", watch: "Victor still receives the most coverage." },
       iulian: { where: "Whole field, busiest rooms first", action: "Shoot volume photos and protect photo priorities.", watch: "No secondary video role. Keep photos moving." },
-      june: { where: "B086 and Gryden first, then D245 ↔ D223 bursts", action: "SECONDARY CAMERA READY. Cover Victor and Bella stills, then short upstairs video bursts for Zoltán and Henry.", watch: "Do not record continuously." },
+      june: { where: "B086/Gryden first, then C233/D223/D245 bursts", action: "SECONDARY CAMERA READY. Cover Victor and Bella stills, then short upstairs video bursts for Rasa, Zoltán, and Henry.", watch: "Do not record continuously." },
     },
     "sun-13:30": {
       constantin: { where: "B086 anchor → D245 and D223 → B086", action: "Film Gof, Gerarda, and Christma, then personally touch Hubert, Gogutsa, Anna, and Hege upstairs once.", watch: "Return before the finish. Gof's podium comes first." },
@@ -1269,9 +1271,9 @@ window.BOARD_QUICK = {
       june: { where: "Gryden → C275 → C233 → D223", action: "Termină fotografiile lui Gof, apoi Victor, Henry și Franky (Essential).", watch: "Franky este muncă foto ușoară." },
     },
     "sat-11:15": {
-      constantin: { where: "D245 → C275 → C233 → B086/Gryden scurt", action: "Filmează Antonio, Gogutsa și Anna, apoi Bella și Hege, apoi fă un tur scurt jos pentru diversitate.", watch: "Nu rămâne blocat sus. Folosește scurtătura prin Auditoriu la coborâre." },
-      iulian: { where: "Toate sălile de sus", action: "Fă doar fotografii de volum.", watch: "Rămâi foto-first toată runda." },
-      june: { where: "D245 → C275 → C233", action: "Alternează fotografiile lui Antonio, Bella și Hege.", watch: "Începe fiecare tur cu Antonio." },
+      constantin: { where: "D245 → C275 → C233 → Gryden", action: "Filmează Antonio, Gogutsa și Anna, apoi Bella și Hege, apoi Rasa în Gryden.", watch: "Rasa este Authority, nu doar tur de diversitate." },
+      iulian: { where: "Toate sălile, sus apoi Gryden", action: "Fă fotografii de volum și prinde Rasa când ești jos.", watch: "Rămâi foto-first toată runda." },
+      june: { where: "D245 → C275 → C233 → Gryden", action: "Alternează fotografiile lui Antonio, Bella, Hege și Rasa.", watch: "Începe fiecare tur cu Antonio." },
     },
     "sat-12:35": {
       constantin: { where: "D245 → D223 → C233 → Gryden → sus", action: "Filmează Antoine, Zoltán, Hubert și Marie sus, apoi atinge personal Pitiprapada și Serena jos.", watch: "June acoperă golurile video, dar Constantin atinge ambele etaje." },
@@ -1294,9 +1296,9 @@ window.BOARD_QUICK = {
       june: { where: "D223 ↔ C275", action: "Fotografiază Antoine primul la fiecare tur, apoi Pitiprapada.", watch: "Rămâi pe fotografiile clienților rezervați." },
     },
     "sun-12:10": {
-      constantin: { where: "B086 → Gryden → D245 și D223 → jos", action: "Filmează bine Victor, atinge Bella în Gryden, apoi fă un tur sus prin Zoltán, Gogutsa, Anna și Henry.", watch: "Victor primește în continuare cel mai mult." },
+      constantin: { where: "B086 → Gryden → C233 → D223/D245 → jos", action: "Filmează bine Victor, atinge Bella, apoi fă un tur sus prin Rasa, Henry, Zoltán, Gogutsa și Anna.", watch: "Victor primește în continuare cel mai mult." },
       iulian: { where: "Tot terenul, sălile aglomerate întâi", action: "Fă fotografii de volum și protejează prioritățile foto.", watch: "Nu ai rol video secundar. Ține fotografiile în mișcare." },
-      june: { where: "B086 și Gryden întâi, apoi D245 ↔ D223 scurt", action: "A DOUA CAMERĂ PREGĂTITĂ. Fă fotografiile lui Victor și Bella, apoi clipuri scurte sus cu Zoltán și Henry.", watch: "Nu filma continuu." },
+      june: { where: "B086/Gryden întâi, apoi C233/D223/D245 scurt", action: "A DOUA CAMERĂ PREGĂTITĂ. Fă fotografiile lui Victor și Bella, apoi clipuri scurte sus cu Rasa, Zoltán și Henry.", watch: "Nu filma continuu." },
     },
     "sun-13:30": {
       constantin: { where: "B086 principal → D245 și D223 → B086", action: "Filmează Gof, Gerarda și Christma, apoi atinge personal Hubert, Gogutsa, Anna și Hege sus o dată.", watch: "Revino înainte de final. Podiumul lui Gof este primul." },
@@ -1316,9 +1318,9 @@ window.BOARD_QUICK = {
       june: { where: "Gryden → C275 → C233 → D223", action: "ถ่ายภาพ Gof ให้ครบ แล้วถ่าย Victor, Henry และ Franky (Essential)", watch: "Franky เป็นงานภาพนิ่งเบาๆ" },
     },
     "sat-11:15": {
-      constantin: { where: "D245 → C275 → C233 → B086/Gryden สั้นๆ", action: "ถ่าย Antonio, Gogutsa และ Anna ก่อน แล้วถ่าย Bella และ Hege จากนั้นลงชั้นล่างสั้นๆ เพื่อเก็บบรรยากาศ", watch: "อย่าติดอยู่ชั้น 2 ใช้ทางลัด Auditorium ตอนลง" },
-      iulian: { where: "ทุกห้องชั้น 2", action: "ถ่ายภาพนิ่งจำนวนมากเท่านั้น", watch: "เน้นภาพนิ่งทั้งรอบ" },
-      june: { where: "D245 → C275 → C233", action: "สลับถ่ายภาพ Antonio, Bella และ Hege", watch: "เริ่มแต่ละรอบที่ Antonio" },
+      constantin: { where: "D245 → C275 → C233 → Gryden", action: "ถ่าย Antonio, Gogutsa และ Anna ก่อน แล้วถ่าย Bella, Hege และ Rasa ที่ Gryden", watch: "Rasa เป็น Authority ไม่ใช่แค่เก็บบรรยากาศ" },
+      iulian: { where: "ทุกห้อง ชั้น 2 แล้ว Gryden", action: "ถ่ายภาพนิ่งจำนวนมาก และเก็บ Rasa ตอนอยู่ชั้นล่าง", watch: "เน้นภาพนิ่งทั้งรอบ" },
+      june: { where: "D245 → C275 → C233 → Gryden", action: "สลับถ่ายภาพ Antonio, Bella, Hege และ Rasa", watch: "เริ่มแต่ละรอบที่ Antonio" },
     },
     "sat-12:35": {
       constantin: { where: "D245 → D223 → C233 → Gryden → กลับขึ้น", action: "ถ่าย Antoine, Zoltán, Hubert และ Marie ชั้น 2 แล้วลงไปหา Pitiprapada และ Serena", watch: "June ปิดช่องว่างวิดีโอ แต่ Constantin ต้องแตะทั้งสองชั้น" },
@@ -1341,9 +1343,9 @@ window.BOARD_QUICK = {
       june: { where: "D223 ↔ C275", action: "ถ่าย Antoine ก่อนในแต่ละรอบ แล้วถ่าย Pitiprapada", watch: "อยู่กับภาพนิ่งของลูกค้าที่จอง" },
     },
     "sun-12:10": {
-      constantin: { where: "B086 → Gryden → D245 และ D223 → ชั้นล่าง", action: "ถ่าย Victor ชุดใหญ่ แตะ Bella ที่ Gryden แล้วขึ้นชั้น 2 ผ่าน Zoltán, Gogutsa, Anna และ Henry", watch: "Victor ยังต้องได้งานมากที่สุด" },
+      constantin: { where: "B086 → Gryden → C233 → D223/D245 → ชั้นล่าง", action: "ถ่าย Victor ชุดใหญ่ แตะ Bella แล้วขึ้นชั้น 2 ผ่าน Rasa, Henry, Zoltán, Gogutsa และ Anna", watch: "Victor ยังต้องได้งานมากที่สุด" },
       iulian: { where: "ทั้งสนาม ห้องที่ยุ่งก่อน", action: "ถ่ายภาพจำนวนมากและดูแลจุดที่ต้องการภาพนิ่ง", watch: "ไม่ต้องรับวิดีโอตัวที่สอง ถ่ายภาพให้ต่อเนื่อง" },
-      june: { where: "B086 และ Gryden ก่อน แล้ว D245 ↔ D223 สั้นๆ", action: "เตรียมกล้องตัวที่สอง ถ่ายภาพ Victor และ Bella ก่อน แล้วถ่ายคลิปสั้น Zoltán กับ Henry ชั้น 2", watch: "ห้ามถ่ายต่อเนื่อง" },
+      june: { where: "B086/Gryden ก่อน แล้ว C233/D223/D245 สั้นๆ", action: "เตรียมกล้องตัวที่สอง ถ่ายภาพ Victor และ Bella ก่อน แล้วถ่ายคลิปสั้น Rasa, Zoltán และ Henry ชั้น 2", watch: "ห้ามถ่ายต่อเนื่อง" },
     },
     "sun-13:30": {
       constantin: { where: "ยึด B086 → D245 และ D223 → กลับ B086", action: "ถ่าย Gof, Gerarda และ Christma แล้วขึ้นไปแตะ Hubert, Gogutsa, Anna และ Hege หนึ่งครั้ง", watch: "กลับมาก่อนจบ โพเดียมของ Gof สำคัญที่สุด" },
@@ -1554,19 +1556,19 @@ window.BOARD_DATA = {
     {
       "day": "sat",
       "round": "11:15",
-      "callout": "Calm",
-      "title": "Upstairs client core plus ground pass",
+      "callout": "Busy",
+      "title": "Upstairs client core plus Rasa downstairs",
       "neckCam": false,
-      "anchor": "Antonio · Western D245",
-      "loop": "Antonio plus Gogutsa and Anna in D245 → Bella in C275 → Hege in C233 → short B086/Gryden diversity pass → repeat",
-      "objective": "The booked clients are upstairs, but Constantin still makes a short ground-floor diversity pass. Start each client loop with Antonio, then Bella and Hege.",
+      "anchor": "Antonio + Rasa · D245/Gryden",
+      "loop": "Antonio plus Gogutsa and Anna in D245 → Bella in C275 → Hege in C233 → Rasa in Gryden → repeat",
+      "objective": "Antonio, Bella, and Hege are upstairs, while Rasa adds an Authority stop downstairs in Gryden. Constantin makes personal video passes on both floors.",
       "assignments": {
-        "constantin": "Open on Antonio and collect the judges in the same room, then work back through Bella and Hege before repeating.",
-        "iulian": "Stay on volume photo across all upstairs rooms.",
-        "june": "Alternate Antonio, Bella, and Hege stills, with Antonio first on each fresh cycle."
+        "constantin": "Open on Antonio and collect the judges in the same room, work back through Bella and Hege, then drop clearly to Rasa in Gryden.",
+        "iulian": "Shoot full-field volume across upstairs and downstairs, with a photo pass on Rasa when close.",
+        "june": "Alternate Antonio, Bella, Hege, and Rasa stills, with Antonio first on each fresh cycle."
       },
       "tips": [
-        "Three upstairs clients, but Constantin still drops down briefly",
+        "Rasa is Authority downstairs and needs personal video",
         "Auditorium has the fast backdoor route from upstairs",
         "Use each return for a new angle"
       ]
@@ -1657,20 +1659,21 @@ window.BOARD_DATA = {
       "day": "sun",
       "round": "12:10",
       "callout": "Split",
-      "title": "Signature downstairs, second camera upstairs",
+      "title": "Signature downstairs, Rasa upstairs",
       "neckCam": true,
-      "anchor": "Victor + Bella · ground floor",
-      "loop": "Victor in B086 → Bella in Gryden → one personal D245 and D223 cinema loop → return",
-      "objective": "Victor is still the Signature anchor, but Bella adds an Authority stop in Gryden. Constantin covers both ground-floor video clients before the upstairs loop. June gives Zoltán and Henry short periodic video visits upstairs while Iulian keeps volume photos moving.",
+      "anchor": "Victor + Bella ground, Rasa upstairs",
+      "loop": "Victor in B086 → Bella in Gryden → Rasa in C233 → D223/D245 loop → return",
+      "objective": "Victor is still the Signature anchor, Bella adds an Authority stop in Gryden, and Rasa adds an Authority stop upstairs in C233. Constantin covers ground first, then makes a personal upstairs video loop.",
       "assignments": {
-        "constantin": "Build a strong Victor block, touch Bella in Gryden, then loop up for Zoltán plus Gogutsa and Anna, then Henry before returning downstairs.",
+        "constantin": "Build a strong Victor block, touch Bella in Gryden, then loop up for Rasa in C233, Henry in D223, Zoltán plus Gogutsa and Anna in D245 before returning downstairs.",
         "iulian": "Shoot full-field volume and photo priorities. Stay useful near the busiest action, but do not take the secondary video role.",
-        "june": "SECONDARY CAMERA READY. Cover Victor and Bella stills first, then take short upstairs video bursts of Zoltán and Henry when Constantin is downstairs."
+        "june": "SECONDARY CAMERA READY. Cover Victor and Bella stills first, then take short upstairs video bursts of Rasa, Zoltán, and Henry when Constantin is downstairs."
       },
       "tips": [
         "Long cross-floor split on Sunday",
         "Victor must still receive the most",
         "Bella adds a Gryden Authority stop",
+        "Rasa adds a C233 Authority stop upstairs",
         "June prevents upstairs video gaps",
         "Iulian keeps photos flowing everywhere"
       ]
@@ -1997,6 +2000,28 @@ window.BOARD_DATA = {
       "category": "Freestyle Western",
       "role": "Official event judge",
       "portrait": "Anna Baroni.webp"
+    },
+    {
+      "id": "rasa-sakaliene-sat-facial",
+      "name": "Rasa Sakaliene",
+      "officialName": "Rasa Sakaliene",
+      "package": "Authority",
+      "day": "sat",
+      "round": "11:15",
+      "room": "gryden",
+      "category": "Facial Massage",
+      "portrait": "Rasa Sakaliene.webp"
+    },
+    {
+      "id": "rasa-sakaliene-sun-swedish",
+      "name": "Rasa Sakaliene",
+      "officialName": "Rasa Sakaliene",
+      "package": "Authority",
+      "day": "sun",
+      "round": "12:10",
+      "room": "c233",
+      "category": "Swedish massage",
+      "portrait": "Rasa Sakaliene.webp"
     },
     {
       "id": "gerarda-sat-sports",
