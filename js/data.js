@@ -81,11 +81,14 @@ window.BOARD_CONFIG = {
     ],
   },
   DELIVERY_SYNC: {
-    PROVIDER: "local",
+    PROVIDER: "supabase",
+    SUPABASE_URL: "https://ubyvgiibfeptqxuxbfxm.supabase.co",
+    SUPABASE_PUBLISHABLE_KEY: "sb_publishable_jXrZx8zC9nIMS77ATdDw2g_omi4coSm",
+    TABLE: "delivery_progress",
     STORAGE_KEY: "ic_delivery_progress_v1",
     CHANNEL: "ic_delivery_progress",
     ENDPOINT: "",
-    POLL_SECONDS: 20,
+    POLL_SECONDS: 8,
   },
   MARKET_PRICING: {
     // Editable cold-DM market signal. 100 means the country is a very high-price
