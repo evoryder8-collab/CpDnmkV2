@@ -274,7 +274,6 @@
   let selectedDatabasePerson = null;
   let deliveryState = { version: 1, items: {} };
   let deliveryChannel = null;
-  let deliverySupabaseClient = null;
   let deliveryRemoteHealthy = false;
 
   function languagePack() {
@@ -2251,7 +2250,7 @@
       deliverySync.PROVIDER === "supabase" &&
       Boolean(deliverySync.SUPABASE_URL) &&
       Boolean(deliverySync.SUPABASE_PUBLISHABLE_KEY) &&
-      Boolean(window.supabase?.createClient)
+      Boolean(window.fetch)
     );
   }
 
@@ -2259,22 +2258,16 @@
     return deliveryCloudEnabled() && deliveryRemoteHealthy;
   }
 
-  function getDeliverySupabaseClient() {
-    if (!deliveryCloudEnabled()) return null;
-    if (!deliverySupabaseClient) {
-      deliverySupabaseClient = window.supabase.createClient(
-        deliverySync.SUPABASE_URL,
-        deliverySync.SUPABASE_PUBLISHABLE_KEY,
-        {
-          auth: {
-            autoRefreshToken: false,
-            detectSessionInUrl: false,
-            persistSession: false,
-          },
-        },
-      );
-    }
-    return deliverySupabaseClient;
+  function deliveryRestUrl(query = "") {
+    const baseUrl = String(deliverySync.SUPABASE_URL || "").replace(/\/$/, "");
+    return `${baseUrl}/rest/v1/${deliveryTableName}${query}`;
+  }
+
+  function deliveryRestHeaders(extra = {}) {
+    return {
+      apikey: deliverySync.SUPABASE_PUBLISHABLE_KEY,
+      ...extra,
+    };
   }
 
   function deliveryRowsToState(rows) {
@@ -2368,14 +2361,17 @@
 
   async function loadDeliveryStateRemote() {
     if (!deliveryCloudEnabled()) return;
-    const client = getDeliverySupabaseClient();
-    if (!client) return;
 
     try {
-      const { data: rows, error } = await client
-        .from(deliveryTableName)
-        .select("client_key,photo_done,video_done,updated_at");
-      if (error) throw error;
+      const response = await window.fetch(
+        deliveryRestUrl("?select=client_key,photo_done,video_done,updated_at"),
+        {
+          cache: "no-store",
+          headers: deliveryRestHeaders(),
+        },
+      );
+      if (!response.ok) throw new Error(`Delivery sync read failed: ${response.status}`);
+      const rows = await response.json();
       deliveryRemoteHealthy = true;
       const remoteState = deliveryRowsToState(rows || []);
       mergeDeliveryState(remoteState);
@@ -2389,16 +2385,22 @@
 
   async function syncDeliveryStateRemote(keys = null) {
     if (!deliveryCloudEnabled()) return;
-    const client = getDeliverySupabaseClient();
-    if (!client) return;
     const rows = deliveryItemsToRows(keys);
     if (!rows.length) return;
 
     try {
-      const { error } = await client
-        .from(deliveryTableName)
-        .upsert(rows, { onConflict: "client_key" });
-      if (error) throw error;
+      const response = await window.fetch(
+        deliveryRestUrl("?on_conflict=client_key"),
+        {
+          method: "POST",
+          headers: deliveryRestHeaders({
+            "Content-Type": "application/json",
+            Prefer: "resolution=merge-duplicates",
+          }),
+          body: JSON.stringify(rows),
+        },
+      );
+      if (!response.ok) throw new Error(`Delivery sync write failed: ${response.status}`);
       deliveryRemoteHealthy = true;
       if (!deliveryOverlay.hidden) renderDelivery();
     } catch {
