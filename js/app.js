@@ -2573,8 +2573,61 @@
     return `${person.appearances.length} ${t("bookedAppearances")}`;
   }
 
+  const deliveryUiFallbacks = {
+    en: {
+      deliveryHint: "Tap Photo or Video as each deliverable is ready. Cloud sync keeps the tracker shared across the team.",
+      deliveryOverall: "Overall delivery",
+      deliveryProgress: "Progress",
+      deliveryFinished: "{done}/{total} media deliverables ready",
+      deliveryClientsFinished: "{done}/{total} clients fully ready",
+      deliveryPackageProgress: "{done}/{total} media ready",
+      deliveryPhotoLabel: "Photo",
+      deliveryVideoLabel: "Video",
+      deliveryPhotoReady: "Photo ready",
+      deliveryVideoReady: "Video ready",
+      deliveryMarkReady: "Tap when ready",
+      readyCount: "{done}/{total} media ready",
+    },
+    ro: {
+      deliveryHint: "Bifează Foto sau Video când fiecare livrabil este gata. Sync-ul cloud ține trackerul la fel pe toate telefoanele.",
+      deliveryOverall: "Progres total",
+      deliveryProgress: "Progres",
+      deliveryFinished: "{done}/{total} livrabile media gata",
+      deliveryClientsFinished: "{done}/{total} clienți complet gata",
+      deliveryPackageProgress: "{done}/{total} media gata",
+      deliveryPhotoLabel: "Foto",
+      deliveryVideoLabel: "Video",
+      deliveryPhotoReady: "Foto gata",
+      deliveryVideoReady: "Video gata",
+      deliveryMarkReady: "Apasă când e gata",
+      readyCount: "{done}/{total} media gata",
+    },
+    th: {
+      deliveryHint: "กดภาพนิ่งหรือวิดีโอเมื่อไฟล์พร้อมส่ง ซิงก์ cloud จะทำให้ทุกเครื่องเห็นเหมือนกัน",
+      deliveryOverall: "ความคืบหน้ารวม",
+      deliveryProgress: "คืบหน้า",
+      deliveryFinished: "ไฟล์พร้อม {done}/{total}",
+      deliveryClientsFinished: "ลูกค้าพร้อมครบ {done}/{total} คน",
+      deliveryPackageProgress: "สื่อพร้อม {done}/{total}",
+      deliveryPhotoLabel: "ภาพนิ่ง",
+      deliveryVideoLabel: "วิดีโอ",
+      deliveryPhotoReady: "ภาพนิ่งพร้อม",
+      deliveryVideoReady: "วิดีโอพร้อม",
+      deliveryMarkReady: "กดเมื่อพร้อมส่ง",
+      readyCount: "พร้อม {done}/{total} ไฟล์",
+    },
+  };
+
+  function deliveryT(key, values = {}) {
+    const template = deliveryUiFallbacks[state.language]?.[key] ?? deliveryUiFallbacks.en[key] ?? t(key);
+    return Object.entries(values).reduce(
+      (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+      template,
+    );
+  }
+
   function deliveryMediaLabel(media) {
-    return media === "photo" ? t("deliveryPhotoLabel") : t("deliveryVideoLabel");
+    return media === "photo" ? deliveryT("deliveryPhotoLabel") : deliveryT("deliveryVideoLabel");
   }
 
   function deliveryPortraitMarkup(person) {
@@ -2593,8 +2646,8 @@
   function renderDeliveryButton(person, media) {
     const checked = Boolean(deliveryItem(person.key)[media]);
     const label = deliveryMediaLabel(media);
-    const readyLabel = media === "photo" ? t("deliveryPhotoReady") : t("deliveryVideoReady");
-    const stateLabel = checked ? readyLabel : t("deliveryMarkReady");
+    const readyLabel = media === "photo" ? deliveryT("deliveryPhotoReady") : deliveryT("deliveryVideoReady");
+    const stateLabel = checked ? readyLabel : deliveryT("deliveryMarkReady");
 
     return `
       <button class="delivery-check" type="button" data-delivery-toggle data-client-key="${escapeHtml(person.key)}" data-media="${media}" aria-pressed="${checked}" aria-label="${escapeHtml(`${label} ${person.client.name}. ${stateLabel}`)}">
@@ -2634,11 +2687,11 @@
           </div>
           <div class="delivery-node">
             <div>
-              <span>${escapeHtml(t("deliveryProgress"))}</span>
+              <span>${escapeHtml(deliveryT("deliveryProgress"))}</span>
               <strong>${progress.percent}%</strong>
             </div>
             <i aria-hidden="true"></i>
-            <small>${escapeHtml(t("readyCount", { done: progress.done, total: progress.total }))}</small>
+            <small>${escapeHtml(deliveryT("readyCount", { done: progress.done, total: progress.total }))}</small>
           </div>
         </div>
       </article>
@@ -2656,15 +2709,15 @@
 
     deliveryContent.innerHTML = `
       <div class="delivery-intro">
-        <p>${escapeHtml(t("deliveryHint"))}</p>
+        <p>${escapeHtml(deliveryT("deliveryHint"))}</p>
         <span data-sync="${deliveryCloudActive() ? "cloud" : "local"}">${escapeHtml(deliveryCloudActive() ? t("deliverySyncCloud") : t("deliverySyncLocal"))}</span>
       </div>
       <section class="delivery-scoreboard" style="--delivery-progress: ${stats.percent}%;">
         <div class="delivery-score-copy">
-          <span>${escapeHtml(t("deliveryOverall"))}</span>
+          <span>${escapeHtml(deliveryT("deliveryOverall"))}</span>
           <strong>${stats.percent}%</strong>
-          <small>${escapeHtml(t("deliveryFinished", { done: stats.doneMedia, total: stats.totalMedia }))}</small>
-          <small class="delivery-client-finish">${escapeHtml(t("deliveryClientsFinished", { done: stats.doneClients, total: stats.totalClients }))}</small>
+          <small>${escapeHtml(deliveryT("deliveryFinished", { done: stats.doneMedia, total: stats.totalMedia }))}</small>
+          <small class="delivery-client-finish">${escapeHtml(deliveryT("deliveryClientsFinished", { done: stats.doneClients, total: stats.totalClients }))}</small>
         </div>
         <div class="delivery-score-visual">
           <div class="delivery-main-rail" aria-hidden="true"><i></i></div>
@@ -2679,7 +2732,7 @@
           <section class="delivery-tier-section" data-tier="${group.packageName.toLowerCase()}">
             <header>
               <h3>${escapeHtml(group.packageName)}</h3>
-              <span>${escapeHtml(t("deliveryPackageProgress", { done: group.done, total: group.total }))}</span>
+              <span>${escapeHtml(deliveryT("deliveryPackageProgress", { done: group.done, total: group.total }))}</span>
             </header>
             <div class="delivery-rows">
               ${group.people.map(renderDeliveryRow).join("")}
