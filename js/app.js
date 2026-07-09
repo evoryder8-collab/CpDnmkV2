@@ -108,6 +108,7 @@
     rolePinned: hasSavedRole,
     briefingExpanded: false,
     easiestSortMode: "fit",
+    deliveryLogOpen: false,
   };
 
   const cardOverlay = document.createElement("div");
@@ -256,6 +257,9 @@
   const deliveryStorageKey = deliverySync.STORAGE_KEY || "ic_delivery_progress_v1";
   const deliveryChannelName = deliverySync.CHANNEL || "ic_delivery_progress";
   const deliveryTableName = deliverySync.TABLE || "delivery_progress";
+  const deliveryLogPrefix = deliverySync.LOG_PREFIX || "__delivery_log__:";
+  const deliveryLogStorageKey = deliverySync.LOG_STORAGE_KEY || "ic_delivery_progress_log_v1";
+  const deliveryLogLimit = deliverySync.LOG_LIMIT || 150;
   let cardOverlayTimer;
   let rosterOverlayTimer;
   let eventScheduleOverlayTimer;
@@ -273,8 +277,10 @@
   let financeUnlocked = false;
   let selectedDatabasePerson = null;
   let deliveryState = { version: 1, items: {} };
+  let deliveryLogEntries = [];
   let deliveryChannel = null;
   let deliveryRemoteHealthy = false;
+  let deliveryLogRemoteHealthy = false;
 
   function languagePack() {
     return i18n[state.language] || i18n.en;
@@ -2270,11 +2276,36 @@
     };
   }
 
+  function isDeliveryLogKey(key) {
+    return String(key || "").startsWith(deliveryLogPrefix);
+  }
+
+  function deliveryRandomId() {
+    if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+    return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+
+  function getDeliveryDeviceId() {
+    const storageKey = `${deliveryStorageKey}_device`;
+    try {
+      const stored = window.localStorage.getItem(storageKey);
+      if (stored) return stored;
+      const nextId = `Device ${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+      window.localStorage.setItem(storageKey, nextId);
+      return nextId;
+    } catch {
+      return "This device";
+    }
+  }
+
+  const deliveryDeviceId = getDeliveryDeviceId();
+
   function deliveryRowsToState(rows) {
     const items = {};
 
     rows.forEach((row) => {
       if (!row.client_key) return;
+      if (isDeliveryLogKey(row.client_key)) return;
       items[row.client_key] = {
         photo: Boolean(row.photo_done),
         video: Boolean(row.video_done),
@@ -2301,6 +2332,80 @@
         video_done: Boolean(items[key].video),
         updated_at: items[key].updatedAt || new Date().toISOString(),
       }));
+  }
+
+  function deliveryLogEntryToRow(entry) {
+    const payload = encodeURIComponent(JSON.stringify(entry));
+    const orderKey = Date.parse(entry.updatedAt) || Date.now();
+    return {
+      client_key: `${deliveryLogPrefix}${orderKey}:${entry.id}:${payload}`,
+      photo_done: Boolean(entry.checked),
+      video_done: entry.media === "video",
+      updated_at: entry.updatedAt,
+    };
+  }
+
+  function deliveryRowToLogEntry(row) {
+    const key = String(row.client_key || "");
+    if (!isDeliveryLogKey(key)) return null;
+    const body = key.slice(deliveryLogPrefix.length);
+    const firstColon = body.indexOf(":");
+    const secondColon = body.indexOf(":", firstColon + 1);
+    if (firstColon < 0 || secondColon < 0) return null;
+
+    try {
+      const entry = JSON.parse(decodeURIComponent(body.slice(secondColon + 1)));
+      return {
+        ...entry,
+        checked: Boolean(entry.checked),
+        updatedAt: entry.updatedAt || row.updated_at || new Date().toISOString(),
+        media: entry.media === "video" ? "video" : "photo",
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  function deliveryRowsToLogEntries(rows) {
+    return rows
+      .map(deliveryRowToLogEntry)
+      .filter(Boolean);
+  }
+
+  function sortDeliveryLogEntries(entries) {
+    return [...entries]
+      .sort((entryA, entryB) => String(entryB.updatedAt).localeCompare(String(entryA.updatedAt)))
+      .slice(0, deliveryLogLimit);
+  }
+
+  function loadDeliveryLogEntries() {
+    try {
+      const stored = JSON.parse(window.localStorage.getItem(deliveryLogStorageKey));
+      if (Array.isArray(stored)) return sortDeliveryLogEntries(stored);
+    } catch {
+      // History stays usable for the current session even if storage is unavailable.
+    }
+
+    return [];
+  }
+
+  function saveDeliveryLogEntries() {
+    try {
+      window.localStorage.setItem(deliveryLogStorageKey, JSON.stringify(deliveryLogEntries));
+    } catch {
+      // The visible tracker remains usable even if local history persistence is unavailable.
+    }
+  }
+
+  function mergeDeliveryLogEntries(entries) {
+    if (!entries?.length) return;
+    const byId = new Map(deliveryLogEntries.map((entry) => [entry.id, entry]));
+    entries.forEach((entry) => {
+      if (!entry?.id) return;
+      byId.set(entry.id, entry);
+    });
+    deliveryLogEntries = sortDeliveryLogEntries([...byId.values()]);
+    saveDeliveryLogEntries();
   }
 
   function loadDeliveryState() {
@@ -2373,12 +2478,15 @@
       if (!response.ok) throw new Error(`Delivery sync read failed: ${response.status}`);
       const rows = await response.json();
       deliveryRemoteHealthy = true;
+      deliveryLogRemoteHealthy = true;
       const remoteState = deliveryRowsToState(rows || []);
       mergeDeliveryState(remoteState);
+      mergeDeliveryLogEntries(deliveryRowsToLogEntries(rows || []));
       saveDeliveryState({ broadcast: false, remote: false });
       if (!deliveryOverlay.hidden) renderDelivery();
     } catch {
       deliveryRemoteHealthy = false;
+      deliveryLogRemoteHealthy = false;
       // A failed cloud check should never block the live board.
     }
   }
@@ -2409,12 +2517,41 @@
     }
   }
 
+  async function syncDeliveryLogRemote(entry) {
+    if (!deliveryCloudEnabled() || !entry) return;
+
+    try {
+      const response = await window.fetch(
+        deliveryRestUrl("?on_conflict=client_key"),
+        {
+          method: "POST",
+          headers: deliveryRestHeaders({
+            "Content-Type": "application/json",
+            Prefer: "resolution=ignore-duplicates,return=minimal",
+          }),
+          body: JSON.stringify([deliveryLogEntryToRow(entry)]),
+        },
+      );
+      if (!response.ok) throw new Error(`Delivery history write failed: ${response.status}`);
+      deliveryLogRemoteHealthy = true;
+    } catch {
+      deliveryLogRemoteHealthy = false;
+      // Local history remains the safety net if the remote endpoint is offline.
+    }
+  }
+
   function initDeliverySync() {
     deliveryState = loadDeliveryState();
+    deliveryLogEntries = loadDeliveryLogEntries();
 
     try {
       deliveryChannel = new BroadcastChannel(deliveryChannelName);
       deliveryChannel.addEventListener("message", (event) => {
+        if (event.data?.type === "delivery-log") {
+          mergeDeliveryLogEntries(event.data.entries || []);
+          if (!deliveryOverlay.hidden) renderDelivery();
+          return;
+        }
         mergeDeliveryState(event.data);
         saveDeliveryState({ broadcast: false });
         if (!deliveryOverlay.hidden) renderDelivery();
@@ -2430,6 +2567,16 @@
         if (!deliveryOverlay.hidden) renderDelivery();
       } catch {
         // Ignore malformed storage updates.
+      }
+    });
+
+    window.addEventListener("storage", (event) => {
+      if (event.key !== deliveryLogStorageKey || !event.newValue) return;
+      try {
+        mergeDeliveryLogEntries(JSON.parse(event.newValue));
+        if (!deliveryOverlay.hidden) renderDelivery();
+      } catch {
+        // Ignore malformed history updates.
       }
     });
 
@@ -2558,15 +2705,47 @@
     };
   }
 
+  function deliveryPersonByKey(key) {
+    return getDeliveryPeople().find((person) => person.key === key);
+  }
+
+  function recordDeliveryLog(entry) {
+    mergeDeliveryLogEntries([entry]);
+
+    try {
+      deliveryChannel?.postMessage({ type: "delivery-log", entries: [entry] });
+    } catch {
+      // BroadcastChannel is optional.
+    }
+
+    syncDeliveryLogRemote(entry);
+  }
+
   function setDeliveryChecked(key, media, checked) {
     deliveryState.items = deliveryState.items || {};
     const item = deliveryState.items[key] || {};
+    const previous = Boolean(item[media]);
+    if (previous === checked) return;
+    const updatedAt = new Date().toISOString();
+    const person = deliveryPersonByKey(key);
     deliveryState.items[key] = {
       ...item,
       [media]: checked,
-      updatedAt: new Date().toISOString(),
+      updatedAt,
     };
     saveDeliveryState({ keys: [key] });
+    recordDeliveryLog({
+      id: deliveryRandomId(),
+      clientKey: key,
+      clientName: person?.client.name || decodeURIComponent(key),
+      officialName: person?.client.officialName || "",
+      package: person?.client.package || "",
+      media,
+      checked,
+      previous,
+      updatedAt,
+      deviceId: deliveryDeviceId,
+    });
   }
 
   function deliveryAppearanceText(person) {
@@ -2587,6 +2766,15 @@
       deliveryVideoReady: "Video ready",
       deliveryMarkReady: "Tap when ready",
       readyCount: "{done}/{total} media ready",
+      deliveryHistory: "History log",
+      deliveryHideHistory: "Hide log",
+      deliveryHistoryTitle: "Modification history",
+      deliveryHistoryHint: "Every check and uncheck is auto-saved here for the team.",
+      deliveryHistoryEmpty: "No delivery changes logged yet.",
+      deliveryHistoryChecked: "marked ready",
+      deliveryHistoryUnchecked: "unchecked",
+      deliveryHistoryCloud: "Shared cloud log",
+      deliveryHistoryLocal: "Local log only until cloud responds",
     },
     ro: {
       deliveryHint: "Bifează Foto sau Video când fiecare livrabil este gata. Sync-ul cloud ține trackerul la fel pe toate telefoanele.",
@@ -2601,6 +2789,15 @@
       deliveryVideoReady: "Video gata",
       deliveryMarkReady: "Apasă când e gata",
       readyCount: "{done}/{total} media gata",
+      deliveryHistory: "Istoric",
+      deliveryHideHistory: "Ascunde",
+      deliveryHistoryTitle: "Istoric modificări",
+      deliveryHistoryHint: "Fiecare bifare și debifare se salvează automat aici pentru echipă.",
+      deliveryHistoryEmpty: "Încă nu există modificări la livrări.",
+      deliveryHistoryChecked: "marcat gata",
+      deliveryHistoryUnchecked: "debifat",
+      deliveryHistoryCloud: "Istoric cloud comun",
+      deliveryHistoryLocal: "Istoric local până răspunde cloud-ul",
     },
     th: {
       deliveryHint: "กดภาพนิ่งหรือวิดีโอเมื่อไฟล์พร้อมส่ง ซิงก์ cloud จะทำให้ทุกเครื่องเห็นเหมือนกัน",
@@ -2615,6 +2812,15 @@
       deliveryVideoReady: "วิดีโอพร้อม",
       deliveryMarkReady: "กดเมื่อพร้อมส่ง",
       readyCount: "พร้อม {done}/{total} ไฟล์",
+      deliveryHistory: "ประวัติ",
+      deliveryHideHistory: "ซ่อน",
+      deliveryHistoryTitle: "ประวัติการแก้ไข",
+      deliveryHistoryHint: "ทุกครั้งที่กดเช็กหรือยกเลิก จะบันทึกไว้ให้ทั้งทีมดู",
+      deliveryHistoryEmpty: "ยังไม่มีการแก้ไขงานส่ง",
+      deliveryHistoryChecked: "ทำเครื่องหมายพร้อม",
+      deliveryHistoryUnchecked: "ยกเลิกเครื่องหมาย",
+      deliveryHistoryCloud: "ประวัติ cloud ร่วมกัน",
+      deliveryHistoryLocal: "ประวัติในเครื่อง ระหว่างรอ cloud",
     },
   };
 
@@ -2628,6 +2834,49 @@
 
   function deliveryMediaLabel(media) {
     return media === "photo" ? deliveryT("deliveryPhotoLabel") : deliveryT("deliveryVideoLabel");
+  }
+
+  function formatDeliveryLogTime(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    const locale = state.language === "ro" ? "ro-RO" : state.language === "th" ? "th-TH" : "en-GB";
+    return new Intl.DateTimeFormat(locale, {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(date);
+  }
+
+  function renderDeliveryLogPanel() {
+    if (!state.deliveryLogOpen) return "";
+    const entries = deliveryLogEntries.slice(0, deliveryLogLimit);
+
+    return `
+      <section class="delivery-log-panel" aria-label="${escapeHtml(deliveryT("deliveryHistoryTitle"))}">
+        <header>
+          <div>
+            <p>${escapeHtml(deliveryT("deliveryHistoryTitle"))}</p>
+            <small>${escapeHtml(deliveryT("deliveryHistoryHint"))}</small>
+          </div>
+          <span data-sync="${deliveryCloudActive() && deliveryLogRemoteHealthy ? "cloud" : "local"}">${escapeHtml(deliveryCloudActive() && deliveryLogRemoteHealthy ? deliveryT("deliveryHistoryCloud") : deliveryT("deliveryHistoryLocal"))}</span>
+        </header>
+        ${entries.length ? `
+          <ol class="delivery-log-list">
+            ${entries.map((entry) => `
+              <li data-action="${entry.checked ? "checked" : "unchecked"}">
+                <time datetime="${escapeHtml(entry.updatedAt)}">${escapeHtml(formatDeliveryLogTime(entry.updatedAt))}</time>
+                <div>
+                  <strong>${escapeHtml(entry.clientName || decodeURIComponent(entry.clientKey || ""))}</strong>
+                  <span>${escapeHtml(deliveryMediaLabel(entry.media))} ${escapeHtml(entry.checked ? deliveryT("deliveryHistoryChecked") : deliveryT("deliveryHistoryUnchecked"))}</span>
+                  <small>${escapeHtml([entry.package, entry.deviceId].filter(Boolean).join(" · "))}</small>
+                </div>
+              </li>
+            `).join("")}
+          </ol>
+        ` : `<p class="delivery-log-empty">${escapeHtml(deliveryT("deliveryHistoryEmpty"))}</p>`}
+      </section>
+    `;
   }
 
   function deliveryPortraitMarkup(person) {
@@ -2710,7 +2959,12 @@
     deliveryContent.innerHTML = `
       <div class="delivery-intro">
         <p>${escapeHtml(deliveryT("deliveryHint"))}</p>
-        <span data-sync="${deliveryCloudActive() ? "cloud" : "local"}">${escapeHtml(deliveryCloudActive() ? t("deliverySyncCloud") : t("deliverySyncLocal"))}</span>
+        <div class="delivery-intro-actions">
+          <span data-sync="${deliveryCloudActive() ? "cloud" : "local"}">${escapeHtml(deliveryCloudActive() ? t("deliverySyncCloud") : t("deliverySyncLocal"))}</span>
+          <button class="delivery-log-toggle" type="button" data-delivery-log-toggle aria-pressed="${state.deliveryLogOpen}">
+            ${escapeHtml(state.deliveryLogOpen ? deliveryT("deliveryHideHistory") : deliveryT("deliveryHistory"))}
+          </button>
+        </div>
       </div>
       <section class="delivery-scoreboard" style="--delivery-progress: ${stats.percent}%;">
         <div class="delivery-score-copy">
@@ -2727,6 +2981,7 @@
           </div>
         </div>
       </section>
+      ${renderDeliveryLogPanel()}
       <div class="delivery-sections">
         ${stats.groups.map((group) => `
           <section class="delivery-tier-section" data-tier="${group.packageName.toLowerCase()}">
@@ -3122,6 +3377,12 @@
     if (event.target === deliveryOverlay) closeDelivery();
   });
   deliveryContent.addEventListener("click", (event) => {
+    const logToggle = event.target.closest("[data-delivery-log-toggle]");
+    if (logToggle) {
+      state.deliveryLogOpen = !state.deliveryLogOpen;
+      renderDelivery();
+      return;
+    }
     const button = event.target.closest("[data-delivery-toggle]");
     if (!button) return;
     setDeliveryChecked(
