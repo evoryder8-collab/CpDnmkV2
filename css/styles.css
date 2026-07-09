@@ -2440,7 +2440,15 @@ main {
   line-height: 1.45;
 }
 
-.delivery-intro span {
+.delivery-intro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.delivery-intro span,
+.delivery-log-toggle {
   display: inline-grid;
   min-height: 30px;
   place-items: center;
@@ -2452,6 +2460,17 @@ main {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+.delivery-log-toggle {
+  background: rgba(0, 0, 0, 0.22);
+  font: inherit;
+  cursor: pointer;
+}
+
+.delivery-log-toggle[aria-pressed="true"] {
+  border-color: rgba(69, 198, 184, 0.34);
+  color: #76ded4;
 }
 
 .delivery-intro span[data-sync="cloud"] {
@@ -2551,6 +2570,130 @@ main {
   font-weight: 900;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.delivery-log-panel {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(218, 184, 94, 0.18);
+  background:
+    radial-gradient(circle at 0 0, rgba(69, 198, 184, 0.08), transparent 28%),
+    rgba(0, 0, 0, 0.22);
+}
+
+.delivery-log-panel header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(218, 184, 94, 0.13);
+}
+
+.delivery-log-panel header p {
+  margin: 0 0 4px;
+  color: #f2eddf;
+  font-size: 0.82rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.delivery-log-panel header small,
+.delivery-log-empty {
+  color: #918e84;
+  font-size: 0.6rem;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.delivery-log-panel header span {
+  display: inline-grid;
+  min-height: 28px;
+  place-items: center;
+  padding: 0 9px;
+  border: 1px solid rgba(218, 184, 94, 0.15);
+  color: var(--gold-pale);
+  font-size: 0.48rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.delivery-log-panel header span[data-sync="cloud"] {
+  border-color: rgba(69, 198, 184, 0.32);
+  color: #76ded4;
+}
+
+.delivery-log-list {
+  display: grid;
+  gap: 8px;
+  max-height: 340px;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.delivery-log-list li {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-left: 3px solid rgba(69, 198, 184, 0.5);
+  background: rgba(255, 255, 255, 0.014);
+}
+
+.delivery-log-list li[data-action="unchecked"] {
+  border-left-color: rgba(207, 72, 86, 0.64);
+  background:
+    linear-gradient(90deg, rgba(207, 72, 86, 0.08), transparent 46%),
+    rgba(255, 255, 255, 0.012);
+}
+
+.delivery-log-list time {
+  color: var(--gold-pale);
+  font-size: 0.54rem;
+  font-weight: 900;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.delivery-log-list strong,
+.delivery-log-list span,
+.delivery-log-list small {
+  display: block;
+}
+
+.delivery-log-list strong {
+  color: #f2eddf;
+  font-size: 0.7rem;
+  font-weight: 950;
+  line-height: 1.18;
+}
+
+.delivery-log-list span {
+  margin-top: 3px;
+  color: #beb9ab;
+  font-size: 0.58rem;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.delivery-log-list small {
+  margin-top: 3px;
+  color: #77746c;
+  font-size: 0.52rem;
+  font-weight: 780;
+}
+
+.delivery-log-empty {
+  margin: 0;
 }
 
 .delivery-sections {
@@ -2774,6 +2917,7 @@ main {
 .delivery-check,
 .delivery-photo-only {
   min-height: 54px;
+  min-width: 0;
   width: 100%;
   padding: 8px;
   border: 1px solid rgba(218, 184, 94, 0.2);
@@ -2797,6 +2941,9 @@ main {
   font-size: 0.62rem;
   font-weight: 900;
   letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .delivery-media-icon {
@@ -2815,6 +2962,13 @@ main {
   display: grid;
   gap: 2px;
   min-width: 0;
+  overflow: hidden;
+}
+
+.delivery-media-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .delivery-check[aria-pressed="true"] {
@@ -3966,12 +4120,33 @@ footer strong {
     align-items: stretch;
   }
 
-  .delivery-intro span {
+  .delivery-intro-actions {
+    justify-content: flex-start;
+  }
+
+  .delivery-intro span,
+  .delivery-log-toggle {
     justify-self: start;
   }
 
   .delivery-score-pills {
     justify-content: flex-start;
+  }
+
+  .delivery-log-panel header {
+    display: grid;
+  }
+
+  .delivery-log-panel header span {
+    justify-self: start;
+  }
+
+  .delivery-log-list {
+    max-height: 290px;
+  }
+
+  .delivery-log-list li {
+    grid-template-columns: 72px minmax(0, 1fr);
   }
 
   .delivery-rows {
