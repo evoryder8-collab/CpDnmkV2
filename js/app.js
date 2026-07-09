@@ -63,6 +63,7 @@
     footerBuiltFor: document.querySelector("#footer-built-for"),
     databaseButton: document.querySelector("#database-button"),
     easiestButton: document.querySelector("#easiest-button"),
+    deliveryButton: document.querySelector("#delivery-button"),
     financeButton: document.querySelector("#finance-button"),
   };
 
@@ -215,7 +216,23 @@
     </section>
   `;
 
-  document.body.append(cardOverlay, rosterOverlay, eventScheduleOverlay, databaseOverlay, easiestOverlay, financeOverlay);
+  const deliveryOverlay = document.createElement("div");
+  deliveryOverlay.className = "delivery-overlay";
+  deliveryOverlay.hidden = true;
+  deliveryOverlay.innerHTML = `
+    <section class="delivery-panel" role="dialog" aria-modal="true" aria-labelledby="delivery-heading">
+      <header class="delivery-header">
+        <div>
+          <p class="eyebrow" id="delivery-eyebrow">Delivery control</p>
+          <h2 id="delivery-heading">Delivery progress</h2>
+        </div>
+        <button class="delivery-close" type="button" aria-label="Close deliveries">Close</button>
+      </header>
+      <div class="delivery-content" id="delivery-content"></div>
+    </section>
+  `;
+
+  document.body.append(cardOverlay, rosterOverlay, eventScheduleOverlay, databaseOverlay, easiestOverlay, deliveryOverlay, financeOverlay);
 
   const rosterContent = rosterOverlay.querySelector("#roster-content");
   const rosterClose = rosterOverlay.querySelector(".roster-close");
@@ -233,20 +250,29 @@
   const financeError = financeOverlay.querySelector("#finance-error");
   const financeUnlock = financeOverlay.querySelector("#finance-unlock");
   const financeBody = financeOverlay.querySelector("#finance-body");
+  const deliveryClose = deliveryOverlay.querySelector(".delivery-close");
+  const deliveryContent = deliveryOverlay.querySelector("#delivery-content");
+  const deliverySync = config.DELIVERY_SYNC || {};
+  const deliveryStorageKey = deliverySync.STORAGE_KEY || "ic_delivery_progress_v1";
+  const deliveryChannelName = deliverySync.CHANNEL || "ic_delivery_progress";
   let cardOverlayTimer;
   let rosterOverlayTimer;
   let eventScheduleOverlayTimer;
   let databaseOverlayTimer;
   let easiestOverlayTimer;
+  let deliveryOverlayTimer;
   let financeOverlayTimer;
   let cardReturnFocus;
   let rosterReturnFocus;
   let eventScheduleReturnFocus;
   let databaseReturnFocus;
   let easiestReturnFocus;
+  let deliveryReturnFocus;
   let financeReturnFocus;
   let financeUnlocked = false;
   let selectedDatabasePerson = null;
+  let deliveryState = { version: 1, items: {} };
+  let deliveryChannel = null;
 
   function languagePack() {
     return i18n[state.language] || i18n.en;
@@ -382,6 +408,7 @@
     setText(elements.footerBuiltFor, t("builtFor"));
     setText(elements.databaseButton, t("database"));
     setText(elements.easiestButton, t("easiestAdditions"));
+    setText(elements.deliveryButton, t("deliveryTracker"));
     setText(elements.financeButton, t("privateTotals"));
     setText(rosterOverlay.querySelector(".roster-header .eyebrow"), t("bookedCoverage"));
     setText(rosterOverlay.querySelector("#roster-heading"), t("allClients"));
@@ -402,6 +429,10 @@
     setText(easiestOverlay.querySelector("#easiest-heading"), t("easiestTitle"));
     setText(easiestClose, t("close"));
     easiestClose.setAttribute("aria-label", t("closeEasiest"));
+    setText(deliveryOverlay.querySelector("#delivery-eyebrow"), t("deliveryEyebrow"));
+    setText(deliveryOverlay.querySelector("#delivery-heading"), t("deliveryTitle"));
+    setText(deliveryClose, t("close"));
+    deliveryClose.setAttribute("aria-label", t("closeDelivery"));
     setText(financeOverlay.querySelector("#finance-eyebrow"), t("financeEyebrow"));
     setText(financeOverlay.querySelector("#finance-heading"), t("financeTitle"));
     setText(financeOverlay.querySelector("#finance-password-label"), t("financePasswordLabel"));
@@ -1284,7 +1315,7 @@
   function syncBodyLock() {
     document.body.classList.toggle(
       "modal-open",
-      !cardOverlay.hidden || !rosterOverlay.hidden || !eventScheduleOverlay.hidden || !databaseOverlay.hidden || !easiestOverlay.hidden || !financeOverlay.hidden,
+      !cardOverlay.hidden || !rosterOverlay.hidden || !eventScheduleOverlay.hidden || !databaseOverlay.hidden || !easiestOverlay.hidden || !deliveryOverlay.hidden || !financeOverlay.hidden,
     );
   }
 
@@ -2212,6 +2243,322 @@
     financeClose.focus();
   }
 
+  function deliveryCloudEnabled() {
+    return deliverySync.PROVIDER === "rest" && Boolean(deliverySync.ENDPOINT);
+  }
+
+  function loadDeliveryState() {
+    try {
+      const stored = JSON.parse(window.localStorage.getItem(deliveryStorageKey));
+      if (stored && typeof stored === "object" && stored.items) return stored;
+    } catch {
+      // Delivery checks still work for the current session when storage is unavailable.
+    }
+
+    return { version: 1, items: {} };
+  }
+
+  function saveDeliveryState(options = {}) {
+    deliveryState = {
+      version: 1,
+      updatedAt: new Date().toISOString(),
+      items: deliveryState.items || {},
+    };
+
+    try {
+      window.localStorage.setItem(deliveryStorageKey, JSON.stringify(deliveryState));
+    } catch {
+      // The visible tracker remains usable even if this browser blocks storage.
+    }
+
+    if (options.broadcast !== false) {
+      try {
+        deliveryChannel?.postMessage(deliveryState);
+      } catch {
+        // BroadcastChannel is optional.
+      }
+    }
+
+    if (deliveryCloudEnabled()) {
+      syncDeliveryStateRemote();
+    }
+  }
+
+  function mergeDeliveryState(nextState) {
+    if (!nextState || typeof nextState !== "object" || !nextState.items) return;
+    const currentItems = deliveryState.items || {};
+    const nextItems = nextState.items || {};
+
+    Object.entries(nextItems).forEach(([key, nextItem]) => {
+      const currentItem = currentItems[key];
+      if (!currentItem || String(nextItem.updatedAt || "") >= String(currentItem.updatedAt || "")) {
+        currentItems[key] = nextItem;
+      }
+    });
+
+    deliveryState = {
+      version: 1,
+      updatedAt: nextState.updatedAt || deliveryState.updatedAt,
+      items: currentItems,
+    };
+  }
+
+  async function loadDeliveryStateRemote() {
+    if (!deliveryCloudEnabled()) return;
+
+    try {
+      const response = await window.fetch(deliverySync.ENDPOINT, { cache: "no-store" });
+      if (!response.ok) return;
+      const remoteState = await response.json();
+      mergeDeliveryState(remoteState);
+      saveDeliveryState({ broadcast: false });
+      if (!deliveryOverlay.hidden) renderDelivery();
+    } catch {
+      // A failed cloud check should never block the live board.
+    }
+  }
+
+  async function syncDeliveryStateRemote() {
+    if (!deliveryCloudEnabled()) return;
+
+    try {
+      await window.fetch(deliverySync.ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(deliveryState),
+      });
+    } catch {
+      // Local saving remains the safety net if the remote endpoint is offline.
+    }
+  }
+
+  function initDeliverySync() {
+    deliveryState = loadDeliveryState();
+
+    try {
+      deliveryChannel = new BroadcastChannel(deliveryChannelName);
+      deliveryChannel.addEventListener("message", (event) => {
+        mergeDeliveryState(event.data);
+        saveDeliveryState({ broadcast: false });
+        if (!deliveryOverlay.hidden) renderDelivery();
+      });
+    } catch {
+      deliveryChannel = null;
+    }
+
+    window.addEventListener("storage", (event) => {
+      if (event.key !== deliveryStorageKey || !event.newValue) return;
+      try {
+        mergeDeliveryState(JSON.parse(event.newValue));
+        if (!deliveryOverlay.hidden) renderDelivery();
+      } catch {
+        // Ignore malformed storage updates.
+      }
+    });
+
+    if (deliveryCloudEnabled()) {
+      loadDeliveryStateRemote();
+      window.setInterval(
+        loadDeliveryStateRemote,
+        Math.max(5, deliverySync.POLL_SECONDS || 20) * 1000,
+      );
+    }
+  }
+
+  function deliveryKeyForClient(client) {
+    return encodeURIComponent(normalize(client.officialName || client.name));
+  }
+
+  function deliveryItem(key) {
+    return deliveryState.items?.[key] || {};
+  }
+
+  function getDeliveryPeople() {
+    const prices = config.FINANCE?.PACKAGE_PRICES_CHF || {};
+    const packageOrder = ["Signature", "Showcase", "Authority", "Essential"];
+    const people = new Map();
+
+    data.clients.forEach((client) => {
+      const key = deliveryKeyForClient(client);
+      if (!people.has(key)) {
+        people.set(key, { key, client, appearances: [] });
+      }
+
+      const person = people.get(key);
+      person.appearances.push(client);
+      const currentPrice = prices[person.client.package] || 0;
+      const nextPrice = prices[client.package] || 0;
+      if (nextPrice > currentPrice) person.client = client;
+    });
+
+    return [...people.values()].sort((personA, personB) => {
+      const packageIndexA = packageOrder.indexOf(personA.client.package);
+      const packageIndexB = packageOrder.indexOf(personB.client.package);
+      return packageIndexA - packageIndexB || personA.client.name.localeCompare(personB.client.name);
+    });
+  }
+
+  function deliveryRequirements(person) {
+    const requirements = ["photo"];
+    if (person.client.package !== "Essential") requirements.push("video");
+    return requirements;
+  }
+
+  function deliveryClientProgress(person) {
+    const requirements = deliveryRequirements(person);
+    const item = deliveryItem(person.key);
+    const done = requirements.filter((media) => Boolean(item[media])).length;
+
+    return {
+      done,
+      total: requirements.length,
+      percent: requirements.length ? Math.round((done / requirements.length) * 100) : 0,
+      complete: done === requirements.length,
+    };
+  }
+
+  function getDeliveryStats(people) {
+    const packageOrder = ["Signature", "Showcase", "Authority", "Essential"];
+    const groups = packageOrder
+      .map((packageName) => {
+        const groupPeople = people.filter((person) => person.client.package === packageName);
+        const done = groupPeople.filter((person) => deliveryClientProgress(person).complete).length;
+        return {
+          packageName,
+          people: groupPeople,
+          done,
+          total: groupPeople.length,
+        };
+      })
+      .filter((group) => group.total);
+    const doneClients = people.filter((person) => deliveryClientProgress(person).complete).length;
+
+    return {
+      groups,
+      doneClients,
+      totalClients: people.length,
+      percent: people.length ? Math.round((doneClients / people.length) * 100) : 0,
+    };
+  }
+
+  function setDeliveryChecked(key, media, checked) {
+    deliveryState.items = deliveryState.items || {};
+    const item = deliveryState.items[key] || {};
+    deliveryState.items[key] = {
+      ...item,
+      [media]: checked,
+      updatedAt: new Date().toISOString(),
+    };
+    saveDeliveryState();
+  }
+
+  function deliveryAppearanceText(person) {
+    return `${person.appearances.length} ${t("bookedAppearances")}`;
+  }
+
+  function renderDeliveryButton(person, media) {
+    const checked = Boolean(deliveryItem(person.key)[media]);
+    const label = media === "photo" ? t("deliveryPhoto") : t("deliveryVideo");
+    const readyLabel = media === "photo" ? t("deliveryPhotoReady") : t("deliveryVideoReady");
+
+    return `
+      <button class="delivery-check" type="button" data-delivery-toggle data-client-key="${escapeHtml(person.key)}" data-media="${media}" aria-pressed="${checked}">
+        <span>${escapeHtml(label)}</span>
+        <small>${escapeHtml(readyLabel)}</small>
+      </button>
+    `;
+  }
+
+  function renderDeliveryRow(person) {
+    const progress = deliveryClientProgress(person);
+    const requirements = deliveryRequirements(person);
+    const tier = person.client.package.toLowerCase();
+    const actions = [
+      renderDeliveryButton(person, "photo"),
+      requirements.includes("video")
+        ? renderDeliveryButton(person, "video")
+        : `<span class="delivery-photo-only">${escapeHtml(t("photoOnly"))}</span>`,
+    ].join("");
+
+    return `
+      <article class="delivery-row" data-tier="${tier}" data-complete="${progress.complete}" style="--delivery-progress: ${progress.percent}%;">
+        <div class="delivery-person">
+          <span class="delivery-tier-dot" aria-hidden="true"></span>
+          <div>
+            <strong>${escapeHtml(person.client.name)}</strong>
+            <small>${escapeHtml(person.client.package)} · ${escapeHtml(deliveryAppearanceText(person))}</small>
+          </div>
+        </div>
+        <div class="delivery-actions">
+          ${actions}
+        </div>
+        <div class="delivery-node">
+          <span>${escapeHtml(t("deliveryProgress"))}</span>
+          <strong>${progress.percent}%</strong>
+          <small>${escapeHtml(t("readyCount", { done: progress.done, total: progress.total }))}</small>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderDelivery() {
+    const people = getDeliveryPeople();
+    const stats = getDeliveryStats(people);
+
+    if (!people.length) {
+      deliveryContent.innerHTML = `<p class="database-empty">${escapeHtml(t("deliveryNoClients"))}</p>`;
+      return;
+    }
+
+    deliveryContent.innerHTML = `
+      <div class="delivery-intro">
+        <p>${escapeHtml(t("deliveryHint"))}</p>
+        <span data-sync="${deliveryCloudEnabled() ? "cloud" : "local"}">${escapeHtml(deliveryCloudEnabled() ? t("deliverySyncCloud") : t("deliverySyncLocal"))}</span>
+      </div>
+      <section class="delivery-scoreboard" style="--delivery-progress: ${stats.percent}%;">
+        <div class="delivery-score-copy">
+          <span>${escapeHtml(t("deliveryOverall"))}</span>
+          <strong>${stats.percent}%</strong>
+          <small>${escapeHtml(t("deliveryFinished", { done: stats.doneClients, total: stats.totalClients }))}</small>
+        </div>
+        <div class="delivery-main-rail" aria-hidden="true"><i></i></div>
+      </section>
+      <div class="delivery-sections">
+        ${stats.groups.map((group) => `
+          <section class="delivery-tier-section" data-tier="${group.packageName.toLowerCase()}">
+            <header>
+              <h3>${escapeHtml(group.packageName)}</h3>
+              <span>${escapeHtml(t("deliveryPackageProgress", { done: group.done, total: group.total }))}</span>
+            </header>
+            <div class="delivery-rows">
+              ${group.people.map(renderDeliveryRow).join("")}
+            </div>
+          </section>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function openDelivery() {
+    window.clearTimeout(deliveryOverlayTimer);
+    deliveryReturnFocus = document.activeElement;
+    renderDelivery();
+    deliveryOverlay.hidden = false;
+    syncBodyLock();
+    window.requestAnimationFrame(() => deliveryOverlay.classList.add("is-open"));
+    deliveryClose.focus();
+  }
+
+  function closeDelivery() {
+    if (deliveryOverlay.hidden) return;
+    deliveryOverlay.classList.remove("is-open");
+    deliveryOverlayTimer = window.setTimeout(() => {
+      deliveryOverlay.hidden = true;
+      syncBodyLock();
+      if (deliveryReturnFocus?.isConnected) deliveryReturnFocus.focus();
+    }, 140);
+  }
+
   function makeParticipantMarker(entry) {
     const marker = document.createElement("div");
     marker.className = "participant-marker";
@@ -2525,6 +2872,7 @@
       }
     }
     if (!easiestOverlay.hidden) renderEasiestAdditions();
+    if (!deliveryOverlay.hidden) renderDelivery();
     if (!financeOverlay.hidden && financeUnlocked) renderFinanceTotals();
   });
 
@@ -2537,6 +2885,7 @@
   elements.eventScheduleButton?.addEventListener("click", openEventSchedule);
   elements.databaseButton.addEventListener("click", openDatabase);
   elements.easiestButton?.addEventListener("click", openEasiest);
+  elements.deliveryButton?.addEventListener("click", openDelivery);
   elements.financeButton?.addEventListener("click", openFinance);
   elements.videoFilterButton.addEventListener("click", () => {
     state.videoIncludedOnly = !state.videoIncludedOnly;
@@ -2547,6 +2896,7 @@
   eventScheduleClose.addEventListener("click", closeEventSchedule);
   databaseClose.addEventListener("click", closeDatabase);
   easiestClose.addEventListener("click", closeEasiest);
+  deliveryClose.addEventListener("click", closeDelivery);
   financeClose.addEventListener("click", closeFinance);
   financeGate.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -2563,6 +2913,19 @@
   });
   easiestOverlay.addEventListener("click", (event) => {
     if (event.target === easiestOverlay) closeEasiest();
+  });
+  deliveryOverlay.addEventListener("click", (event) => {
+    if (event.target === deliveryOverlay) closeDelivery();
+  });
+  deliveryContent.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-delivery-toggle]");
+    if (!button) return;
+    setDeliveryChecked(
+      button.dataset.clientKey,
+      button.dataset.media,
+      button.getAttribute("aria-pressed") !== "true",
+    );
+    renderDelivery();
   });
   easiestContent.addEventListener("click", (event) => {
     const button = event.target.closest("[data-easiest-sort]");
@@ -2593,10 +2956,13 @@
       closeDatabase();
     } else if (!easiestOverlay.hidden) {
       closeEasiest();
+    } else if (!deliveryOverlay.hidden) {
+      closeDelivery();
     } else if (!financeOverlay.hidden) {
       closeFinance();
     }
   });
 
+  initDeliverySync();
   render();
 })();
