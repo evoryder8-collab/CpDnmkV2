@@ -2496,25 +2496,65 @@
 
   function getDeliveryStats(people) {
     const packageOrder = ["Signature", "Showcase", "Authority", "Essential"];
+    const summarizePeople = (groupPeople) => {
+      const mediaTotals = {
+        photo: { done: 0, total: 0 },
+        video: { done: 0, total: 0 },
+      };
+      let doneMedia = 0;
+      let totalMedia = 0;
+      let doneClients = 0;
+
+      groupPeople.forEach((person) => {
+        const progress = deliveryClientProgress(person);
+        const requirements = deliveryRequirements(person);
+        const item = deliveryItem(person.key);
+
+        doneMedia += progress.done;
+        totalMedia += progress.total;
+        if (progress.complete) doneClients += 1;
+
+        requirements.forEach((media) => {
+          mediaTotals[media].total += 1;
+          if (item[media]) mediaTotals[media].done += 1;
+        });
+      });
+
+      return {
+        doneMedia,
+        totalMedia,
+        doneClients,
+        totalClients: groupPeople.length,
+        mediaTotals,
+        percent: totalMedia ? Math.round((doneMedia / totalMedia) * 100) : 0,
+      };
+    };
+
     const groups = packageOrder
       .map((packageName) => {
         const groupPeople = people.filter((person) => person.client.package === packageName);
-        const done = groupPeople.filter((person) => deliveryClientProgress(person).complete).length;
+        const summary = summarizePeople(groupPeople);
         return {
           packageName,
           people: groupPeople,
-          done,
-          total: groupPeople.length,
+          done: summary.doneMedia,
+          total: summary.totalMedia,
+          doneClients: summary.doneClients,
+          totalClients: summary.totalClients,
+          percent: summary.percent,
         };
       })
-      .filter((group) => group.total);
-    const doneClients = people.filter((person) => deliveryClientProgress(person).complete).length;
+      .filter((group) => group.totalClients);
+    const summary = summarizePeople(people);
 
     return {
       groups,
-      doneClients,
-      totalClients: people.length,
-      percent: people.length ? Math.round((doneClients / people.length) * 100) : 0,
+      doneClients: summary.doneClients,
+      totalClients: summary.totalClients,
+      doneMedia: summary.doneMedia,
+      totalMedia: summary.totalMedia,
+      mediaTotals: summary.mediaTotals,
+      percent: summary.percent,
     };
   }
 
@@ -2533,15 +2573,36 @@
     return `${person.appearances.length} ${t("bookedAppearances")}`;
   }
 
-  function renderDeliveryButton(person, media) {
-    const checked = Boolean(deliveryItem(person.key)[media]);
-    const label = media === "photo" ? t("deliveryPhoto") : t("deliveryVideo");
-    const readyLabel = media === "photo" ? t("deliveryPhotoReady") : t("deliveryVideoReady");
+  function deliveryMediaLabel(media) {
+    return media === "photo" ? t("deliveryPhotoLabel") : t("deliveryVideoLabel");
+  }
+
+  function deliveryPortraitMarkup(person) {
+    const portrait = person.client.portrait ? `img/${person.client.portrait}` : "";
+    const fallback = initials(person.client.name);
 
     return `
-      <button class="delivery-check" type="button" data-delivery-toggle data-client-key="${escapeHtml(person.key)}" data-media="${media}" aria-pressed="${checked}">
-        <span>${escapeHtml(label)}</span>
-        <small>${escapeHtml(readyLabel)}</small>
+      <div class="delivery-portrait-card" aria-hidden="true">
+        <span class="delivery-portrait-fallback">${escapeHtml(fallback)}</span>
+        ${portrait ? `<img src="${escapeHtml(portrait)}" alt="" loading="lazy" onerror="this.style.display='none';">` : ""}
+        <span class="delivery-mini-ribbon">${escapeHtml(person.client.package)}</span>
+      </div>
+    `;
+  }
+
+  function renderDeliveryButton(person, media) {
+    const checked = Boolean(deliveryItem(person.key)[media]);
+    const label = deliveryMediaLabel(media);
+    const readyLabel = media === "photo" ? t("deliveryPhotoReady") : t("deliveryVideoReady");
+    const stateLabel = checked ? readyLabel : t("deliveryMarkReady");
+
+    return `
+      <button class="delivery-check" type="button" data-delivery-toggle data-client-key="${escapeHtml(person.key)}" data-media="${media}" aria-pressed="${checked}" aria-label="${escapeHtml(`${label} ${person.client.name}. ${stateLabel}`)}">
+        <span class="delivery-media-icon" aria-hidden="true">${checked ? "✓" : media === "photo" ? "P" : "V"}</span>
+        <span class="delivery-media-copy">
+          <strong>${escapeHtml(label)}</strong>
+          <small>${escapeHtml(stateLabel)}</small>
+        </span>
       </button>
     `;
   }
@@ -2559,20 +2620,26 @@
 
     return `
       <article class="delivery-row" data-tier="${tier}" data-complete="${progress.complete}" style="--delivery-progress: ${progress.percent}%;">
-        <div class="delivery-person">
-          <span class="delivery-tier-dot" aria-hidden="true"></span>
-          <div>
-            <strong>${escapeHtml(person.client.name)}</strong>
-            <small>${escapeHtml(person.client.package)} · ${escapeHtml(deliveryAppearanceText(person))}</small>
+        ${deliveryPortraitMarkup(person)}
+        <div class="delivery-card-main">
+          <div class="delivery-person">
+            <span class="delivery-tier-dot" aria-hidden="true"></span>
+            <div>
+              <strong>${escapeHtml(person.client.name)}</strong>
+              <small>${escapeHtml(person.client.package)} · ${escapeHtml(deliveryAppearanceText(person))}</small>
+            </div>
           </div>
-        </div>
-        <div class="delivery-actions">
-          ${actions}
-        </div>
-        <div class="delivery-node">
-          <span>${escapeHtml(t("deliveryProgress"))}</span>
-          <strong>${progress.percent}%</strong>
-          <small>${escapeHtml(t("readyCount", { done: progress.done, total: progress.total }))}</small>
+          <div class="delivery-actions">
+            ${actions}
+          </div>
+          <div class="delivery-node">
+            <div>
+              <span>${escapeHtml(t("deliveryProgress"))}</span>
+              <strong>${progress.percent}%</strong>
+            </div>
+            <i aria-hidden="true"></i>
+            <small>${escapeHtml(t("readyCount", { done: progress.done, total: progress.total }))}</small>
+          </div>
         </div>
       </article>
     `;
@@ -2596,9 +2663,16 @@
         <div class="delivery-score-copy">
           <span>${escapeHtml(t("deliveryOverall"))}</span>
           <strong>${stats.percent}%</strong>
-          <small>${escapeHtml(t("deliveryFinished", { done: stats.doneClients, total: stats.totalClients }))}</small>
+          <small>${escapeHtml(t("deliveryFinished", { done: stats.doneMedia, total: stats.totalMedia }))}</small>
+          <small class="delivery-client-finish">${escapeHtml(t("deliveryClientsFinished", { done: stats.doneClients, total: stats.totalClients }))}</small>
         </div>
-        <div class="delivery-main-rail" aria-hidden="true"><i></i></div>
+        <div class="delivery-score-visual">
+          <div class="delivery-main-rail" aria-hidden="true"><i></i></div>
+          <div class="delivery-score-pills">
+            <span>${escapeHtml(deliveryMediaLabel("photo"))} ${stats.mediaTotals.photo.done}/${stats.mediaTotals.photo.total}</span>
+            <span>${escapeHtml(deliveryMediaLabel("video"))} ${stats.mediaTotals.video.done}/${stats.mediaTotals.video.total}</span>
+          </div>
+        </div>
       </section>
       <div class="delivery-sections">
         ${stats.groups.map((group) => `
