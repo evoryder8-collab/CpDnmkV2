@@ -255,6 +255,7 @@
   const deliverySync = config.DELIVERY_SYNC || {};
   const deliveryStorageKey = deliverySync.STORAGE_KEY || "ic_delivery_progress_v1";
   const deliveryChannelName = deliverySync.CHANNEL || "ic_delivery_progress";
+  const deliveryTableName = deliverySync.TABLE || "delivery_progress";
   let cardOverlayTimer;
   let rosterOverlayTimer;
   let eventScheduleOverlayTimer;
@@ -273,6 +274,8 @@
   let selectedDatabasePerson = null;
   let deliveryState = { version: 1, items: {} };
   let deliveryChannel = null;
+  let deliverySupabaseClient = null;
+  let deliveryRemoteHealthy = false;
 
   function languagePack() {
     return i18n[state.language] || i18n.en;
@@ -2244,7 +2247,67 @@
   }
 
   function deliveryCloudEnabled() {
-    return deliverySync.PROVIDER === "rest" && Boolean(deliverySync.ENDPOINT);
+    return (
+      deliverySync.PROVIDER === "supabase" &&
+      Boolean(deliverySync.SUPABASE_URL) &&
+      Boolean(deliverySync.SUPABASE_PUBLISHABLE_KEY) &&
+      Boolean(window.supabase?.createClient)
+    );
+  }
+
+  function deliveryCloudActive() {
+    return deliveryCloudEnabled() && deliveryRemoteHealthy;
+  }
+
+  function getDeliverySupabaseClient() {
+    if (!deliveryCloudEnabled()) return null;
+    if (!deliverySupabaseClient) {
+      deliverySupabaseClient = window.supabase.createClient(
+        deliverySync.SUPABASE_URL,
+        deliverySync.SUPABASE_PUBLISHABLE_KEY,
+        {
+          auth: {
+            autoRefreshToken: false,
+            detectSessionInUrl: false,
+            persistSession: false,
+          },
+        },
+      );
+    }
+    return deliverySupabaseClient;
+  }
+
+  function deliveryRowsToState(rows) {
+    const items = {};
+
+    rows.forEach((row) => {
+      if (!row.client_key) return;
+      items[row.client_key] = {
+        photo: Boolean(row.photo_done),
+        video: Boolean(row.video_done),
+        updatedAt: row.updated_at || new Date().toISOString(),
+      };
+    });
+
+    return {
+      version: 1,
+      updatedAt: new Date().toISOString(),
+      items,
+    };
+  }
+
+  function deliveryItemsToRows(keys = null) {
+    const items = deliveryState.items || {};
+    const selectedKeys = keys || Object.keys(items);
+
+    return selectedKeys
+      .filter((key) => items[key])
+      .map((key) => ({
+        client_key: key,
+        photo_done: Boolean(items[key].photo),
+        video_done: Boolean(items[key].video),
+        updated_at: items[key].updatedAt || new Date().toISOString(),
+      }));
   }
 
   function loadDeliveryState() {
@@ -2279,8 +2342,8 @@
       }
     }
 
-    if (deliveryCloudEnabled()) {
-      syncDeliveryStateRemote();
+    if (deliveryCloudEnabled() && options.remote !== false) {
+      syncDeliveryStateRemote(options.keys || null);
     }
   }
 
@@ -2305,29 +2368,41 @@
 
   async function loadDeliveryStateRemote() {
     if (!deliveryCloudEnabled()) return;
+    const client = getDeliverySupabaseClient();
+    if (!client) return;
 
     try {
-      const response = await window.fetch(deliverySync.ENDPOINT, { cache: "no-store" });
-      if (!response.ok) return;
-      const remoteState = await response.json();
+      const { data: rows, error } = await client
+        .from(deliveryTableName)
+        .select("client_key,photo_done,video_done,updated_at");
+      if (error) throw error;
+      deliveryRemoteHealthy = true;
+      const remoteState = deliveryRowsToState(rows || []);
       mergeDeliveryState(remoteState);
-      saveDeliveryState({ broadcast: false });
+      saveDeliveryState({ broadcast: false, remote: false });
       if (!deliveryOverlay.hidden) renderDelivery();
     } catch {
+      deliveryRemoteHealthy = false;
       // A failed cloud check should never block the live board.
     }
   }
 
-  async function syncDeliveryStateRemote() {
+  async function syncDeliveryStateRemote(keys = null) {
     if (!deliveryCloudEnabled()) return;
+    const client = getDeliverySupabaseClient();
+    if (!client) return;
+    const rows = deliveryItemsToRows(keys);
+    if (!rows.length) return;
 
     try {
-      await window.fetch(deliverySync.ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(deliveryState),
-      });
+      const { error } = await client
+        .from(deliveryTableName)
+        .upsert(rows, { onConflict: "client_key" });
+      if (error) throw error;
+      deliveryRemoteHealthy = true;
+      if (!deliveryOverlay.hidden) renderDelivery();
     } catch {
+      deliveryRemoteHealthy = false;
       // Local saving remains the safety net if the remote endpoint is offline.
     }
   }
@@ -2357,7 +2432,7 @@
     });
 
     if (deliveryCloudEnabled()) {
-      loadDeliveryStateRemote();
+      loadDeliveryStateRemote().then(() => syncDeliveryStateRemote());
       window.setInterval(
         loadDeliveryStateRemote,
         Math.max(5, deliverySync.POLL_SECONDS || 20) * 1000,
@@ -2449,7 +2524,7 @@
       [media]: checked,
       updatedAt: new Date().toISOString(),
     };
-    saveDeliveryState();
+    saveDeliveryState({ keys: [key] });
   }
 
   function deliveryAppearanceText(person) {
@@ -2513,7 +2588,7 @@
     deliveryContent.innerHTML = `
       <div class="delivery-intro">
         <p>${escapeHtml(t("deliveryHint"))}</p>
-        <span data-sync="${deliveryCloudEnabled() ? "cloud" : "local"}">${escapeHtml(deliveryCloudEnabled() ? t("deliverySyncCloud") : t("deliverySyncLocal"))}</span>
+        <span data-sync="${deliveryCloudActive() ? "cloud" : "local"}">${escapeHtml(deliveryCloudActive() ? t("deliverySyncCloud") : t("deliverySyncLocal"))}</span>
       </div>
       <section class="delivery-scoreboard" style="--delivery-progress: ${stats.percent}%;">
         <div class="delivery-score-copy">
